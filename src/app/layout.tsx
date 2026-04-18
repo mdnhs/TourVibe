@@ -24,15 +24,13 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
+          defaultTheme="system"
+          enableSystem={true}
           disableTransitionOnChange
-          enableColorScheme={false}
-          suppressHydrationWarning
         >
-          <TooltipProvider>
-            <NuqsAdapter>{children}</NuqsAdapter>
-          </TooltipProvider>
+          <NuqsAdapter>
+            <TooltipProvider>{children}</TooltipProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html>

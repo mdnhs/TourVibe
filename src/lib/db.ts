@@ -56,6 +56,22 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS review (
+    id TEXT PRIMARY KEY,
+    tourPackageId TEXT NOT NULL,
+    userId TEXT NOT NULL,
+    rating INTEGER NOT NULL,
+    comment TEXT,
+    reviewerName TEXT,
+    reviewerImage TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tourPackageId) REFERENCES tour_package(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
+  )
+`);
+
 // Migration to add columns if they don't exist (for existing databases)
 try {
   db.exec("ALTER TABLE vehicle ADD COLUMN thumbnail TEXT NOT NULL DEFAULT ''");
@@ -66,4 +82,11 @@ try {
 
 try {
   db.exec("ALTER TABLE tour_package ADD COLUMN maxPersons INTEGER NOT NULL DEFAULT 1");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE review ADD COLUMN reviewerName TEXT");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE review ADD COLUMN reviewerImage TEXT");
 } catch (e) {}

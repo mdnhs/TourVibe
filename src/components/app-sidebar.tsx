@@ -8,6 +8,7 @@ import {
   CarFrontIcon,
   LayoutDashboardIcon,
   MapIcon,
+  StarIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -50,6 +51,11 @@ export function AppSidebar({
       href: "/dashboard/tours",
       icon: MapIcon,
       adminOnly: true,
+    },
+    {
+      label: "Reviews",
+      href: "/dashboard/reviews",
+      icon: StarIcon,
     },
     {
       label: "Drivers",

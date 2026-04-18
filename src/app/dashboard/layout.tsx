@@ -27,9 +27,7 @@ export default async function DashboardLayout({
           avatar: session.user.image,
         }}
       />
-      <SidebarInset>
-        {children}
-      </SidebarInset>
+      <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
 }
