@@ -59,6 +59,7 @@ function Button({
     {
       className: cn(buttonVariants({ variant, size, className })),
       "data-slot": "button",
+      nativeButton: asChild || !!render ? false : props.nativeButton,
     },
     props
   )

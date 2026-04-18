@@ -146,7 +146,11 @@ export function CreateVehicleForm({ drivers }: FormProps) {
         <Label htmlFor="driverId">Assign Driver (Optional)</Label>
         <Select value={driverId} onValueChange={setDriverId} disabled={isPending}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a driver" />
+            <SelectValue>
+              {driverId === "none" 
+                ? "No Driver Assigned" 
+                : drivers.find(d => d.id === driverId)?.name || "Select a driver"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">No Driver Assigned</SelectItem>
@@ -331,7 +335,11 @@ export function EditVehicleForm({
         <Label htmlFor="driverId">Assign Driver (Optional)</Label>
         <Select value={driverId} onValueChange={setDriverId} disabled={isPending}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a driver" />
+            <SelectValue>
+              {driverId === "none" 
+                ? "No Driver Assigned" 
+                : drivers.find(d => d.id === driverId)?.name || "Select a driver"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">No Driver Assigned</SelectItem>

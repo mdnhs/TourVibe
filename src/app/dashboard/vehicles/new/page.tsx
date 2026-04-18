@@ -15,13 +15,20 @@ export default async function NewVehiclePage() {
     redirect("/dashboard");
   }
 
-  const drivers = db.prepare(`
+  const drivers = db
+    .prepare(
+      `
     SELECT id, name, email FROM user WHERE role = 'driver'
-  `).all() as { id: string; name: string; email: string }[];
+  `,
+    )
+    .all() as { id: string; name: string; email: string }[];
 
   return (
     <>
-      <SiteHeader title="Add New Vehicle" subtitle="Register a new vehicle to the fleet" />
+      <SiteHeader
+        title="Add New Vehicle"
+        subtitle="Register a new vehicle to the fleet"
+      />
       <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
         <div className="flex items-center gap-4">
           <Button asChild variant="ghost" size="icon">
@@ -29,7 +36,9 @@ export default async function NewVehiclePage() {
               <ChevronLeft className="size-4" />
             </Link>
           </Button>
-          <h2 className="text-2xl font-bold tracking-tight">Vehicle Registration</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Vehicle Registration
+          </h2>
         </div>
 
         <Card>
