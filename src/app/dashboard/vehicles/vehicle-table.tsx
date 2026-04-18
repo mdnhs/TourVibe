@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   closestCenter,
   DndContext,
@@ -86,13 +85,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export type Vehicle = {
   id: string;
@@ -452,10 +445,139 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     manualPagination: false,
   });
 
-  const handleCloseSheet = () => {
+  const handleClose = () => {
     setViewId(null);
     setEditId(null);
   };
+
+  // ── Render Logic ──
+
+  if (editId && activeVehicle) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={handleClose}>
+            <ChevronLeft className="size-4" />
+          </Button>
+          <h2 className="text-2xl font-bold tracking-tight">Edit Vehicle</h2>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <EditVehicleForm 
+              vehicle={activeVehicle} 
+              drivers={drivers} 
+              onSuccess={handleClose} 
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (viewId && activeVehicle) {
+    return (
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={handleClose}>
+              <ChevronLeft className="size-4" />
+            </Button>
+            <h2 className="text-2xl font-bold tracking-tight">Vehicle Overview</h2>
+          </div>
+          <Button variant="outline" onClick={() => { setViewId(null); setEditId(activeVehicle.id); }}>
+            <Pencil className="mr-2 size-4" />
+            Edit Vehicle
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Media Gallery</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {activeVehicle.thumbnail && (
+                  <div className="w-full aspect-video rounded-xl overflow-hidden border bg-muted">
+                    <img
+                      src={activeVehicle.thumbnail}
+                      alt={activeVehicle.make}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                {activeVehicle.gallery && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {activeVehicle.gallery.split(",").map((url, idx) => {
+                      const isVideo = url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg");
+                      return (
+                        <div key={idx} className="aspect-video rounded-lg border overflow-hidden bg-muted group relative">
+                          {isVideo ? (
+                            <video src={url.trim()} controls className="w-full h-full object-cover" />
+                          ) : (
+                            <img src={url.trim()} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Specifications</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Name</p>
+                    <p className="text-sm font-semibold">{activeVehicle.make}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Model</p>
+                    <p className="text-sm font-semibold">{activeVehicle.model}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Year</p>
+                    <p className="text-sm font-semibold">{activeVehicle.year}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">License Plate</p>
+                    <Badge variant="outline" className="font-mono">{activeVehicle.licensePlate}</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Assignment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Assigned Driver</p>
+                  {activeVehicle.driverName ? (
+                    <div className="p-3 rounded-lg border bg-accent/50">
+                      <p className="text-sm font-bold">{activeVehicle.driverName}</p>
+                      <p className="text-xs text-muted-foreground">{activeVehicle.driverEmail}</p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic p-3 rounded-lg border border-dashed">No driver assigned</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -573,108 +695,6 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
           <PaginationControls table={table} />
         </div>
       </Tabs>
-
-      {/* ── Side Sheet for View/Edit ── */}
-      <Sheet open={!!activeVehicle} onOpenChange={(open) => !open && handleCloseSheet()}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
-          <SheetHeader className="mb-6">
-            <SheetTitle>
-              {editId ? "Edit Vehicle" : "Vehicle Details"}
-            </SheetTitle>
-            <SheetDescription>
-              {editId 
-                ? "Update vehicle information and media." 
-                : "Comprehensive overview of vehicle specifications and media."
-              }
-            </SheetDescription>
-          </SheetHeader>
-
-          {activeVehicle && (
-            <div className="space-y-8">
-              {editId ? (
-                <EditVehicleForm 
-                  vehicle={activeVehicle} 
-                  drivers={drivers} 
-                  onSuccess={handleCloseSheet}
-                />
-              ) : (
-                <div className="space-y-6">
-                  {/* Media */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Media</h3>
-                    {activeVehicle.thumbnail && (
-                      <div className="w-full aspect-video rounded-xl overflow-hidden border bg-muted">
-                        <img
-                          src={activeVehicle.thumbnail}
-                          alt={activeVehicle.make}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {activeVehicle.gallery && (
-                      <div className="grid grid-cols-2 gap-2">
-                        {activeVehicle.gallery.split(",").map((url, idx) => {
-                          const isVideo = url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg");
-                          return (
-                            <div key={idx} className="aspect-video rounded-lg border overflow-hidden bg-muted">
-                              {isVideo ? (
-                                <video src={url.trim()} controls className="w-full h-full object-cover" />
-                              ) : (
-                                <img src={url.trim()} alt="" className="w-full h-full object-cover" />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Specs */}
-                  <div className="grid grid-cols-2 gap-6 border-t pt-6">
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">Name</p>
-                      <p className="text-sm font-semibold">{activeVehicle.make}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">Model</p>
-                      <p className="text-sm font-semibold">{activeVehicle.model}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">Year</p>
-                      <p className="text-sm">{activeVehicle.year}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">License Plate</p>
-                      <Badge variant="outline" className="font-mono">{activeVehicle.licensePlate}</Badge>
-                    </div>
-                  </div>
-
-                  {/* Driver */}
-                  <div className="border-t pt-6">
-                    <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Assigned Driver</p>
-                    {activeVehicle.driverName ? (
-                      <div className="p-3 rounded-lg border bg-accent/50">
-                        <p className="text-sm font-bold">{activeVehicle.driverName}</p>
-                        <p className="text-xs text-muted-foreground">{activeVehicle.driverEmail}</p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground italic">No driver assigned</p>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-3 border-t pt-6">
-                    <Button className="flex-1" onClick={() => { setViewId(null); setEditId(activeVehicle.id); }}>
-                      <Pencil className="mr-2 size-4" />
-                      Edit Vehicle
-                    </Button>
-                    <Button variant="outline" onClick={handleCloseSheet}>Close</Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
     </>
   );
 }
