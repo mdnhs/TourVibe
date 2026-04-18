@@ -7,66 +7,88 @@ interface NavbarProps {
   session: Session | null;
 }
 
+const navLinks = [
+  { label: "Services", href: "#services" },
+  { label: "About", href: "#about" },
+  { label: "Reviews", href: "#reviews" },
+  { label: "Contact", href: "#contact" },
+];
+
 export function Navbar({ session }: NavbarProps) {
   return (
-    <div className="sticky top-0 z-50 w-full px-6 pt-4">
-      <header className="mx-auto max-w-6xl flex flex-col gap-6 rounded-full border border-white/70 bg-white/80 px-5 py-4 shadow-lg shadow-amber-950/5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/">
-            <div className="flex size-11 items-center justify-center rounded-full bg-slate-950 text-white">
-              <CarFront className="size-5" />
-            </div>
-          </Link>
-          <div>
-            <p className="font-heading text-lg font-semibold">TourVibe</p>
-            <p className="text-sm text-slate-500">
-              Car-based tour management platform
+    <div className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6">
+      <header className="mx-auto max-w-6xl flex items-center justify-between rounded-full border border-white/70 bg-white/85 px-4 py-3 shadow-lg shadow-slate-900/8 backdrop-blur-md">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-slate-950 text-white shadow-md shadow-slate-900/30 transition group-hover:bg-slate-800">
+            <CarFront className="size-[18px]" />
+          </div>
+          <div className="hidden sm:block">
+            <p className="font-heading text-[15px] font-bold leading-tight text-slate-900">
+              TourVibe
+            </p>
+            <p className="text-[11px] text-slate-400 leading-tight">
+              Car-based tour management
             </p>
           </div>
-        </div>
-        <nav className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-          <Link href="/tours" className="transition hover:text-slate-950">
-            Tours
-          </Link>
-          <Link href="/#services" className="transition hover:text-slate-950">
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-1">
+          <Link
+            href="#services"
+            className="relative px-3.5 py-2 text-[13px] font-medium text-slate-500 rounded-lg transition-all hover:text-slate-900 hover:bg-slate-100/80 group"
+          >
             Services
+            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-0 rounded-full bg-amber-400 transition-all duration-200 group-hover:w-4" />
           </Link>
-          <Link href="/#about" className="transition hover:text-slate-950">
+          <Link
+            href="#about"
+            className="relative px-3.5 py-2 text-[13px] font-medium text-slate-500 rounded-lg transition-all hover:text-slate-900 hover:bg-slate-100/80 group"
+          >
             About
+            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-0 rounded-full bg-amber-400 transition-all duration-200 group-hover:w-4" />
           </Link>
-          <Link href="/#reviews" className="transition hover:text-slate-950">
+          <Link
+            href="#reviews"
+            className="relative px-3.5 py-2 text-[13px] font-medium text-slate-500 rounded-lg transition-all hover:text-slate-900 hover:bg-slate-100/80 group"
+          >
             Reviews
+            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-0 rounded-full bg-amber-400 transition-all duration-200 group-hover:w-4" />
           </Link>
-          <Link href="/#contact" className="transition hover:text-slate-950">
+          <Link
+            href="#contact"
+            className="relative px-3.5 py-2 text-[13px] font-medium text-slate-500 rounded-lg transition-all hover:text-slate-900 hover:bg-slate-100/80 group"
+          >
             Contact
+            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-0 rounded-full bg-amber-400 transition-all duration-200 group-hover:w-4" />
           </Link>
+        </nav>
+
+        <div className="flex items-center gap-2">
           {session ? (
             <Link href="/dashboard">
-              <Button
-                variant="outline"
-                className="rounded-full h-10 border-amber-300 bg-amber-50 px-6 text-amber-900 hover:bg-amber-100 cursor-pointer"
-              >
+              <Button className="h-9 rounded-xl bg-amber-400 px-5 text-[13px] font-semibold text-slate-950 shadow-md shadow-amber-400/25 hover:bg-amber-300 transition-all">
                 Dashboard
               </Button>
             </Link>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/login" className="hidden sm:block">
                 <Button
-                  variant="outline"
-                  className="rounded-full h-10 border-amber-300 bg-amber-50 px-6 text-amber-900 hover:bg-amber-100 cursor-pointer"
+                  variant="ghost"
+                  className="h-9 rounded-xl px-5 text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                 >
                   Login
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button className="rounded-full h-10 bg-slate-950 px-6 text-white hover:bg-slate-800 cursor-pointer">
+                <Button className="h-9 rounded-xl bg-slate-950 px-5 text-[13px] font-semibold text-white shadow-md shadow-slate-900/20 hover:bg-slate-800 transition-all">
                   Sign Up
+                  <span className="ml-1 text-slate-400">→</span>
                 </Button>
               </Link>
             </>
           )}
-        </nav>
+        </div>
       </header>
     </div>
   );
