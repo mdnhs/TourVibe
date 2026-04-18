@@ -7,6 +7,7 @@ import {
   BusFrontIcon,
   CarFrontIcon,
   LayoutDashboardIcon,
+  MapIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -45,16 +46,34 @@ export function AppSidebar({
       icon: LayoutDashboardIcon,
     },
     {
+      label: "Tours",
+      href: "/dashboard/tours",
+      icon: MapIcon,
+      adminOnly: true,
+    },
+    {
       label: "Drivers",
       href: "/dashboard/drivers",
       icon: BusFrontIcon,
+      adminOnly: true,
+    },
+    {
+      label: "Vehicles",
+      href: "/dashboard/vehicles",
+      icon: CarFrontIcon,
+      adminOnly: true,
     },
     {
       label: "Users",
       href: "/dashboard/users",
       icon: UsersIcon,
+      adminOnly: true,
     },
   ];
+
+  const filteredMenuItems = menuItems.filter(
+    (item) => !item.adminOnly || user.role === "Super Admin",
+  );
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
@@ -76,7 +95,7 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => {
+              {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive =
                   item.href === "/dashboard"

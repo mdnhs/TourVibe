@@ -1,5 +1,7 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
+import { mergeProps } from "@base-ui/react/merge-props"
+import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -40,18 +42,34 @@ const buttonVariants = cva(
   }
 )
 
+interface ButtonProps extends ButtonPrimitive.Props, VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  asChild = false,
+  render,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
+  const mergedProps = mergeProps(
+    {
+      className: cn(buttonVariants({ variant, size, className })),
+      "data-slot": "button",
+    },
+    props
+  )
+
   return (
-    <ButtonPrimitive
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
+    <ButtonPrimitive 
+      render={asChild ? (children as React.ReactElement) : render} 
+      {...mergedProps}
+    >
+      {asChild ? undefined : children}
+    </ButtonPrimitive>
   )
 }
 

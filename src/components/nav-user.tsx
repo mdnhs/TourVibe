@@ -47,10 +47,15 @@ export function NavUser({
   const router = useRouter()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 
-  const avatarSrc = user.avatar ?? undefined
+  if (!mounted) {
+    return null
+  }
+
+  const avatarSrc = user.avatar || undefined
   const initials = user.name
     .split(" ")
     .filter(Boolean)

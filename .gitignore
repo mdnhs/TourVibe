@@ -20,6 +20,9 @@
 # local database
 /data/
 
+# uploads
+/public/uploads/
+
 # production
 /build
 
