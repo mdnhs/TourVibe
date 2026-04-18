@@ -25,18 +25,21 @@ export function Navbar({ session }: NavbarProps) {
           </div>
         </div>
         <nav className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-          <a href="#services" className="transition hover:text-slate-950">
+          <Link href="/tours" className="transition hover:text-slate-950">
+            Tours
+          </Link>
+          <Link href="/#services" className="transition hover:text-slate-950">
             Services
-          </a>
-          <a href="#about" className="transition hover:text-slate-950">
+          </Link>
+          <Link href="/#about" className="transition hover:text-slate-950">
             About
-          </a>
-          <a href="#reviews" className="transition hover:text-slate-950">
+          </Link>
+          <Link href="/#reviews" className="transition hover:text-slate-950">
             Reviews
-          </a>
-          <a href="#contact" className="transition hover:text-slate-950">
+          </Link>
+          <Link href="/#contact" className="transition hover:text-slate-950">
             Contact
-          </a>
+          </Link>
           {session ? (
             <Link href="/dashboard">
               <Button

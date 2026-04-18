@@ -1,22 +1,25 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
   Clock,
   ExternalLink,
-  MapPinned,
+  Map,
+  MapPin,
   Mountain,
   Navigation,
   RotateCcw,
+  Search,
   Star,
   Users,
+  Car,
+  MessageSquareText,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  Map,
+  Map as MapComponent,
   MapControls,
   MapMarker,
   MarkerContent,
@@ -25,14 +28,6 @@ import {
   MarkerTooltip,
   useMap,
 } from "@/components/ui/map";
-
-interface HeroProps {
-  stats: { value: string; label: string }[];
-  flagshipTour?: { name: string; duration: string; vehicleCount: number };
-  flagshipDriver?: { name: string };
-  userCount: number;
-  adminCredentials: { email: string; password: string };
-}
 
 const locations = [
   {
@@ -127,58 +122,83 @@ function MapController() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function Hero({
-  stats,
-  flagshipTour,
-  flagshipDriver,
-  userCount,
-  adminCredentials,
-}: HeroProps) {
+export function Hero({ stats }: { stats: { value: string; label: string }[] }) {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/tours?q=${encodeURIComponent(query.trim())}`);
+    } else {
+      router.push("/tours");
+    }
+  };
+
   return (
     <section className="px-6 pb-20">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 pt-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           {/* Left column */}
           <div className="space-y-8">
-            <Badge className="rounded-full bg-amber-100 px-4 py-1 text-amber-800 hover:bg-amber-100">
-              Better Auth + SQLite + RBAC
-            </Badge>
-            <div className="space-y-5">
-              <h1 className="max-w-3xl font-heading text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
-                Road-trip booking and driver operations in one clean platform.
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50/50 px-4 py-1.5 text-sm font-medium text-cyan-900 backdrop-blur-sm">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex size-2 rounded-full bg-cyan-500"></span>
+              </span>
+              Your Journey Starts Here
+            </div>
+            <div className="space-y-4">
+              <h1 className="max-w-xl font-heading text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+                Discover Ireland's finest car tours.
               </h1>
-              <p className="max-w-2xl text-lg leading-8 text-slate-600">
-                TourVibe helps you sell car-based tours, assign drivers, manage
-                bookings and keep tourists informed through an eye-catching
-                customer experience.
+              <p className="max-w-lg text-lg leading-8 text-slate-600">
+                Book your next adventure with our curated selection of scenic road trips.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link href="/signup">
-                <Button className="h-12 rounded-full bg-slate-950 px-6 text-white hover:bg-slate-800">
-                  Start Free Setup
-                  <ArrowRight className="size-4" />
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button
-                  variant="outline"
-                  className="h-12 rounded-full border-amber-300 bg-amber-50 px-6 text-amber-900 hover:bg-amber-100"
-                >
-                  Open Dashboard
-                </Button>
-              </Link>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {stats.map((stat) => (
+            
+            <form 
+              onSubmit={handleSearch}
+              className="relative flex max-w-md items-center gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-200/50 transition-all focus-within:border-amber-300 focus-within:ring-4 focus-within:ring-amber-100/50"
+            >
+              <div className="flex flex-1 items-center px-3">
+                <Search className="size-5 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Search tour, city or place..."
+                  className="border-0 bg-transparent text-slate-900 placeholder:text-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+              <Button 
+                type="submit"
+                className="h-11 rounded-full bg-slate-950 px-6 text-white hover:bg-slate-800"
+              >
+                Search
+              </Button>
+            </form>
+
+            <div className="grid gap-3 sm:grid-cols-4 pt-6">
+              {stats.map((stat, i) => (
                 <div
                   key={stat.label}
-                  className="rounded-3xl border border-white/70 bg-white/80 px-5 py-4 shadow-lg shadow-slate-200/40 backdrop-blur"
+                  className={`group relative overflow-hidden rounded-lg bg-white p-4 shadow-sm border-t-2 border-slate-200 transition-all ${
+                    i === 0 ? "border-t-amber-400" : i === 1 ? "border-t-cyan-400" : i === 2 ? "border-t-emerald-400" : "border-t-rose-400"
+                  }`}
                 >
-                  <p className="font-heading text-3xl font-semibold text-slate-950">
+                  <div className="mb-3">
+                    {i === 0 ? <MapPin className="size-5 text-amber-500" /> :
+                     i === 1 ? <Car className="size-5 text-cyan-500" /> :
+                     i === 2 ? <MessageSquareText className="size-5 text-emerald-500" /> :
+                     <Users className="size-5 text-rose-500" />}
+                  </div>
+                  <p className="font-heading text-xl font-extrabold text-slate-950">
                     {stat.value}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">{stat.label}</p>
+                  <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
@@ -191,11 +211,10 @@ export function Hero({
             <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-slate-950/5 p-2 text-white shadow-[0_40px_120px_rgba(15,23,42,0.45)]">
               <div className="grid gap-2">
                 <div className="relative h-[480px] w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5">
-                  <Map
+                  <MapComponent
                     center={[-7.6921, 53.1424]}
                     zoom={6}
                     theme="light"
-                    // OpenFreeMap liberty style supports 3D buildings
                     styles={{
                       light: "https://tiles.openfreemap.org/styles/liberty",
                     }}
@@ -207,10 +226,7 @@ export function Hero({
                       showLocate
                       showFullscreen
                     />
-
-                    {/* 3D toggle button */}
                     <MapController />
-
                     {locations.map((loc) => (
                       <MapMarker
                         key={loc.id}
@@ -267,7 +283,7 @@ export function Hero({
                         </MarkerPopup>
                       </MapMarker>
                     ))}
-                  </Map>
+                  </MapComponent>
                 </div>
               </div>
             </div>

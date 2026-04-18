@@ -32,18 +32,14 @@ export default async function Home() {
         count: number;
       }
     ).count,
-    userCount: (
-      db.prepare("SELECT COUNT(*) as count FROM user").get() as {
+    touristCount: (
+      db
+        .prepare("SELECT COUNT(*) as count FROM user WHERE role = 'tourist'")
+        .get() as {
         count: number;
       }
     ).count,
   };
-
-  const stats = [
-    { value: `${statsData.tourCount}+`, label: "active tour packages" },
-    { value: "24/7", label: "customer support coverage" },
-    { value: statsData.avgRating.toFixed(1), label: "average tourist rating" },
-  ];
 
   // Fetch dynamic reviews
   const dynamicReviews = db
@@ -138,15 +134,16 @@ export default async function Home() {
     },
   ];
 
+  const stats = [
+    { label: "Tour Packages", value: `${statsData.tourCount}+` },
+    { label: "Total Vehicles", value: `${statsData.vehicleCount}+` },
+    { label: "Total Reviews", value: `${statsData.reviewCount}+` },
+    { label: "Total Tourists", value: `${statsData.touristCount}+` },
+  ];
+
   return (
     <div className="min-h-screen text-slate-900">
-      <Hero
-        stats={stats}
-        flagshipTour={flagshipTour}
-        flagshipDriver={flagshipDriver}
-        userCount={statsData.userCount}
-        adminCredentials={seededAdminCredentials}
-      />
+      <Hero stats={stats} />
 
       <Services services={services} />
 
