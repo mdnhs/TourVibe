@@ -2,8 +2,6 @@ import { BusFront, CalendarClock, CarFront } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { seededAdminCredentials } from "@/lib/seed";
-import { getServerSession } from "@/lib/session";
-import { Navbar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
 import { Services } from "@/components/landing/services";
 import { About } from "@/components/landing/about";
@@ -11,9 +9,6 @@ import { Reviews } from "@/components/landing/reviews";
 import { Contact } from "@/components/landing/contact";
 
 export default async function Home() {
-  const sessionData = await getServerSession();
-  const session = sessionData?.session ?? null;
-
   // Fetch real-time statistics
   const statsData = {
     tourCount: (
@@ -144,10 +139,7 @@ export default async function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#fff7ed_0%,#fff_22%,#f8fafc_100%)] text-slate-900 relative isolate ">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_15%_20%,rgba(251,191,36,0.35),transparent_24%),radial-gradient(circle_at_82%_12%,rgba(34,211,238,0.22),transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.7))]" />
-      <Navbar session={session} />
-
+    <div className="min-h-screen text-slate-900">
       <Hero
         stats={stats}
         flagshipTour={flagshipTour}
@@ -163,6 +155,6 @@ export default async function Home() {
       <Reviews reviews={displayReviews} />
 
       <Contact />
-    </main>
+    </div>
   );
 }

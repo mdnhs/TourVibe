@@ -5,7 +5,7 @@ import { SignUpForm } from "@/components/auth/sign-up-form";
 
 export default function SignupPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.22),_transparent_25%),linear-gradient(180deg,#f8fafc_0%,#fff7ed_100%)] px-6 py-8 text-slate-900">
+    <div className="relative overflow-hidden px-6 py-12 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 lg:flex-row">
         <div className="flex-1 space-y-6 rounded-[2rem] border border-slate-200/70 bg-white/70 px-8 py-10 shadow-[0_40px_120px_rgba(148,163,184,0.18)] backdrop-blur">
           <Link
@@ -20,11 +20,12 @@ export default function SignupPage() {
               Join TourVibe
             </p>
             <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
-              Launch bookings, transport coordination and guest service from one app.
+              Launch bookings, transport coordination and guest service from one
+              app.
             </h1>
             <p className="max-w-xl text-base leading-7 text-slate-600">
-              Public registration is for tourists. Operational driver accounts are created
-              by your super admin from the dashboard.
+              Public registration is for tourists. Operational driver accounts
+              are created by your super admin from the dashboard.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -32,14 +33,16 @@ export default function SignupPage() {
               <Compass className="mb-3 size-5 text-cyan-600" />
               <h2 className="font-medium">Tourist journeys</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Book rides, explore itineraries and submit reviews after the trip.
+                Book rides, explore itineraries and submit reviews after the
+                trip.
               </p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-5">
               <BusFront className="mb-3 size-5 text-amber-600" />
               <h2 className="font-medium">Driver operations</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Driver accounts are provisioned internally so access stays controlled.
+                Driver accounts are provisioned internally so access stays
+                controlled.
               </p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -56,6 +59,6 @@ export default function SignupPage() {
           <SignUpForm />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
