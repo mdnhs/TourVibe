@@ -146,4 +146,10 @@
   h6 {
     font-family: "Space Grotesk", sans-serif;
   }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
 }

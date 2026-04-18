@@ -1,7 +1,30 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowRight, MapPinned, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  Clock,
+  ExternalLink,
+  MapPinned,
+  Mountain,
+  Navigation,
+  RotateCcw,
+  Star,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Map,
+  MapControls,
+  MapMarker,
+  MarkerContent,
+  MarkerLabel,
+  MarkerPopup,
+  MarkerTooltip,
+  useMap,
+} from "@/components/ui/map";
 
 interface HeroProps {
   stats: { value: string; label: string }[];
@@ -10,6 +33,99 @@ interface HeroProps {
   userCount: number;
   adminCredentials: { email: string; password: string };
 }
+
+const locations = [
+  {
+    id: 1,
+    name: "Dublin",
+    description: "Ireland's vibrant capital city",
+    hours: "Open year round",
+    rating: 4.8,
+    reviews: 12453,
+    color: "bg-amber-400",
+    ring: "ring-amber-400/30",
+    lng: -6.2603,
+    lat: 53.3498,
+  },
+  {
+    id: 2,
+    name: "Galway",
+    description: "The City of the Tribes on the west coast",
+    hours: "Open year round",
+    rating: 4.7,
+    reviews: 6821,
+    color: "bg-cyan-400",
+    ring: "ring-cyan-400/30",
+    lng: -9.0568,
+    lat: 53.2707,
+  },
+  {
+    id: 3,
+    name: "Cork",
+    description: "The rebel city of southern Ireland",
+    hours: "Open year round",
+    rating: 4.6,
+    reviews: 5340,
+    color: "bg-emerald-400",
+    ring: "ring-emerald-400/30",
+    lng: -8.4756,
+    lat: 51.8985,
+  },
+];
+
+// ─── 3D controller — must live inside <Map> to use useMap() ──────────────────
+function MapController() {
+  const { map, isLoaded } = useMap();
+  const [is3D, setIs3D] = useState(true); // default true
+
+  // Enter 3D on load
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+    map.setPaintProperty("water", "fill-color", "rgba(34, 211, 238, 0.35)");
+    map.setPaintProperty("water", "fill-opacity", 1);
+
+    map.easeTo({ pitch: 60, bearing: -20, duration: 800 });
+
+    const handleMove = () => setIs3D(map.getPitch() > 10);
+    map.on("move", handleMove);
+    return () => {
+      map.off("move", handleMove);
+    };
+  }, [map, isLoaded]);
+
+  const toggle = () => {
+    if (is3D) {
+      map?.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+    } else {
+      map?.easeTo({ pitch: 60, bearing: -20, duration: 800 });
+    }
+  };
+
+  if (!isLoaded) return null;
+
+  return (
+    <div className="absolute bottom-3 left-3 z-10">
+      <button
+        onClick={toggle}
+        className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-md backdrop-blur transition hover:bg-white"
+      >
+        {is3D ? (
+          <>
+            <RotateCcw className="size-3.5" />
+            2D View
+          </>
+        ) : (
+          <>
+            <Mountain className="size-3.5" />
+            3D View
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function Hero({
   stats,
@@ -22,6 +138,7 @@ export function Hero({
     <section className="px-6 pb-20">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 pt-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          {/* Left column */}
           <div className="space-y-8">
             <Badge className="rounded-full bg-amber-100 px-4 py-1 text-amber-800 hover:bg-amber-100">
               Better Auth + SQLite + RBAC
@@ -67,72 +184,90 @@ export function Hero({
             </div>
           </div>
 
+          {/* Right column */}
           <div className="relative">
             <div className="absolute -left-10 top-10 size-40 rounded-full bg-cyan-200/50 blur-3xl" />
             <div className="absolute -right-6 bottom-12 size-48 rounded-full bg-amber-200/60 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-slate-950 p-7 text-white shadow-[0_40px_120px_rgba(15,23,42,0.45)]">
-              <div className="grid gap-4">
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm text-white/60">
-                        Today’s flagship ride
-                      </p>
-                      <h2 className="mt-2 font-heading text-2xl font-semibold">
-                        {flagshipTour?.name || "Coastal Highway Escape"}
-                      </h2>
-                    </div>
-                    <div className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs text-emerald-300">
-                      On schedule
-                    </div>
-                  </div>
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-white/6 p-4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-white/45">
-                        Driver
-                      </p>
-                      <p className="mt-2 text-lg font-medium">
-                        {flagshipDriver?.name || "Nadia Rahman"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-white/6 p-4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-white/45">
-                        Duration
-                      </p>
-                      <p className="mt-2 text-lg font-medium">
-                        {flagshipTour?.duration || "Full Day"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-amber-400 to-orange-500 p-5 text-slate-950">
-                    <MapPinned className="size-5" />
-                    <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em]">
-                      Options
-                    </p>
-                    <p className="mt-2 font-heading text-3xl font-semibold">
-                      {flagshipTour?.vehicleCount || 12} cars
-                    </p>
-                  </div>
-                  <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
-                    <Users className="size-5 text-cyan-300" />
-                    <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em] text-white/50">
-                      Live Guests
-                    </p>
-                    <p className="mt-2 font-heading text-3xl font-semibold">
-                      {userCount} riders
-                    </p>
-                  </div>
-                </div>
-                <div className="rounded-[1.5rem] border border-dashed border-white/15 bg-white/5 p-5 text-sm leading-7 text-white/70">
-                  Seeded super admin for local testing:
-                  <span className="block font-medium text-white">
-                    {adminCredentials.email}
-                  </span>
-                  <span className="block font-medium text-white">
-                    {adminCredentials.password}
-                  </span>
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-slate-950/5 p-2 text-white shadow-[0_40px_120px_rgba(15,23,42,0.45)]">
+              <div className="grid gap-2">
+                <div className="relative h-[480px] w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5">
+                  <Map
+                    center={[-7.6921, 53.1424]}
+                    zoom={6}
+                    theme="light"
+                    // OpenFreeMap liberty style supports 3D buildings
+                    styles={{
+                      light: "https://tiles.openfreemap.org/styles/liberty",
+                    }}
+                  >
+                    <MapControls
+                      position="top-right"
+                      showZoom
+                      showCompass
+                      showLocate
+                      showFullscreen
+                    />
+
+                    {/* 3D toggle button */}
+                    <MapController />
+
+                    {locations.map((loc) => (
+                      <MapMarker
+                        key={loc.id}
+                        longitude={loc.lng}
+                        latitude={loc.lat}
+                      >
+                        <MarkerContent>
+                          <div
+                            className={`size-3 cursor-pointer rounded-full ring-4 transition-transform hover:scale-125 ${loc.color} ${loc.ring}`}
+                          />
+                          <MarkerLabel
+                            position="bottom"
+                            className="text-slate-800 font-medium text-[11px]"
+                          >
+                            {loc.name}
+                          </MarkerLabel>
+                        </MarkerContent>
+                        <MarkerTooltip>{loc.description}</MarkerTooltip>
+                        <MarkerPopup className="w-56 p-0">
+                          <div className="space-y-2 p-3">
+                            <div>
+                              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                Tour Stop
+                              </span>
+                              <h3 className="font-semibold leading-tight text-foreground">
+                                {loc.name}
+                              </h3>
+                            </div>
+                            <div className="flex items-center gap-1 text-sm">
+                              <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                              <span className="font-medium">{loc.rating}</span>
+                              <span className="text-muted-foreground">
+                                ({loc.reviews.toLocaleString()} reviews)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <Clock className="size-3.5" />
+                              <span>{loc.hours}</span>
+                            </div>
+                            <div className="flex gap-2 pt-1">
+                              <Button size="sm" className="h-8 flex-1">
+                                <Navigation className="mr-1.5 size-3.5" />
+                                Directions
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8"
+                              >
+                                <ExternalLink className="size-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </MarkerPopup>
+                      </MapMarker>
+                    ))}
+                  </Map>
                 </div>
               </div>
             </div>

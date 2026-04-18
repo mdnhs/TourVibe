@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { requireDashboardSession } from "@/lib/dashboard";
+
 import { db } from "@/lib/db";
+import { requireDashboardSession } from "@/lib/dashboard";
+import { auth } from "@/lib/auth";
 
 export async function createDriver(formData: FormData) {
   const { isSuperAdmin } = await requireDashboardSession();
@@ -19,19 +20,16 @@ export async function createDriver(formData: FormData) {
   }
 
   try {
-    const response = await auth.api.createUser({
-      headers: await headers(),
+    await auth.api.signUpEmail({
       body: {
         name,
         email,
         password,
-        role: "driver",
       },
     });
 
-    if (response.error) {
-      return { error: response.error.message || "Unable to create the driver account." };
-    }
+    // Manually update the role to driver
+    db.prepare("UPDATE user SET role = ? WHERE email = ?").run("driver", email);
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -91,18 +89,10 @@ export async function deleteDriver(id: string) {
     // Check if driver has assigned vehicles
     const assignedVehicles = db.prepare("SELECT id FROM vehicle WHERE driverId = ?").all(id);
     if (assignedVehicles.length > 0) {
-      // Option 1: Prevent deletion
-      // return { error: "Cannot delete driver with assigned vehicles. Please unassign first." };
-      
-      // Option 2: Unassign vehicles (handled by FK SET NULL) - but we might want to be explicit
       db.prepare("UPDATE vehicle SET driverId = NULL WHERE driverId = ?").run(id);
     }
 
-    // better-auth doesn't seem to have a direct 'deleteUser' in admin api by default, 
-    // but we can delete from db directly if needed, or use better-auth if available.
-    // Actually better-auth admin plugin has removeUser if configured, let's check if we can just delete from db.
     db.prepare("DELETE FROM user WHERE id = ?").run(id);
-    // Also delete sessions etc if needed, but better-auth usually handles this if using its API.
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
