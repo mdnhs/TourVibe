@@ -73,23 +73,23 @@ const locations = [
 const statIcons = [MapPin, Car, MessageSquareText, Users];
 const statColors = [
   {
-    iconBg: "bg-amber-400/15",
-    icon: "text-amber-400",
+    iconBg: "bg-amber-400",
+    icon: "text-white",
     bar: "bg-gradient-to-r from-amber-400 to-amber-300",
   },
   {
-    iconBg: "bg-cyan-400/15",
-    icon: "text-cyan-400",
+    iconBg: "bg-cyan-400",
+    icon: "text-white",
     bar: "bg-gradient-to-r from-cyan-400 to-cyan-300",
   },
   {
-    iconBg: "bg-emerald-400/15",
-    icon: "text-emerald-400",
+    iconBg: "bg-emerald-400",
+    icon: "text-white",
     bar: "bg-gradient-to-r from-emerald-400 to-emerald-300",
   },
   {
-    iconBg: "bg-violet-400/15",
-    icon: "text-violet-400",
+    iconBg: "bg-violet-400",
+    icon: "text-white",
     bar: "bg-gradient-to-r from-violet-400 to-violet-300",
   },
 ];
