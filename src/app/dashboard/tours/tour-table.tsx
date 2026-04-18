@@ -3,25 +3,6 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type UniqueIdentifier,
-} from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
   ColumnDef,
   ColumnFiltersState,
   Row,
@@ -43,18 +24,19 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Eye,
-  GripVertical,
   LayoutIcon,
   MoreHorizontal,
   Pencil,
-  Plus,
   Trash,
+  Clock,
+  DollarSign,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
+import Link from "next/link";
 
-import { deleteVehicle, deleteVehicles } from "./actions";
-import { EditVehicleForm } from "./vehicle-forms";
+import { deleteTour, deleteTours } from "./actions";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,78 +69,31 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export type Vehicle = {
+export type TourPackage = {
   id: string;
-  make: string;
-  model: string;
-  year: number;
-  licensePlate: string;
-  driverId: string | null;
-  driverName?: string;
-  driverEmail?: string;
+  name: string;
+  description: string | null;
+  price: number;
+  duration: string;
+  maxPersons: number;
   thumbnail: string;
-  gallery?: string; // Stored as JSON string
+  gallery: string | null;
+  assignedVehicles?: string; // Comma separated IDs
+  vehicleCount?: number;
 };
 
-interface VehicleTableProps {
-  vehicles: Vehicle[];
-  drivers: { id: string; name: string; email: string }[];
+interface TourTableProps {
+  tours: TourPackage[];
+  vehicles: { id: string; make: string; model: string; licensePlate: string }[];
 }
 
-// ── Drag handle ────────────────────────────────────────────────────────────────
-
-function DragHandle({ id }: { id: string }) {
-  const { attributes, listeners } = useSortable({ id });
-  return (
-    <Button
-      {...attributes}
-      {...listeners}
-      variant="ghost"
-      size="icon"
-      className="size-7 text-muted-foreground hover:bg-transparent cursor-grab active:cursor-grabbing"
-    >
-      <GripVertical className="size-3 text-muted-foreground" />
-      <span className="sr-only">Drag to reorder</span>
-    </Button>
-  );
-}
-
-// ── Draggable row ──────────────────────────────────────────────────────────────
-
-function DraggableRow({ row }: { row: Row<Vehicle> }) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
-  });
-
-  return (
-    <TableRow
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
-      ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-      }}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
-    </TableRow>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
-
-export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
+export function TourTable({ tours, vehicles }: TourTableProps) {
   const router = useRouter();
-  const [data, setData] = React.useState<Vehicle[]>(() => vehicles);
+  const [data, setData] = React.useState<TourPackage[]>(() => tours);
 
   React.useEffect(() => {
-    setData(vehicles);
-  }, [vehicles]);
+    setData(tours);
+  }, [tours]);
 
   const [search, setSearch] = useQueryState(
     "search",
@@ -177,34 +112,28 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     parseAsInteger.withDefault(10).withOptions({ shallow: true }),
   );
 
-  // nuqs for View/Edit
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
-  const [editId, setEditId] = useQueryState("edit", { shallow: true });
 
-  const activeVehicle = React.useMemo(() => {
-    const id = viewId || editId;
-    return data.find((v) => v.id === id);
-  }, [data, viewId, editId]);
+  const activeTour = React.useMemo(() => {
+    return data.find((t) => t.id === viewId);
+  }, [data, viewId]);
 
   const filteredData = React.useMemo(() => {
     let result = [...data];
 
-    // Filter by tab
-    if (tab === "assigned") {
-      result = result.filter((v) => v.driverId);
-    } else if (tab === "unassigned") {
-      result = result.filter((v) => !v.driverId);
+    if (tab === "with-vehicles") {
+      result = result.filter((t) => (t.vehicleCount || 0) > 0);
+    } else if (tab === "without-vehicles") {
+      result = result.filter((t) => (t.vehicleCount || 0) === 0);
     }
 
-    // Filter by search
     if (search) {
       const s = search.toLowerCase();
       result = result.filter(
-        (v) =>
-          v.make.toLowerCase().includes(s) ||
-          v.model.toLowerCase().includes(s) ||
-          v.licensePlate.toLowerCase().includes(s) ||
-          v.driverName?.toLowerCase().includes(s),
+        (t) =>
+          t.name.toLowerCase().includes(s) ||
+          t.description?.toLowerCase().includes(s) ||
+          t.duration.toLowerCase().includes(s),
       );
     }
 
@@ -221,18 +150,6 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
 
   const [isPending, startTransition] = React.useTransition();
 
-  const sortableId = React.useId();
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {}),
-  );
-
-  const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => filteredData.map(({ id }) => id),
-    [filteredData],
-  );
-
   const pagination = React.useMemo(
     () => ({
       pageIndex: page - 1,
@@ -241,26 +158,15 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     [page, pageSize],
   );
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (active && over && active.id !== over.id) {
-      setData((prev) => {
-        const oldIndex = data.findIndex((v) => v.id === active.id);
-        const newIndex = data.findIndex((v) => v.id === over.id);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
-    }
-  }
-
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this vehicle?")) {
+    if (confirm("Are you sure you want to delete this tour package?")) {
       startTransition(async () => {
-        const result = await deleteVehicle(id);
+        const result = await deleteTour(id);
         if (result?.error) {
           toast.error(result.error);
         } else {
-          toast.success("Vehicle deleted successfully");
-          setData((prev) => prev.filter((v) => v.id !== id));
+          toast.success("Tour package deleted successfully");
+          setData((prev) => prev.filter((t) => t.id !== id));
           router.refresh();
         }
       });
@@ -272,15 +178,15 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     if (selectedIds.length === 0) return;
 
     if (
-      confirm(`Are you sure you want to delete ${selectedIds.length} vehicles?`)
+      confirm(`Are you sure you want to delete ${selectedIds.length} packages?`)
     ) {
       startTransition(async () => {
-        const result = await deleteVehicles(selectedIds);
+        const result = await deleteTours(selectedIds);
         if (result?.error) {
           toast.error(result.error);
         } else {
-          toast.success("Vehicles deleted successfully");
-          setData((prev) => prev.filter((v) => !selectedIds.includes(v.id)));
+          toast.success("Packages deleted successfully");
+          setData((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
           setRowSelection({});
           router.refresh();
         }
@@ -288,12 +194,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     }
   };
 
-  const columns: ColumnDef<Vehicle>[] = [
-    {
-      id: "drag",
-      header: () => null,
-      cell: ({ row }) => <DragHandle id={row.original.id} />,
-    },
+  const columns: ColumnDef<TourPackage>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -323,57 +224,64 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
       enableHiding: false,
     },
     {
-      accessorKey: "make",
-      header: "Name",
+      accessorKey: "name",
+      header: "Package Name",
+      size: 200,
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.make}</div>
+        <div className="flex items-center gap-3 w-[200px]">
+          <div className="size-10 rounded-lg overflow-hidden border bg-muted flex-shrink-0">
+            <img src={row.original.thumbnail} alt="" className="w-full h-full object-cover" />
+          </div>
+          <div className="font-medium truncate" title={row.original.name}>
+            {row.original.name}
+          </div>
+        </div>
       ),
     },
     {
-      accessorKey: "model",
-      header: "Model",
-      cell: ({ row }) => <div>{row.original.model}</div>,
-    },
-    {
-      accessorKey: "year",
-      header: "Year",
-      cell: ({ row }) => <div>{row.original.year}</div>,
-    },
-    {
-      accessorKey: "licensePlate",
-      header: "License Plate",
+      accessorKey: "price",
+      header: "Price",
       cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className="px-1.5 text-muted-foreground font-mono"
-        >
-          {row.original.licensePlate}
+        <div className="font-semibold text-emerald-600">
+          ${row.original.price.toFixed(2)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "duration",
+      header: "Duration",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+          <Clock className="size-3" />
+          {row.original.duration}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "maxPersons",
+      header: "Persons",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5 text-xs font-medium">
+          <Users className="size-3.5 text-muted-foreground" />
+          Up to {row.original.maxPersons}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "vehicleCount",
+      header: "Vehicles",
+      cell: ({ row }) => (
+        <Badge variant={row.original.vehicleCount ? "secondary" : "outline"}>
+          {row.original.vehicleCount || 0} Assigned
         </Badge>
       ),
-    },
-    {
-      accessorKey: "driverName",
-      header: "Assigned Driver",
-      cell: ({ row }) => {
-        const { driverName, driverEmail } = row.original;
-        return driverName ? (
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">{driverName}</span>
-            <span className="text-xs text-muted-foreground">{driverEmail}</span>
-          </div>
-        ) : (
-          <Badge variant="outline" className="px-1.5 text-muted-foreground">
-            Unassigned
-          </Badge>
-        );
-      },
     },
     {
       id: "actions",
       header: "Action",
       enableHiding: false,
       cell: ({ row }) => {
-        const vehicle = row.original;
+        const tour = row.original;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -390,19 +298,19 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
               }
             />
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setViewId(vehicle.id)}>
+              <DropdownMenuItem onClick={() => setViewId(tour.id)}>
                 <Eye className="mr-2 size-4" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setEditId(vehicle.id)}>
+              <DropdownMenuItem onClick={() => router.push(`/dashboard/tours/${tour.id}/edit`)}>
                 <Pencil className="mr-2 size-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
-                onClick={() => handleDelete(vehicle.id)}
+                onClick={() => handleDelete(tour.id)}
               >
                 <Trash className="mr-2 size-4" />
                 Delete
@@ -448,34 +356,11 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
 
   const handleClose = () => {
     setViewId(null);
-    setEditId(null);
   };
 
   // ── Render Logic ──
 
-  if (editId && activeVehicle) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleClose}>
-            <ChevronLeft className="size-4" />
-          </Button>
-          <h2 className="text-2xl font-bold tracking-tight">Edit Vehicle</h2>
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <EditVehicleForm 
-              vehicle={activeVehicle} 
-              drivers={drivers} 
-              onSuccess={handleClose} 
-            />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (viewId && activeVehicle) {
+  if (viewId && activeTour) {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <div className="flex items-center justify-between">
@@ -483,11 +368,13 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
             <Button variant="ghost" size="icon" onClick={handleClose}>
               <ChevronLeft className="size-4" />
             </Button>
-            <h2 className="text-2xl font-bold tracking-tight">Vehicle Overview</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Tour Overview</h2>
           </div>
-          <Button variant="outline" onClick={() => { setViewId(null); setEditId(activeVehicle.id); }}>
-            <Pencil className="mr-2 size-4" />
-            Edit Vehicle
+          <Button variant="outline" asChild>
+            <Link href={`/dashboard/tours/${activeTour.id}/edit`}>
+              <Pencil className="mr-2 size-4" />
+              Edit Package
+            </Link>
           </Button>
         </div>
 
@@ -498,31 +385,35 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
                 <CardTitle>Media Gallery</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {activeVehicle.thumbnail && (
+                {activeTour.thumbnail && (
                   <div className="w-full aspect-video rounded-xl overflow-hidden border bg-muted">
                     <img
-                      src={activeVehicle.thumbnail}
-                      alt={activeVehicle.make}
+                      src={activeTour.thumbnail}
+                      alt={activeTour.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
                 )}
-                {activeVehicle.gallery && (
+                {activeTour.gallery && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {activeVehicle.gallery.split(",").map((url, idx) => {
-                      const isVideo = url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg");
-                      return (
-                        <div key={idx} className="aspect-video rounded-lg border overflow-hidden bg-muted group relative">
-                          {isVideo ? (
-                            <video src={url.trim()} controls className="w-full h-full object-cover" />
-                          ) : (
-                            <img src={url.trim()} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                          )}
-                        </div>
-                      );
-                    })}
+                    {activeTour.gallery.split(",").map((url, idx) => (
+                      <div key={idx} className="aspect-video rounded-lg border overflow-hidden bg-muted">
+                        <img src={url.trim()} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {activeTour.description || "No description provided."}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -530,46 +421,48 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Specifications</CardTitle>
+                <CardTitle>Quick Specs</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Name</p>
-                    <p className="text-sm font-semibold">{activeVehicle.make}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <DollarSign className="size-4" />
+                    <span className="text-sm">Price</span>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Model</p>
-                    <p className="text-sm font-semibold">{activeVehicle.model}</p>
-                  </div>
+                  <span className="font-bold text-emerald-600">${activeTour.price.toFixed(2)}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Year</p>
-                    <p className="text-sm font-semibold">{activeVehicle.year}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="size-4" />
+                    <span className="text-sm">Duration</span>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">License Plate</p>
-                    <Badge variant="outline" className="font-mono">{activeVehicle.licensePlate}</Badge>
+                  <span className="font-medium text-sm">{activeTour.duration}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="size-4" />
+                    <span className="text-sm">Capacity</span>
                   </div>
+                  <span className="font-medium text-sm">Up to {activeTour.maxPersons} persons</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Assignment</CardTitle>
+                <CardTitle>Assigned Vehicles</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Assigned Driver</p>
-                  {activeVehicle.driverName ? (
-                    <div className="p-3 rounded-lg border bg-accent/50">
-                      <p className="text-sm font-bold">{activeVehicle.driverName}</p>
-                      <p className="text-xs text-muted-foreground">{activeVehicle.driverEmail}</p>
-                    </div>
+                <div className="space-y-2">
+                  {activeTour.assignedVehicles ? (
+                    vehicles.filter(v => activeTour.assignedVehicles?.split(",").includes(v.id)).map(v => (
+                      <div key={v.id} className="p-2 rounded border bg-accent/50 text-xs flex justify-between items-center">
+                        <span className="font-medium">{v.make} {v.model}</span>
+                        <Badge variant="outline" className="font-mono text-[10px]">{v.licensePlate}</Badge>
+                      </div>
+                    ))
                   ) : (
-                    <p className="text-sm text-muted-foreground italic p-3 rounded-lg border border-dashed">No driver assigned</p>
+                    <p className="text-sm text-muted-foreground italic">No vehicles assigned</p>
                   )}
                 </div>
               </CardContent>
@@ -587,28 +480,30 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
         onValueChange={setTab}
         className="w-full flex-col justify-start gap-6"
       >
-        {/* ── Toolbar ── */}
         <div className="flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4 flex-1">
             <TabsList>
-              <TabsTrigger value="all">All Vehicles</TabsTrigger>
-              <TabsTrigger value="assigned">
-                Assigned{" "}
+              <TabsTrigger value="all">
+                All Packages
+                <Badge variant="secondary" className="ml-1">{data.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="with-vehicles">
+                With Vehicles
                 <Badge variant="secondary" className="ml-1">
-                  {data.filter((v) => v.driverId).length}
+                  {data.filter(t => (t.vehicleCount || 0) > 0).length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="unassigned">
-                Unassigned{" "}
+              <TabsTrigger value="without-vehicles">
+                Without Vehicles
                 <Badge variant="secondary" className="ml-1">
-                  {data.filter((v) => !v.driverId).length}
+                  {data.filter(t => (t.vehicleCount || 0) === 0).length}
                 </Badge>
               </TabsTrigger>
             </TabsList>
 
             <div className="relative max-w-sm flex-1">
               <Input
-                placeholder="Search vehicles..."
+                placeholder="Search packages..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-8"
@@ -625,18 +520,16 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
                 disabled={isPending}
               >
                 <Trash className="size-4" />
-                <span>Delete Selected ({Object.keys(rowSelection).length})</span>
+                <span>Delete ({Object.keys(rowSelection).length})</span>
               </Button>
             )}
 
-            {/* Column visibility */}
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" data-slot="dropdown-menu-trigger">
                     <LayoutIcon className="size-4" />
                     <span className="hidden lg:inline">Customize Columns</span>
-                    <span className="lg:hidden">Columns</span>
                     <ChevronDown className="size-4" />
                   </Button>
                 }
@@ -646,7 +539,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
                   .getAllColumns()
                   .filter(
                     (col) =>
-                      typeof col.accessorFn !== "undefined" && col.getCanHide(),
+                      col.getCanHide(),
                   )
                   .map((col) => (
                     <DropdownMenuCheckboxItem
@@ -663,16 +556,62 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
           </div>
         </div>
 
-        {/* ── Table Content ── */}
         <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-          <VehicleDataGrid
-            table={table}
-            dataIds={dataIds}
-            sortableId={sortableId}
-            sensors={sensors}
-            handleDragEnd={handleDragEnd}
-            columns={columns}
-          />
+          <div className="overflow-hidden rounded-lg border">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-muted">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead 
+                        key={header.id} 
+                        colSpan={header.colSpan}
+                        style={{ width: header.getSize() !== 150 ? `${header.getSize()}px` : undefined }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell 
+                          key={cell.id}
+                          style={{ width: cell.column.getSize() !== 150 ? `${cell.column.getSize()}px` : undefined }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
           <PaginationControls table={table} />
         </div>
       </Tabs>
@@ -680,89 +619,18 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
   );
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function VehicleDataGrid({
-  table,
-  dataIds,
-  sortableId,
-  sensors,
-  handleDragEnd,
-  columns,
-}: {
-  table: ReturnType<typeof useReactTable<Vehicle>>;
-  dataIds: UniqueIdentifier[];
-  sortableId: string;
-  sensors: ReturnType<typeof useSensors>;
-  handleDragEnd: (event: DragEndEvent) => void;
-  columns: ColumnDef<Vehicle>[];
-}) {
-  return (
-    <div className="overflow-hidden rounded-lg border">
-      <DndContext
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-        id={sortableId}
-      >
-        <Table>
-          <TableHeader className="sticky top-0 z-10 bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="**:data-[slot=table-cell]:first:w-8">
-            {table.getRowModel().rows?.length ? (
-              <SortableContext
-                items={dataIds}
-                strategy={verticalListSortingStrategy}
-              >
-                {table.getRowModel().rows.map((row) => (
-                  <DraggableRow key={row.id} row={row} />
-                ))}
-              </SortableContext>
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </DndContext>
-    </div>
-  );
-}
-
 function PaginationControls({
   table,
 }: {
-  table: ReturnType<typeof useReactTable<Vehicle>>;
+  table: any;
 }) {
   return (
-    <div className="flex items-center justify-between px-4">
+    <div className="flex items-center justify-between px-4 py-4">
       <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
       <div className="flex w-full items-center gap-8 lg:w-fit">
-        {/* Rows per page */}
         <div className="hidden items-center gap-2 lg:flex">
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
             Rows per page
@@ -784,13 +652,11 @@ function PaginationControls({
           </Select>
         </div>
 
-        {/* Page indicator */}
         <div className="flex w-fit items-center justify-center text-sm font-medium">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
 
-        {/* Nav buttons */}
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <Button
             variant="outline"

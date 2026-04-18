@@ -31,10 +31,39 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tour_package (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    price REAL NOT NULL,
+    duration TEXT NOT NULL, -- e.g. "3 Days / 2 Nights"
+    maxPersons INTEGER NOT NULL DEFAULT 1,
+    thumbnail TEXT NOT NULL DEFAULT '',
+    gallery TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tour_package_vehicle (
+    tourPackageId TEXT NOT NULL,
+    vehicleId TEXT NOT NULL,
+    PRIMARY KEY (tourPackageId, vehicleId),
+    FOREIGN KEY (tourPackageId) REFERENCES tour_package(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicleId) REFERENCES vehicle(id) ON DELETE CASCADE
+  )
+`);
+
 // Migration to add columns if they don't exist (for existing databases)
 try {
   db.exec("ALTER TABLE vehicle ADD COLUMN thumbnail TEXT NOT NULL DEFAULT ''");
 } catch (e) {}
 try {
   db.exec("ALTER TABLE vehicle ADD COLUMN gallery TEXT");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE tour_package ADD COLUMN maxPersons INTEGER NOT NULL DEFAULT 1");
 } catch (e) {}

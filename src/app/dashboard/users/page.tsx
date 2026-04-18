@@ -1,9 +1,24 @@
 import { redirect } from "next/navigation";
+import { Plus } from "lucide-react";
 
-import { UserManagementTable } from "@/components/dashboard/user-management-table";
 import { SiteHeader } from "@/components/site-header";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { UserTable, User } from "./user-table";
+import { CreateUserForm } from "./user-forms";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { roleLabels } from "@/lib/permissions";
 
 export default async function UsersPage() {
@@ -31,13 +46,47 @@ export default async function UsersPage() {
     <>
       <SiteHeader title="User Administration" subtitle="Admin only route" />
       <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
-        <UserManagementTable
-          currentUserId={session.user.id}
-          users={allUsers.map((user) => ({
-            ...user,
-            banned: Boolean(user.banned),
-          }))}
-        />
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-bold tracking-tight">User Directory</h2>
+            <p className="text-muted-foreground">
+              Overview of all registered accounts in the system.
+            </p>
+          </div>
+          <Dialog>
+            <DialogTrigger
+              render={
+                <Button data-slot="dialog-trigger">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add New User
+                </Button>
+              }
+            />
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New User</DialogTitle>
+                <DialogDescription>
+                  Create a new user account with a specific role.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateUserForm />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <Card className="shadow-xs">
+          <CardContent className="p-0">
+            <div className="p-6">
+               <UserTable 
+                currentUserId={session.user.id}
+                users={allUsers.map((user) => ({
+                  ...user,
+                  banned: Boolean(user.banned),
+                }))} 
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </>
   );

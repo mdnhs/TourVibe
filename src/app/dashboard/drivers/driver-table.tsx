@@ -3,25 +3,6 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type UniqueIdentifier,
-} from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
   ColumnDef,
   ColumnFiltersState,
   Row,
@@ -43,18 +24,17 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Eye,
-  GripVertical,
   LayoutIcon,
   MoreHorizontal,
   Pencil,
-  Plus,
   Trash,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 
-import { deleteVehicle, deleteVehicles } from "./actions";
-import { EditVehicleForm } from "./vehicle-forms";
+import { deleteDriver, deleteDrivers } from "./actions";
+import { EditDriverForm } from "./driver-forms";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,78 +67,27 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export type Vehicle = {
+export type Driver = {
   id: string;
-  make: string;
-  model: string;
-  year: number;
-  licensePlate: string;
-  driverId: string | null;
-  driverName?: string;
-  driverEmail?: string;
-  thumbnail: string;
-  gallery?: string; // Stored as JSON string
+  name: string;
+  email: string;
+  createdAt: string;
+  vehicleId: string | null;
+  vehicleName?: string;
+  vehiclePlate?: string;
 };
 
-interface VehicleTableProps {
-  vehicles: Vehicle[];
-  drivers: { id: string; name: string; email: string }[];
+interface DriverTableProps {
+  drivers: Driver[];
 }
 
-// ── Drag handle ────────────────────────────────────────────────────────────────
-
-function DragHandle({ id }: { id: string }) {
-  const { attributes, listeners } = useSortable({ id });
-  return (
-    <Button
-      {...attributes}
-      {...listeners}
-      variant="ghost"
-      size="icon"
-      className="size-7 text-muted-foreground hover:bg-transparent cursor-grab active:cursor-grabbing"
-    >
-      <GripVertical className="size-3 text-muted-foreground" />
-      <span className="sr-only">Drag to reorder</span>
-    </Button>
-  );
-}
-
-// ── Draggable row ──────────────────────────────────────────────────────────────
-
-function DraggableRow({ row }: { row: Row<Vehicle> }) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
-  });
-
-  return (
-    <TableRow
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
-      ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-      }}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
-    </TableRow>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
-
-export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
+export function DriverTable({ drivers }: DriverTableProps) {
   const router = useRouter();
-  const [data, setData] = React.useState<Vehicle[]>(() => vehicles);
+  const [data, setData] = React.useState<Driver[]>(() => drivers);
 
   React.useEffect(() => {
-    setData(vehicles);
-  }, [vehicles]);
+    setData(drivers);
+  }, [drivers]);
 
   const [search, setSearch] = useQueryState(
     "search",
@@ -181,30 +110,30 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
   const [editId, setEditId] = useQueryState("edit", { shallow: true });
 
-  const activeVehicle = React.useMemo(() => {
+  const activeDriver = React.useMemo(() => {
     const id = viewId || editId;
-    return data.find((v) => v.id === id);
+    return data.find((d) => d.id === id);
   }, [data, viewId, editId]);
 
   const filteredData = React.useMemo(() => {
     let result = [...data];
 
     // Filter by tab
-    if (tab === "assigned") {
-      result = result.filter((v) => v.driverId);
-    } else if (tab === "unassigned") {
-      result = result.filter((v) => !v.driverId);
+    if (tab === "with-vehicle") {
+      result = result.filter((d) => d.vehicleId);
+    } else if (tab === "without-vehicle") {
+      result = result.filter((d) => !d.vehicleId);
     }
 
     // Filter by search
     if (search) {
       const s = search.toLowerCase();
       result = result.filter(
-        (v) =>
-          v.make.toLowerCase().includes(s) ||
-          v.model.toLowerCase().includes(s) ||
-          v.licensePlate.toLowerCase().includes(s) ||
-          v.driverName?.toLowerCase().includes(s),
+        (d) =>
+          d.name.toLowerCase().includes(s) ||
+          d.email.toLowerCase().includes(s) ||
+          d.vehicleName?.toLowerCase().includes(s) ||
+          d.vehiclePlate?.toLowerCase().includes(s),
       );
     }
 
@@ -221,18 +150,6 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
 
   const [isPending, startTransition] = React.useTransition();
 
-  const sortableId = React.useId();
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {}),
-  );
-
-  const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => filteredData.map(({ id }) => id),
-    [filteredData],
-  );
-
   const pagination = React.useMemo(
     () => ({
       pageIndex: page - 1,
@@ -241,26 +158,15 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     [page, pageSize],
   );
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (active && over && active.id !== over.id) {
-      setData((prev) => {
-        const oldIndex = data.findIndex((v) => v.id === active.id);
-        const newIndex = data.findIndex((v) => v.id === over.id);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
-    }
-  }
-
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this vehicle?")) {
+    if (confirm("Are you sure you want to delete this driver?")) {
       startTransition(async () => {
-        const result = await deleteVehicle(id);
+        const result = await deleteDriver(id);
         if (result?.error) {
           toast.error(result.error);
         } else {
-          toast.success("Vehicle deleted successfully");
-          setData((prev) => prev.filter((v) => v.id !== id));
+          toast.success("Driver deleted successfully");
+          setData((prev) => prev.filter((d) => d.id !== id));
           router.refresh();
         }
       });
@@ -272,15 +178,15 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     if (selectedIds.length === 0) return;
 
     if (
-      confirm(`Are you sure you want to delete ${selectedIds.length} vehicles?`)
+      confirm(`Are you sure you want to delete ${selectedIds.length} drivers?`)
     ) {
       startTransition(async () => {
-        const result = await deleteVehicles(selectedIds);
+        const result = await deleteDrivers(selectedIds);
         if (result?.error) {
           toast.error(result.error);
         } else {
-          toast.success("Vehicles deleted successfully");
-          setData((prev) => prev.filter((v) => !selectedIds.includes(v.id)));
+          toast.success("Drivers deleted successfully");
+          setData((prev) => prev.filter((d) => !selectedIds.includes(d.id)));
           setRowSelection({});
           router.refresh();
         }
@@ -288,12 +194,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     }
   };
 
-  const columns: ColumnDef<Vehicle>[] = [
-    {
-      id: "drag",
-      header: () => null,
-      cell: ({ row }) => <DragHandle id={row.original.id} />,
-    },
+  const columns: ColumnDef<Driver>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -323,47 +224,46 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
       enableHiding: false,
     },
     {
-      accessorKey: "make",
+      accessorKey: "name",
       header: "Name",
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.make}</div>
+        <div className="flex items-center gap-2">
+          <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="size-4 text-primary" />
+          </div>
+          <div className="font-medium">{row.original.name}</div>
+        </div>
       ),
     },
     {
-      accessorKey: "model",
-      header: "Model",
-      cell: ({ row }) => <div>{row.original.model}</div>,
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => <div>{row.original.email}</div>,
     },
     {
-      accessorKey: "year",
-      header: "Year",
-      cell: ({ row }) => <div>{row.original.year}</div>,
-    },
-    {
-      accessorKey: "licensePlate",
-      header: "License Plate",
+      accessorKey: "createdAt",
+      header: "Created At",
       cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className="px-1.5 text-muted-foreground font-mono"
-        >
-          {row.original.licensePlate}
-        </Badge>
+        <div className="text-muted-foreground">
+          {new Date(row.original.createdAt).toLocaleDateString()}
+        </div>
       ),
     },
     {
-      accessorKey: "driverName",
-      header: "Assigned Driver",
+      accessorKey: "vehicleName",
+      header: "Assigned Vehicle",
       cell: ({ row }) => {
-        const { driverName, driverEmail } = row.original;
-        return driverName ? (
+        const { vehicleName, vehiclePlate } = row.original;
+        return vehicleName ? (
           <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">{driverName}</span>
-            <span className="text-xs text-muted-foreground">{driverEmail}</span>
+            <span className="text-sm font-medium">{vehicleName}</span>
+            <Badge variant="outline" className="w-fit px-1.5 text-[10px] font-mono">
+              {vehiclePlate}
+            </Badge>
           </div>
         ) : (
           <Badge variant="outline" className="px-1.5 text-muted-foreground">
-            Unassigned
+            No Vehicle
           </Badge>
         );
       },
@@ -373,7 +273,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
       header: "Action",
       enableHiding: false,
       cell: ({ row }) => {
-        const vehicle = row.original;
+        const driver = row.original;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -382,7 +282,6 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
                   variant="ghost"
                   className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
                   size="icon"
-                  data-slot="dropdown-menu-trigger"
                 >
                   <MoreHorizontal className="size-4" />
                   <span className="sr-only">Open menu</span>
@@ -390,19 +289,19 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
               }
             />
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setViewId(vehicle.id)}>
+              <DropdownMenuItem onClick={() => setViewId(driver.id)}>
                 <Eye className="mr-2 size-4" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setEditId(vehicle.id)}>
+              <DropdownMenuItem onClick={() => setEditId(driver.id)}>
                 <Pencil className="mr-2 size-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
-                onClick={() => handleDelete(vehicle.id)}
+                onClick={() => handleDelete(driver.id)}
               >
                 <Trash className="mr-2 size-4" />
                 Delete
@@ -453,20 +352,19 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
 
   // ── Render Logic ──
 
-  if (editId && activeVehicle) {
+  if (editId && activeDriver) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={handleClose}>
             <ChevronLeft className="size-4" />
           </Button>
-          <h2 className="text-2xl font-bold tracking-tight">Edit Vehicle</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Edit Driver</h2>
         </div>
         <Card>
           <CardContent className="p-6">
-            <EditVehicleForm 
-              vehicle={activeVehicle} 
-              drivers={drivers} 
+            <EditDriverForm 
+              driver={activeDriver} 
               onSuccess={handleClose} 
             />
           </CardContent>
@@ -475,7 +373,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
     );
   }
 
-  if (viewId && activeVehicle) {
+  if (viewId && activeDriver) {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <div className="flex items-center justify-between">
@@ -483,11 +381,11 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
             <Button variant="ghost" size="icon" onClick={handleClose}>
               <ChevronLeft className="size-4" />
             </Button>
-            <h2 className="text-2xl font-bold tracking-tight">Vehicle Overview</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Driver Overview</h2>
           </div>
-          <Button variant="outline" onClick={() => { setViewId(null); setEditId(activeVehicle.id); }}>
+          <Button variant="outline" onClick={() => { setViewId(null); setEditId(activeDriver.id); }}>
             <Pencil className="mr-2 size-4" />
-            Edit Vehicle
+            Edit Driver
           </Button>
         </div>
 
@@ -495,34 +393,29 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Media Gallery</CardTitle>
+                <CardTitle>Basic Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {activeVehicle.thumbnail && (
-                  <div className="w-full aspect-video rounded-xl overflow-hidden border bg-muted">
-                    <img
-                      src={activeVehicle.thumbnail}
-                      alt={activeVehicle.make}
-                      className="w-full h-full object-cover"
-                    />
+              <CardContent className="grid gap-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Full Name</p>
+                    <p className="text-lg font-semibold">{activeDriver.name}</p>
                   </div>
-                )}
-                {activeVehicle.gallery && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {activeVehicle.gallery.split(",").map((url, idx) => {
-                      const isVideo = url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg");
-                      return (
-                        <div key={idx} className="aspect-video rounded-lg border overflow-hidden bg-muted group relative">
-                          {isVideo ? (
-                            <video src={url.trim()} controls className="w-full h-full object-cover" />
-                          ) : (
-                            <img src={url.trim()} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                          )}
-                        </div>
-                      );
-                    })}
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Email Address</p>
+                    <p className="text-lg font-semibold">{activeDriver.email}</p>
                   </div>
-                )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Joined Date</p>
+                    <p className="text-sm">{new Date(activeDriver.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Account Status</p>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Active</Badge>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -530,48 +423,27 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Specifications</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Name</p>
-                    <p className="text-sm font-semibold">{activeVehicle.make}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Model</p>
-                    <p className="text-sm font-semibold">{activeVehicle.model}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Year</p>
-                    <p className="text-sm font-semibold">{activeVehicle.year}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">License Plate</p>
-                    <Badge variant="outline" className="font-mono">{activeVehicle.licensePlate}</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Assignment</CardTitle>
+                <CardTitle>Assigned Vehicle</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Assigned Driver</p>
-                  {activeVehicle.driverName ? (
-                    <div className="p-3 rounded-lg border bg-accent/50">
-                      <p className="text-sm font-bold">{activeVehicle.driverName}</p>
-                      <p className="text-xs text-muted-foreground">{activeVehicle.driverEmail}</p>
+                {activeDriver.vehicleId ? (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl border bg-accent/50">
+                      <p className="text-sm font-bold">{activeDriver.vehicleName}</p>
+                      <Badge variant="outline" className="mt-1 font-mono">{activeDriver.vehiclePlate}</Badge>
                     </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic p-3 rounded-lg border border-dashed">No driver assigned</p>
-                  )}
-                </div>
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href={`/dashboard/vehicles?view=${activeDriver.vehicleId}`}>View Vehicle Details</a>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center rounded-xl border border-dashed flex flex-col items-center gap-2">
+                    <p className="text-sm text-muted-foreground italic">No vehicle assigned</p>
+                    <Button variant="link" size="sm" asChild>
+                      <a href="/dashboard/vehicles">Assign a vehicle</a>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -591,24 +463,24 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
         <div className="flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4 flex-1">
             <TabsList>
-              <TabsTrigger value="all">All Vehicles</TabsTrigger>
-              <TabsTrigger value="assigned">
-                Assigned{" "}
+              <TabsTrigger value="all">All Drivers</TabsTrigger>
+              <TabsTrigger value="with-vehicle">
+                With Vehicle{" "}
                 <Badge variant="secondary" className="ml-1">
-                  {data.filter((v) => v.driverId).length}
+                  {data.filter((d) => d.vehicleId).length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="unassigned">
-                Unassigned{" "}
+              <TabsTrigger value="without-vehicle">
+                Without Vehicle{" "}
                 <Badge variant="secondary" className="ml-1">
-                  {data.filter((v) => !v.driverId).length}
+                  {data.filter((d) => !d.vehicleId).length}
                 </Badge>
               </TabsTrigger>
             </TabsList>
 
             <div className="relative max-w-sm flex-1">
               <Input
-                placeholder="Search vehicles..."
+                placeholder="Search drivers..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-8"
@@ -625,18 +497,16 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
                 disabled={isPending}
               >
                 <Trash className="size-4" />
-                <span>Delete Selected ({Object.keys(rowSelection).length})</span>
+                <span>Delete ({Object.keys(rowSelection).length})</span>
               </Button>
             )}
 
-            {/* Column visibility */}
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
                   <Button variant="outline" size="sm">
                     <LayoutIcon className="size-4" />
                     <span className="hidden lg:inline">Customize Columns</span>
-                    <span className="lg:hidden">Columns</span>
                     <ChevronDown className="size-4" />
                   </Button>
                 }
@@ -646,7 +516,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
                   .getAllColumns()
                   .filter(
                     (col) =>
-                      typeof col.accessorFn !== "undefined" && col.getCanHide(),
+                      col.getCanHide(),
                   )
                   .map((col) => (
                     <DropdownMenuCheckboxItem
@@ -665,14 +535,54 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
 
         {/* ── Table Content ── */}
         <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-          <VehicleDataGrid
-            table={table}
-            dataIds={dataIds}
-            sortableId={sortableId}
-            sensors={sensors}
-            handleDragEnd={handleDragEnd}
-            columns={columns}
-          />
+          <div className="overflow-hidden rounded-lg border">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-muted">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id} colSpan={header.colSpan}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
           <PaginationControls table={table} />
         </div>
       </Tabs>
@@ -680,89 +590,18 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
   );
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function VehicleDataGrid({
-  table,
-  dataIds,
-  sortableId,
-  sensors,
-  handleDragEnd,
-  columns,
-}: {
-  table: ReturnType<typeof useReactTable<Vehicle>>;
-  dataIds: UniqueIdentifier[];
-  sortableId: string;
-  sensors: ReturnType<typeof useSensors>;
-  handleDragEnd: (event: DragEndEvent) => void;
-  columns: ColumnDef<Vehicle>[];
-}) {
-  return (
-    <div className="overflow-hidden rounded-lg border">
-      <DndContext
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-        id={sortableId}
-      >
-        <Table>
-          <TableHeader className="sticky top-0 z-10 bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="**:data-[slot=table-cell]:first:w-8">
-            {table.getRowModel().rows?.length ? (
-              <SortableContext
-                items={dataIds}
-                strategy={verticalListSortingStrategy}
-              >
-                {table.getRowModel().rows.map((row) => (
-                  <DraggableRow key={row.id} row={row} />
-                ))}
-              </SortableContext>
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </DndContext>
-    </div>
-  );
-}
-
 function PaginationControls({
   table,
 }: {
-  table: ReturnType<typeof useReactTable<Vehicle>>;
+  table: any;
 }) {
   return (
-    <div className="flex items-center justify-between px-4">
+    <div className="flex items-center justify-between px-4 py-4">
       <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
       <div className="flex w-full items-center gap-8 lg:w-fit">
-        {/* Rows per page */}
         <div className="hidden items-center gap-2 lg:flex">
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
             Rows per page
@@ -784,13 +623,11 @@ function PaginationControls({
           </Select>
         </div>
 
-        {/* Page indicator */}
         <div className="flex w-fit items-center justify-center text-sm font-medium">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
 
-        {/* Nav buttons */}
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <Button
             variant="outline"

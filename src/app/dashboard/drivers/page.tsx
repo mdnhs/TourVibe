@@ -1,17 +1,24 @@
 import { redirect } from "next/navigation";
-import { BadgeCheck, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 
-import { CreateDriverForm } from "@/components/dashboard/create-driver-form";
 import { SiteHeader } from "@/components/site-header";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { DriverTable, Driver } from "./driver-table";
+import { CreateDriverForm } from "./driver-forms";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default async function DriversPage() {
   const { isSuperAdmin } = await requireDashboardSession();
@@ -20,59 +27,60 @@ export default async function DriversPage() {
     redirect("/dashboard");
   }
 
-  const driverAccounts = db
-    .prepare(
-      "SELECT id, name, email, createdAt FROM user WHERE role = ? ORDER BY createdAt DESC",
-    )
-    .all("driver") as Array<{
-      id: string;
-      name: string;
-      email: string;
-      createdAt: string;
-    }>;
+  const drivers = db.prepare(`
+    SELECT 
+      u.id, 
+      u.name, 
+      u.email, 
+      u.createdAt,
+      v.id as vehicleId,
+      v.make || ' ' || v.model as vehicleName,
+      v.licensePlate as vehiclePlate
+    FROM user u
+    LEFT JOIN vehicle v ON u.id = v.driverId
+    WHERE u.role = 'driver'
+    ORDER BY u.createdAt DESC
+  `).all() as Driver[];
 
   return (
     <>
       <SiteHeader title="Driver Management" subtitle="Admin only route" />
       <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
-        <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-          <CreateDriverForm />
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-bold tracking-tight">Driver Directory</h2>
+            <p className="text-muted-foreground">
+              Manage driver accounts and their assignments.
+            </p>
+          </div>
+          <Dialog>
+            <DialogTrigger
+              render={
+                <Button data-slot="dialog-trigger">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add New Driver
+                </Button>
+              }
+            />
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New Driver</DialogTitle>
+                <DialogDescription>
+                  Create a new driver account. They can then be assigned to vehicles.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateDriverForm />
+            </DialogContent>
+          </Dialog>
+        </div>
 
-          <Card className="shadow-xs">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BadgeCheck className="size-5 text-cyan-600 dark:text-cyan-400" />
-                Driver Directory
-              </CardTitle>
-              <CardDescription>
-                Accounts below were created internally by super admin.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {driverAccounts.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
-                  No drivers created yet.
-                </div>
-              ) : (
-                driverAccounts.map((driver) => (
-                  <div
-                    key={driver.id}
-                    className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 px-4 py-4 md:flex-row md:items-center md:justify-between"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{driver.name}</p>
-                      <p className="text-sm text-muted-foreground">{driver.email}</p>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground/70">
-                      <Users className="size-4" />
-                      Created {new Date(driver.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </section>
+        <Card className="shadow-xs">
+          <CardContent className="p-0">
+            <div className="p-6">
+               <DriverTable drivers={drivers} />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </>
   );
