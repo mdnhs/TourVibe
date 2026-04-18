@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardDescription,
@@ -10,36 +8,46 @@ import {
   BusFrontIcon,
   CalendarRangeIcon,
   CarFrontIcon,
-  StarIcon,
+  UsersIcon,
 } from "lucide-react";
 
-export function SectionCards() {
+interface SectionCardsProps {
+  stats: {
+    tourCount: number;
+    vehicleCount: number;
+    driverCount: number;
+    userCount: number;
+    avgRating: number;
+  };
+}
+
+export function SectionCards({ stats }: SectionCardsProps) {
   const cards = [
     {
-      title: "Upcoming tours",
-      value: "18",
+      title: "Tour packages",
+      value: String(stats.tourCount),
       description:
-        "Airport transfers and full-day car tours confirmed this week.",
+        "Total curated tour packages available for booking.",
       icon: CalendarRangeIcon,
     },
     {
-      title: "Available vehicles",
-      value: "12",
-      description: "Sedans, SUVs and family vans open for assignment.",
+      title: "Total vehicles",
+      value: String(stats.vehicleCount),
+      description: "Sedans, SUVs and family vans in the fleet.",
       icon: CarFrontIcon,
     },
     {
-      title: "Assigned drivers",
-      value: "7",
+      title: "Active drivers",
+      value: String(stats.driverCount),
       description:
-        "Operational driver accounts currently scheduled for active routes.",
+        "Registered driver accounts ready for assignments.",
       icon: BusFrontIcon,
     },
     {
-      title: "Average review",
-      value: "4.9/5",
-      description: "Verified tourist satisfaction from recent trips.",
-      icon: StarIcon,
+      title: "System users",
+      value: String(stats.userCount),
+      description: "Total registered accounts including guests and admins.",
+      icon: UsersIcon,
     },
   ];
 

@@ -15,9 +15,13 @@ import { requireDashboardSession } from "@/lib/dashboard";
 export default async function DashboardOverviewPage() {
   const { session, label, highlights } = await requireDashboardSession();
 
-  const driverCount = db
-    .prepare("SELECT COUNT(*) as count FROM user WHERE role = ?")
-    .get("driver") as { count: number };
+  const stats = {
+    tourCount: (db.prepare("SELECT COUNT(*) as count FROM tour_package").get() as { count: number }).count,
+    vehicleCount: (db.prepare("SELECT COUNT(*) as count FROM vehicle").get() as { count: number }).count,
+    driverCount: (db.prepare("SELECT COUNT(*) as count FROM user WHERE role = ?").get("driver") as { count: number }).count,
+    userCount: (db.prepare("SELECT COUNT(*) as count FROM user").get() as { count: number }).count,
+    avgRating: (db.prepare("SELECT AVG(rating) as avg FROM review").get() as { avg: number | null }).avg || 0,
+  };
 
   return (
     <>
@@ -41,12 +45,12 @@ export default async function DashboardOverviewPage() {
                 },
                 {
                   title: "Active drivers",
-                  value: String(driverCount.count),
+                  value: String(stats.driverCount),
                   icon: BusFront,
                 },
                 {
                   title: "Guest rating",
-                  value: "4.9/5",
+                  value: `${stats.avgRating.toFixed(1)}/5`,
                   icon: Star,
                 },
               ].map((item) => {
@@ -87,7 +91,7 @@ export default async function DashboardOverviewPage() {
           </Card>
         </section>
 
-        <SectionCards />
+        <SectionCards stats={stats} />
 
         <Card className="shadow-xs">
           <CardHeader>
