@@ -1,4 +1,4 @@
-import { BusFront, CalendarClock, CarFront } from "lucide-react";
+import { Compass, Headset, Map, Plane, Users } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { seededAdminCredentials } from "@/lib/seed";
@@ -73,9 +73,9 @@ export default async function Home() {
           },
           {
             quote:
-              "We used one control panel for guests, vehicles and route timing. That removed most of our manual follow-up work.",
+              "Our family trip through the Wild Atlantic Way was flawless — the driver knew every hidden gem along the route.",
             name: "Rafid Hasan",
-            role: "Operations Manager",
+            role: "Family traveler from Dhaka",
           },
           {
             quote:
@@ -168,30 +168,42 @@ export default async function Home() {
 
   const services = [
     {
-      title: "City Tour Scheduling",
+      title: "Scenic Road Tours",
       description:
-        "Plan morning rides, sunset circuits and full-day car tours with organized departure slots.",
-      icon: CalendarClock,
+        "Explore breathtaking landscapes on handcrafted routes through Ireland's most iconic coastlines, mountains and countryside.",
+      icon: Compass,
     },
     {
-      title: "Driver Coordination",
+      title: "Airport Transfers",
       description:
-        "Assign drivers, surface route context and keep transport operations visible in one dashboard.",
-      icon: BusFront,
+        "Stress-free, punctual pickups and drop-offs at all major airports — so your journey starts and ends smoothly.",
+      icon: Plane,
     },
     {
-      title: "Premium Vehicle Booking",
+      title: "Group Adventures",
       description:
-        "Offer family sedans, executive SUVs and group-ready vans for flexible tourist packages.",
-      icon: CarFront,
+        "Shared experiences for families, friends and travel groups — with spacious vehicles and flexible departure times.",
+      icon: Users,
+    },
+    {
+      title: "Custom Itineraries",
+      description:
+        "Tell us your dream destinations and we'll craft a tailor-made route that fits your interests, time and budget.",
+      icon: Map,
+    },
+    {
+      title: "24/7 Guest Support",
+      description:
+        "Our team is always on call — whether you need a route change, local recommendation or emergency assistance.",
+      icon: Headset,
     },
   ];
 
   const stats = [
     { label: "Tour Packages", value: `${statsData.tourCount}+` },
-    { label: "Total Vehicles", value: `${statsData.vehicleCount}+` },
-    { label: "Total Reviews", value: `${statsData.reviewCount}+` },
-    { label: "Total Tourists", value: `${statsData.touristCount}+` },
+    { label: "Fleet Vehicles", value: `${statsData.vehicleCount}+` },
+    { label: "Happy Travelers", value: `${statsData.touristCount}+` },
+    { label: "Guest Reviews", value: `${statsData.reviewCount}+` },
   ];
 
   return (

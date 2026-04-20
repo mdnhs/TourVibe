@@ -1,4 +1,4 @@
-import { ShieldCheck, Headset, ArrowRight, Sparkles } from "lucide-react";
+import { ShieldCheck, Award, Heart, ArrowRight } from "lucide-react";
 
 export function About() {
   return (
@@ -12,10 +12,9 @@ export function About() {
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
 
-          {/* ── LEFT: dark hero card ── */}
+          {/* ── LEFT: story card ── */}
           <div className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-8 text-white shadow-[0_40px_120px_rgba(15,23,42,0.35)]
                           animate-in fade-in slide-in-from-left-4 duration-500">
-            {/* Decorative orbs inside card */}
             <div className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-amber-400/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-12 -left-12 size-48 rounded-full bg-cyan-400/10 blur-3xl" />
 
@@ -25,58 +24,47 @@ export function About() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-amber-400" />
               </span>
-              About
+              Our Story
             </div>
 
             <h2 className="mt-6 font-heading text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-              Designed for operators who sell{" "}
+              Born from a passion for{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">memorable</span>
-                <span
-                  className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60"
-                  aria-hidden="true"
-                />
+                <span className="relative z-10">unforgettable</span>
+                <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
               </span>{" "}
-              car journeys.
+              Irish roads.
             </h2>
 
             <p className="mt-5 text-sm leading-7 text-white/60">
-              TourVibe combines a premium landing page with practical operator
-              tooling: login, signup, roles, local database storage and a
-              starter dashboard.
+              TourVibe was founded by a team of travel enthusiasts who believed that
+              the real Ireland is best discovered from the window of a car — not a
+              tour bus. Every route we offer has been personally driven, refined and
+              handpicked for its scenery, culture and hidden surprises.
             </p>
 
-            {/* Stat pills */}
-            <div className="mt-8 flex flex-wrap gap-3">
+            {/* Stats row */}
+            <div className="mt-8 grid grid-cols-3 gap-3">
               {[
-                { value: "100%", label: "TypeScript" },
-                { value: "v16", label: "Next.js" },
-                { value: "MIT", label: "License" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm"
-                >
-                  <p className="font-heading text-lg font-bold text-white leading-none">
-                    {item.value}
-                  </p>
-                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/35">
-                    {item.label}
-                  </p>
+                { value: "8+",   label: "Years operating" },
+                { value: "50+",  label: "Destinations" },
+                { value: "98%",  label: "Happy guests" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-center">
+                  <p className="font-heading text-xl font-extrabold text-white leading-none">{s.value}</p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-white/35">{s.label}</p>
                 </div>
               ))}
             </div>
 
-            {/* Bottom gradient bar */}
             <div className="mt-8 h-px w-full bg-linear-to-r from-amber-400/40 via-cyan-400/40 to-transparent" />
-
-            <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-white/40">
-              <Sparkles className="size-3.5 text-amber-400/60" />
-              Production-ready from day one
+            <div className="mt-5 flex items-center gap-2">
+              <div className="h-0.75 w-8 rounded-full bg-linear-to-r from-amber-400 to-orange-500" />
+              <div className="h-0.75 w-3 rounded-full bg-linear-to-r from-amber-400 to-orange-500 opacity-40" />
             </div>
           </div>
 
-          {/* ── RIGHT: feature cards ── */}
+          {/* ── RIGHT: value cards ── */}
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Card 1 */}
             <div
@@ -85,30 +73,19 @@ export function About() {
                          animate-in fade-in slide-in-from-bottom-4 duration-500"
               style={{ animationDelay: "120ms" }}
             >
-              {/* Hover glow */}
               <div className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full bg-amber-300/20 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-              {/* Top bar */}
               <div className="absolute inset-x-0 top-0 h-1 rounded-t-[2rem] bg-linear-to-r from-amber-400 to-orange-500" />
 
-              <div className="mt-2 flex size-11 items-center justify-center rounded-2xl bg-amber-400 text-white shadow-lg
-                              transition-transform duration-300 group-hover:scale-110">
+              <div className="mt-2 flex size-11 items-center justify-center rounded-2xl bg-amber-400 text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
                 <ShieldCheck className="size-5" />
               </div>
-
-              <h3 className="mt-6 font-heading text-xl font-bold text-slate-950 leading-snug">
-                Secure by default
-              </h3>
+              <h3 className="mt-6 font-heading text-xl font-bold text-slate-950 leading-snug">Safety first, always</h3>
               <p className="mt-2.5 text-sm leading-7 text-slate-500">
-                Better Auth handles credentials and sessions, while SQLite keeps
-                the setup lightweight for local development and fast iteration.
+                All our drivers are fully licensed, background-checked and trained in first aid. Your safety is built into every route we operate.
               </p>
-
               <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-amber-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 Learn more <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
               </div>
-
-              {/* Accent dashes */}
               <div className="mt-4 flex items-center gap-2">
                 <div className="h-0.75 w-8 rounded-full bg-linear-to-r from-amber-400 to-orange-500" />
                 <div className="h-0.75 w-3 rounded-full bg-linear-to-r from-amber-400 to-orange-500 opacity-40" />
@@ -120,35 +97,51 @@ export function About() {
               className="group relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-lg shadow-slate-200/50
                          transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80
                          animate-in fade-in slide-in-from-bottom-4 duration-500"
-              style={{ animationDelay: "220ms" }}
+              style={{ animationDelay: "200ms" }}
             >
-              {/* Hover glow */}
               <div className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full bg-cyan-300/20 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-              {/* Top bar */}
               <div className="absolute inset-x-0 top-0 h-1 rounded-t-[2rem] bg-linear-to-r from-cyan-400 to-sky-500" />
 
-              <div className="mt-2 flex size-11 items-center justify-center rounded-2xl bg-cyan-400 text-white shadow-lg
-                              transition-transform duration-300 group-hover:scale-110">
-                <Headset className="size-5" />
+              <div className="mt-2 flex size-11 items-center justify-center rounded-2xl bg-cyan-400 text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
+                <Award className="size-5" />
               </div>
-
-              <h3 className="mt-6 font-heading text-xl font-bold text-slate-950 leading-snug">
-                Customer support ready
-              </h3>
+              <h3 className="mt-6 font-heading text-xl font-bold text-slate-950 leading-snug">Award-winning guides</h3>
               <p className="mt-2.5 text-sm leading-7 text-slate-500">
-                The contact and review sections give your tour brand a more
-                trustworthy, service-led presentation from day one.
+                Our expert local guides bring each destination to life with fascinating stories, insider knowledge and genuine passion for Ireland.
               </p>
-
               <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-cyan-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 Learn more <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
               </div>
-
-              {/* Accent dashes */}
               <div className="mt-4 flex items-center gap-2">
                 <div className="h-0.75 w-8 rounded-full bg-linear-to-r from-cyan-400 to-sky-500" />
                 <div className="h-0.75 w-3 rounded-full bg-linear-to-r from-cyan-400 to-sky-500 opacity-40" />
+              </div>
+            </div>
+
+            {/* Card 3 — full width */}
+            <div
+              className="group relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-lg shadow-slate-200/50 sm:col-span-2
+                         transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80
+                         animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: "280ms" }}
+            >
+              <div className="pointer-events-none absolute -top-10 -right-10 size-48 rounded-full bg-emerald-300/20 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="absolute inset-x-0 top-0 h-1 rounded-t-[2rem] bg-linear-to-r from-emerald-400 to-teal-500" />
+
+              <div className="flex items-start gap-5">
+                <div className="mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-400 text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
+                  <Heart className="size-5" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-heading text-xl font-bold text-slate-950 leading-snug">Crafted with care, every time</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-500">
+                    We don&apos;t do cookie-cutter tours. Every booking is reviewed by our team to ensure the route, vehicle and timing are perfectly matched to your group&apos;s needs — because great travel is all in the details.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex items-center gap-2">
+                <div className="h-0.75 w-8 rounded-full bg-linear-to-r from-emerald-400 to-teal-500" />
+                <div className="h-0.75 w-3 rounded-full bg-linear-to-r from-emerald-400 to-teal-500 opacity-40" />
               </div>
             </div>
           </div>

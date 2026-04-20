@@ -80,7 +80,7 @@ export function Navbar({ session }: NavbarProps) {
     <div className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6">
       <header
         className={cn(
-          "mx-auto max-w-6xl rounded-2xl border px-4 py-2.5 transition-all duration-300",
+          "mx-auto max-w-6xl rounded-full border px-4 py-2.5 transition-all duration-300",
           scrolled
             ? "border-white/80 bg-white/95 shadow-xl shadow-slate-900/10 backdrop-blur-lg"
             : "border-white/60 bg-white/80 shadow-lg shadow-slate-900/6 backdrop-blur-md",
@@ -171,7 +171,7 @@ export function Navbar({ session }: NavbarProps) {
 
         {/* ── Mobile menu ── */}
         {mobileOpen && (
-          <div className="mt-2.5 border-t border-slate-100 pt-3 pb-1 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="mt-2.5 border-t border-slate-100 pt-3 pb-2 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
             <nav className="flex flex-col gap-0.5">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
