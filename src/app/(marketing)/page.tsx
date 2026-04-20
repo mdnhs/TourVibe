@@ -3,6 +3,8 @@ import { BusFront, CalendarClock, CarFront } from "lucide-react";
 import { db } from "@/lib/db";
 import { seededAdminCredentials } from "@/lib/seed";
 import { Hero } from "@/components/landing/hero";
+import { PopularTours } from "@/components/landing/popular-tours";
+import { PopularCars } from "@/components/landing/popular-cars";
 import { Services } from "@/components/landing/services";
 import { About } from "@/components/landing/about";
 import { Reviews } from "@/components/landing/reviews";
@@ -83,6 +85,57 @@ export default async function Home() {
           },
         ];
 
+  // Fetch popular tours with avg rating and review count
+  const popularTours = db
+    .prepare(
+      `
+    SELECT
+      tp.id, tp.name, tp.description, tp.price, tp.duration, tp.maxPersons, tp.thumbnail,
+      AVG(r.rating) as avgRating,
+      COUNT(r.id) as reviewCount
+    FROM tour_package tp
+    LEFT JOIN review r ON r.tourPackageId = tp.id
+    GROUP BY tp.id
+    ORDER BY reviewCount DESC, tp.createdAt DESC
+    LIMIT 6
+  `,
+    )
+    .all() as {
+      id: string;
+      name: string;
+      description: string | null;
+      price: number;
+      duration: string;
+      maxPersons: number;
+      thumbnail: string;
+      avgRating: number | null;
+      reviewCount: number;
+    }[];
+
+  // Fetch popular cars ordered by tour appearances
+  const popularCars = db
+    .prepare(
+      `
+    SELECT
+      v.id, v.make, v.model, v.year, v.licensePlate, v.thumbnail,
+      COUNT(tpv.tourPackageId) as tourCount
+    FROM vehicle v
+    LEFT JOIN tour_package_vehicle tpv ON tpv.vehicleId = v.id
+    GROUP BY v.id
+    ORDER BY tourCount DESC, v.createdAt DESC
+    LIMIT 6
+  `,
+    )
+    .all() as {
+      id: string;
+      make: string;
+      model: string;
+      year: number;
+      licensePlate: string;
+      thumbnail: string;
+      tourCount: number;
+    }[];
+
   // Fetch a flagship ride (the latest tour package)
   const flagshipTour = db
     .prepare(
@@ -144,6 +197,10 @@ export default async function Home() {
   return (
     <div className="min-h-screen text-slate-900">
       <Hero stats={stats} />
+
+      <PopularTours tours={popularTours} />
+
+      <PopularCars cars={popularCars} />
 
       <Services services={services} />
 
