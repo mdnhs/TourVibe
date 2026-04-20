@@ -72,6 +72,22 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS booking (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    tourPackageId TEXT NOT NULL,
+    amount REAL NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'usd',
+    status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'paid', 'cancelled'
+    stripeSessionId TEXT UNIQUE,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (tourPackageId) REFERENCES tour_package(id) ON DELETE CASCADE
+  )
+`);
+
 // Migration to add columns if they don't exist (for existing databases)
 try {
   db.exec("ALTER TABLE vehicle ADD COLUMN thumbnail TEXT NOT NULL DEFAULT ''");

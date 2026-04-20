@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { Clock, Users, Star, ArrowLeft, Quote, ArrowRight, MapPin } from "lucide-react";
+import { Clock, Users, Star, ArrowLeft, Quote, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { BookingBar } from "./booking-bar";
+import { BookingButton } from "./booking-button";
 
 interface Tour {
   id: string;
@@ -197,10 +198,7 @@ export default async function TourDetailsPage({ params }: TourDetailsPageProps) 
                 </p>
                 <p className="mt-1 text-xs text-slate-400">per person · all inclusive</p>
 
-                <button className="group mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-slate-900/30">
-                  Book this tour
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </button>
+                <BookingButton tourId={tour.id} />
 
                 <div className="mt-4 flex items-center gap-2">
                   <div className="h-0.75 w-8 rounded-full bg-linear-to-r from-amber-400 to-orange-500" />
@@ -312,6 +310,7 @@ export default async function TourDetailsPage({ params }: TourDetailsPageProps) 
       </div>
     </div>
       <BookingBar
+        tourId={tour.id}
         name={tour.name}
         price={tour.price}
         duration={tour.duration}

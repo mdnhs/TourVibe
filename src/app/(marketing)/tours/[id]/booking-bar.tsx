@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Clock, MapPin, Star, Users } from "lucide-react";
+import { ArrowRight, Clock, MapPin, Star, Users, Loader2 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface BookingBarProps {
+  tourId: string;
   name: string;
   price: number;
   duration: string;
@@ -11,14 +15,50 @@ interface BookingBarProps {
   rating: string | null;
 }
 
-export function BookingBar({ name, price, duration, maxPersons, rating }: BookingBarProps) {
+export function BookingBar({ tourId, name, price, duration, maxPersons, rating }: BookingBarProps) {
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 320);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleBookNow = async () => {
+    try {
+      setLoading(true);
+      const { data: session } = await authClient.getSession();
+      
+      if (!session) {
+        toast.error("Please login to book a tour");
+        router.push("/login");
+        return;
+      }
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tourId }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Failed to initiate booking");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -61,9 +101,22 @@ export function BookingBar({ name, price, duration, maxPersons, rating }: Bookin
             </div>
 
             {/* CTA */}
-            <button className="group shrink-0 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800">
-              Book this tour
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            <button 
+              disabled={loading}
+              onClick={handleBookNow}
+              className="group shrink-0 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Book this tour
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </>
+              )}
             </button>
           </div>
         </div>

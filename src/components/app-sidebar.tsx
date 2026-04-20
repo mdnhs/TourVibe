@@ -10,6 +10,7 @@ import {
   MapIcon,
   StarIcon,
   UsersIcon,
+  TicketIcon,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -45,6 +46,11 @@ export function AppSidebar({
       label: "Overview",
       href: "/dashboard",
       icon: LayoutDashboardIcon,
+    },
+    {
+      label: "Bookings",
+      href: "/dashboard/bookings",
+      icon: TicketIcon,
     },
     {
       label: "Tours",
