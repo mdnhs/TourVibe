@@ -1,14 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import {
   Clock,
-  ExternalLink,
   MapPin,
-  Mountain,
-  Navigation,
-  RotateCcw,
   Search,
   Star,
   Users,
@@ -19,17 +15,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Map as MapComponent,
-  MapControls,
-  MapMarker,
-  MarkerContent,
-  MarkerLabel,
-  MarkerPopup,
-  MarkerTooltip,
-  useMap,
-} from "@/components/ui/map";
 import Image from "next/image";
+import { DriverTrackerMap } from "@/components/driver-tracker-map";
+import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
 const locations = [
   {
@@ -94,52 +82,20 @@ const statColors = [
   },
 ];
 
-// ─── 3D controller ────────────────────────────────────────────────────────────
-function MapController() {
-  const { map, isLoaded } = useMap();
-  const [is3D, setIs3D] = useState(true);
-
-  useEffect(() => {
-    if (!map || !isLoaded) return;
-    map.setPaintProperty("water", "fill-color", "rgba(34, 211, 238, 0.35)");
-    map.setPaintProperty("water", "fill-opacity", 1);
-    map.easeTo({ pitch: 60, bearing: -20, duration: 800 });
-    const handleMove = () => setIs3D(map.getPitch() > 10);
-    map.on("move", handleMove);
-    return () => {
-      map.off("move", handleMove);
-    };
-  }, [map, isLoaded]);
-
-  const toggle = () => {
-    if (is3D) map?.easeTo({ pitch: 0, bearing: 0, duration: 800 });
-    else map?.easeTo({ pitch: 60, bearing: -20, duration: 800 });
-  };
-
-  if (!isLoaded) return null;
-
-  return (
-    <div className="absolute bottom-3 left-3 z-10">
-      <button
-        onClick={toggle}
-        className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-md backdrop-blur transition hover:bg-white"
-      >
-        {is3D ? (
-          <>
-            <RotateCcw className="size-3.5" /> 2D View
-          </>
-        ) : (
-          <>
-            <Mountain className="size-3.5" /> 3D View
-          </>
-        )}
-      </button>
-    </div>
-  );
-}
-
 // ─── Floating route card ──────────────────────────────────────────────────────
-function FloatingRouteCard() {
+function FloatingRouteCard({
+  tour,
+}: {
+  tour?: {
+    name: string;
+    duration: string;
+    avgRating: number | null;
+    reviewCount: number;
+    price: number;
+  };
+}) {
+  if (!tour) return null;
+
   return (
     <div className="absolute bottom-26 -right-12 z-20 hidden lg:block animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
       <div className="w-52 rounded-2xl border border-white/60 bg-white/95 p-3.5 shadow-2xl shadow-slate-900/20 backdrop-blur-sm">
@@ -152,36 +108,33 @@ function FloatingRouteCard() {
             Live
           </span>
         </div>
-        <p className="text-sm font-semibold text-slate-900 leading-tight">
-          Wild Atlantic Way
+        <p className="text-sm font-semibold text-slate-900 leading-tight line-clamp-2">
+          {tour.name}
         </p>
-        <p className="mt-0.5 text-xs text-slate-500">Dublin → Galway → Cork</p>
+        <p className="mt-0.5 text-xs text-slate-500">{tour.duration}</p>
         <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
           <div className="text-center">
             <p className="text-xs font-bold text-slate-900">
-              2,500
-              <span className="text-[9px] font-normal text-slate-400">km</span>
+              ${tour.price.toLocaleString()}
             </p>
             <p className="text-[9px] text-slate-400 uppercase tracking-wide">
-              Distance
+              Price
             </p>
           </div>
           <div className="h-6 w-px bg-slate-100" />
           <div className="text-center">
             <p className="text-xs font-bold text-slate-900">
-              7
-              <span className="text-[9px] font-normal text-slate-400">
-                days
-              </span>
+              {tour.reviewCount}
             </p>
             <p className="text-[9px] text-slate-400 uppercase tracking-wide">
-              Duration
+              Reviews
             </p>
           </div>
           <div className="h-6 w-px bg-slate-100" />
           <div className="text-center">
             <p className="text-xs font-bold text-amber-500">
-              4.8<span className="text-[9px]">★</span>
+              {tour.avgRating?.toFixed(1) || "New"}
+              {tour.avgRating ? <span className="text-[9px]">★</span> : ""}
             </p>
             <p className="text-[9px] text-slate-400 uppercase tracking-wide">
               Rating
@@ -213,7 +166,21 @@ function WeatherBadge() {
 }
 
 // ─── Main Hero ────────────────────────────────────────────────────────────────
-export function Hero({ stats }: { stats: { value: string; label: string }[] }) {
+export function Hero({
+  stats,
+  initialDrivers = [],
+  activeTour,
+}: {
+  stats: { value: string; label: string }[];
+  initialDrivers?: DriverLocation[];
+  activeTour?: {
+    name: string;
+    duration: string;
+    avgRating: number | null;
+    reviewCount: number;
+    price: number;
+  };
+}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
 
@@ -386,7 +353,7 @@ export function Hero({ stats }: { stats: { value: string; label: string }[] }) {
 
             {/* Floating cards */}
             <WeatherBadge />
-            <FloatingRouteCard />
+            <FloatingRouteCard tour={activeTour} />
 
             {/* Map frame */}
             <div className="relative overflow-hidden rounded-[2rem] border border-white/50 bg-white/5 p-2 shadow-[0_32px_80px_rgba(15,23,42,0.40)] backdrop-blur-sm">
@@ -401,82 +368,19 @@ export function Hero({ stats }: { stats: { value: string; label: string }[] }) {
                 </div>
                 <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium text-white/60 backdrop-blur-sm">
                   <MapPin className="size-2.5" />
-                  Ireland, EU
+                  Live Tracking
                 </div>
                 <div className="w-10" />
               </div>
 
               {/* Map itself */}
               <div className="relative h-[460px] w-full overflow-hidden rounded-[1.5rem] border border-white/10">
-                <MapComponent
-                  center={[-7.6921, 53.1424]}
-                  zoom={6}
-                  theme="light"
-                  styles={{
-                    light: "https://tiles.openfreemap.org/styles/liberty",
-                  }}
-                >
-                  <MapControls
-                    position="top-right"
-                    showZoom
-                    showCompass
-                    showLocate
-                    showFullscreen
-                  />
-                  <MapController />
-                  {locations.map((loc) => (
-                    <MapMarker
-                      key={loc.id}
-                      longitude={loc.lng}
-                      latitude={loc.lat}
-                    >
-                      <MarkerContent>
-                        <div
-                          className={`size-3 cursor-pointer rounded-full ring-4 transition-transform hover:scale-125 ${loc.color} ${loc.ring}`}
-                        />
-                        <MarkerLabel
-                          position="bottom"
-                          className="text-slate-800 font-medium text-[11px]"
-                        >
-                          {loc.name}
-                        </MarkerLabel>
-                      </MarkerContent>
-                      <MarkerTooltip>{loc.description}</MarkerTooltip>
-                      <MarkerPopup className="w-56 p-0">
-                        <div className="space-y-2 p-3">
-                          <div>
-                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Tour Stop
-                            </span>
-                            <h3 className="font-semibold leading-tight text-foreground">
-                              {loc.name}
-                            </h3>
-                          </div>
-                          <div className="flex items-center gap-1 text-sm">
-                            <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                            <span className="font-medium">{loc.rating}</span>
-                            <span className="text-muted-foreground">
-                              ({loc.reviews.toLocaleString()} reviews)
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Clock className="size-3.5" />
-                            <span>{loc.hours}</span>
-                          </div>
-                          <div className="flex gap-2 pt-1">
-                            <Button size="sm" className="h-8 flex-1">
-                              <Navigation className="mr-1.5 size-3.5" />{" "}
-                              Directions
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-8">
-                              <ExternalLink className="size-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      </MarkerPopup>
-                    </MapMarker>
-                  ))}
-                </MapComponent>
+                <DriverTrackerMap
+                  initialDrivers={initialDrivers}
+                  className="h-full"
+                  pollInterval={20_000}
+                  show3DToggle={true}
+                />
               </div>
 
               {/* Bottom strip */}

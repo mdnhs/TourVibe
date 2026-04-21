@@ -30,7 +30,7 @@ import {
   ExternalLink,
   LayoutIcon,
   MapPin,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
 } from "lucide-react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
@@ -390,25 +390,73 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
       cell: ({ row }) => {
         const b = row.original;
 
-        if (isAdmin) {
-          return (
-            <div className="flex justify-center w-full">
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      className="size-8 text-muted-foreground"
-                      size="icon"
-                      disabled={isPending}
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  }
-                />
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Invoice</DropdownMenuLabel>
+        return (
+          <div className="flex justify-center w-full">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="size-8 text-muted-foreground"
+                    size="icon"
+                    disabled={isPending}
+                  >
+                    <MoreVertical className="size-4" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end" className="w-48">
+                {isAdmin ? (
+                  <>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Invoice</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          window.open(`/api/invoice/${b.id}`, "_blank")
+                        }
+                      >
+                        <Download className="mr-2 size-4" />
+                        Download Invoice
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        disabled={b.status === "paid"}
+                        onClick={() => handleStatusChange(b.id, "paid")}
+                      >
+                        <CheckCircle2 className="mr-2 size-4 text-emerald-600" />
+                        Mark as Paid
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={b.status === "pending"}
+                        onClick={() => handleStatusChange(b.id, "pending")}
+                      >
+                        <Clock className="mr-2 size-4 text-amber-600" />
+                        Mark as Pending
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        disabled={b.status === "cancelled"}
+                        onClick={() => handleStatusChange(b.id, "cancelled")}
+                      >
+                        <Ban className="mr-2 size-4" />
+                        Cancel Booking
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/tours/${b.tourPackageId}`}>
+                        <ExternalLink className="mr-2 size-4" />
+                        View Tour
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
                         window.open(`/api/invoice/${b.id}`, "_blank")
@@ -417,71 +465,23 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
                       <Download className="mr-2 size-4" />
                       Download Invoice
                     </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      disabled={b.status === "paid"}
-                      onClick={() => handleStatusChange(b.id, "paid")}
-                    >
-                      <CheckCircle2 className="mr-2 size-4 text-emerald-600" />
-                      Mark as Paid
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      disabled={b.status === "pending"}
-                      onClick={() => handleStatusChange(b.id, "pending")}
-                    >
-                      <Clock className="mr-2 size-4 text-amber-600" />
-                      Mark as Pending
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      disabled={b.status === "cancelled"}
-                      onClick={() => handleStatusChange(b.id, "cancelled")}
-                    >
-                      <Ban className="mr-2 size-4" />
-                      Cancel Booking
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        }
-
-        return (
-          <div className="flex items-center gap-2 w-full justify-end">
-            <Button variant="ghost" size="sm" className="h-8 text-xs px-2" asChild>
-              <Link href={`/tours/${b.tourPackageId}`}>
-                <ExternalLink className="mr-1.5 size-3" />
-                Tour
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 text-xs px-2"
-              onClick={() => window.open(`/api/invoice/${b.id}`, "_blank")}
-            >
-              <Download className="mr-1.5 size-3" />
-              Invoice
-            </Button>
-            {b.status !== "cancelled" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs px-2 text-destructive hover:text-destructive"
-                disabled={isPending}
-                onClick={() => handleCancelOwn(b.id)}
-              >
-                <Ban className="mr-1.5 size-3" />
-                Cancel
-              </Button>
-            )}
+                    {b.status !== "cancelled" && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          variant="destructive"
+                          disabled={isPending}
+                          onClick={() => handleCancelOwn(b.id)}
+                        >
+                          <Ban className="mr-2 size-4" />
+                          Cancel Booking
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },

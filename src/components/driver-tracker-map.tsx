@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Car, Clock, Flag, MapPin, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Car, Clock, Flag, MapPin, RefreshCw, Wifi, WifiOff, Mountain, RotateCcw } from "lucide-react";
 
 import {
   Map,
@@ -11,6 +11,7 @@ import {
   MapRoute,
   MarkerContent,
   MarkerPopup,
+  useMap,
   type MapRef,
 } from "@/components/ui/map";
 import type { DriverLocation } from "@/app/api/drivers/locations/route";
@@ -22,6 +23,7 @@ interface DriverTrackerMapProps {
   pollInterval?: number;
   initialDrivers?: DriverLocation[];
   showControls?: boolean;
+  show3DToggle?: boolean;
   destination?: Destination | null;
   activeRoute?: RouteResult | null;
   /** Called each poll cycle with fresh driver list */
@@ -67,11 +69,63 @@ function DriverPin({ online }: { online: boolean }) {
   );
 }
 
+// ─── 3D controller ────────────────────────────────────────────────────────────
+function MapController() {
+  const { map, isLoaded } = useMap();
+  const [is3D, setIs3D] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!map || !isLoaded) return;
+    const handleMove = () => setIs3D(map.getPitch() > 10);
+    map.on("move", handleMove);
+    return () => {
+      map.off("move", handleMove);
+    };
+  }, [map, isLoaded]);
+
+  const toggle = () => {
+    if (is3D) {
+      map?.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+    } else {
+      map?.easeTo({ pitch: 60, bearing: -20, duration: 800 });
+    }
+  };
+
+  if (!isLoaded) return null;
+
+  return (
+    <div className="absolute bottom-4 left-4 z-10">
+      <button
+        onClick={toggle}
+        className={cn(
+          "flex items-center gap-2 rounded-xl border px-4 py-2 text-[11px] font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all active:scale-95",
+          is3D
+            ? "border-amber-400/50 bg-amber-400/10 text-amber-600 dark:text-amber-400"
+            : "border-border/50 bg-background/80 text-muted-foreground hover:text-foreground",
+        )}
+      >
+        {is3D ? (
+          <>
+            <RotateCcw className="size-3.5" />
+            <span>2D View</span>
+          </>
+        ) : (
+          <>
+            <Mountain className="size-3.5" />
+            <span>3D Perspective</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
 export function DriverTrackerMap({
   className,
   pollInterval = 20_000,
   initialDrivers = [],
   showControls = true,
+  show3DToggle = false,
   destination = null,
   activeRoute = null,
   onDriversChange,
@@ -165,11 +219,18 @@ export function DriverTrackerMap({
         ref={mapRef}
         center={defaultCenter}
         zoom={drivers.length > 0 ? 10 : 6}
+        pitch={show3DToggle ? 60 : 0}
+        bearing={show3DToggle ? -20 : 0}
+        styles={{
+          light: "https://tiles.openfreemap.org/styles/bright",
+        }}
         className="h-full w-full rounded-xl"
       >
         {showControls && (
-          <MapControls showZoom showFullscreen position="bottom-right" />
+          <MapControls showZoom showFullscreen showLocate showCompass position="top-right" />
         )}
+        
+        {show3DToggle && <MapController />}
 
         {/* Route polyline */}
         {activeRoute && activeRoute.coordinates.length >= 2 && (

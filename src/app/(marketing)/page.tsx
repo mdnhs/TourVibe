@@ -220,9 +220,17 @@ export default async function Home() {
     { label: "Guest Reviews", value: `${statsData.reviewCount}+` },
   ];
 
+  const activeTour = popularTours.length > 0 ? {
+    name: popularTours[0].name,
+    duration: popularTours[0].duration,
+    avgRating: popularTours[0].avgRating,
+    reviewCount: popularTours[0].reviewCount,
+    price: popularTours[0].price,
+  } : undefined;
+
   return (
     <div className="min-h-screen text-slate-900">
-      <Hero stats={stats} />
+      <Hero stats={stats} initialDrivers={liveDrivers} activeTour={activeTour} />
 
       <PopularTours tours={popularTours} />
 

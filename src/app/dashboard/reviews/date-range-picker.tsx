@@ -35,31 +35,33 @@ export function DateRangePicker({
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover open={open} onOpenChange={setOpen} modal={false}>
-        <PopoverTrigger>
-          <Button
-            id="date"
-            variant="outline"
-            size="sm"
-            className={cn(
-              "w-[240px] justify-start text-left font-normal h-8",
-              !date && "text-muted-foreground",
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "MMM dd, y")} &ndash;{" "}
-                  {format(date.to, "MMM dd, y")}
-                </>
+        <PopoverTrigger
+          render={
+            <Button
+              id="date"
+              variant="outline"
+              size="sm"
+              className={cn(
+                "w-[240px] justify-start text-left font-normal h-8",
+                !date && "text-muted-foreground",
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {format(date.from, "MMM dd, y")} &ndash;{" "}
+                    {format(date.to, "MMM dd, y")}
+                  </>
+                ) : (
+                  format(date.from, "MMM dd, y")
+                )
               ) : (
-                format(date.from, "MMM dd, y")
-              )
-            ) : (
-              <span>Pick a date range</span>
-            )}
-          </Button>
-        </PopoverTrigger>
+                <span>Pick a date range</span>
+              )}
+            </Button>
+          }
+        />
         <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
           <Calendar
             mode="range"

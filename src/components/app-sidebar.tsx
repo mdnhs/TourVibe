@@ -14,6 +14,7 @@ import {
   StarIcon,
   UsersIcon,
   TicketIcon,
+  PaletteIcon,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -57,6 +58,7 @@ export function AppSidebar({
     { label: "Users", href: "/dashboard/users", icon: UsersIcon, adminOnly: true },
     { label: "Live Tracking", href: "/dashboard/tracking", icon: NavigationIcon },
     { label: "Notifications", href: "/dashboard/notifications", icon: BellIcon },
+    { label: "Appearance", href: "/dashboard/appearance", icon: PaletteIcon },
     { label: "Account", href: "/dashboard/account", icon: CircleUserRoundIcon },
   ];
 
