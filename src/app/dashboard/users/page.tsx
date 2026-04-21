@@ -36,11 +36,14 @@ export default async function UsersPage() {
       id: string;
       name: string;
       email: string;
-      role: keyof typeof roleLabels;
+      role: keyof typeof roleLabels | string;
       banned: number;
       banReason: string | null;
       createdAt: string;
     }>;
+
+  const customRoles = db.prepare("SELECT name FROM custom_role").all() as { name: string }[];
+  const customRoleLabels = Object.fromEntries(customRoles.map(r => [r.name, r.name]));
 
   return (
     <>
@@ -69,7 +72,7 @@ export default async function UsersPage() {
                   Create a new user account with a specific role.
                 </DialogDescription>
               </DialogHeader>
-              <CreateUserForm />
+              <CreateUserForm customRoles={customRoleLabels} />
             </DialogContent>
           </Dialog>
         </div>
@@ -83,6 +86,7 @@ export default async function UsersPage() {
                   ...user,
                   banned: Boolean(user.banned),
                 }))} 
+                customRoles={customRoleLabels}
               />
             </div>
           </CardContent>

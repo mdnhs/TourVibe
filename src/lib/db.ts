@@ -136,3 +136,14 @@ db.exec(`
     FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
   )
 `);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS custom_role (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    permissions TEXT NOT NULL, -- JSON array of menu item labels
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);

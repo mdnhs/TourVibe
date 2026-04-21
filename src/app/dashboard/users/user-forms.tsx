@@ -20,11 +20,16 @@ import {
 
 // ── Create User Form ──────────────────────────────────────────────────────────
 
-export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
+export function CreateUserForm({ 
+  onSuccess,
+  customRoles = {} 
+}: { onSuccess?: () => void; customRoles?: Record<string, string> }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
   const [role, setRole] = useState<string>("tourist");
+
+  const allRoleLabels = { ...roleLabels, ...customRoles };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,7 +73,7 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(roleLabels).map(([value, label]) => (
+            {Object.entries(allRoleLabels).map(([value, label]) => (
               <SelectItem key={value} value={value}>
                 {label}
               </SelectItem>
@@ -88,11 +93,14 @@ export function CreateUserForm({ onSuccess }: { onSuccess?: () => void }) {
 
 export function EditUserForm({ 
   user,
-  onSuccess
-}: { user: any; onSuccess?: () => void }) {
+  onSuccess,
+  customRoles = {}
+}: { user: any; onSuccess?: () => void; customRoles?: Record<string, string> }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [role, setRole] = useState<string>(user.role);
+
+  const allRoleLabels = { ...roleLabels, ...customRoles };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -147,7 +155,7 @@ export function EditUserForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(roleLabels).map(([value, label]) => (
+            {Object.entries(allRoleLabels).map(([value, label]) => (
               <SelectItem key={value} value={value}>
                 {label}
               </SelectItem>

@@ -74,7 +74,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  role: keyof typeof roleLabels;
+  role: string;
   banned: boolean;
   banReason: string | null;
   createdAt: string;
@@ -83,11 +83,14 @@ export type User = {
 interface UserTableProps {
   users: User[];
   currentUserId: string;
+  customRoles?: Record<string, string>;
 }
 
-export function UserTable({ users, currentUserId }: UserTableProps) {
+export function UserTable({ users, currentUserId, customRoles = {} }: UserTableProps) {
   const router = useRouter();
   const [data, setData] = React.useState<User[]>(() => users);
+
+  const allRoleLabels = { ...roleLabels, ...customRoles } as Record<string, string>;
 
   React.useEffect(() => {
     setData(users);
@@ -419,6 +422,7 @@ export function UserTable({ users, currentUserId }: UserTableProps) {
             <EditUserForm 
               user={activeUser} 
               onSuccess={handleClose} 
+              customRoles={customRoles}
             />
           </CardContent>
         </Card>

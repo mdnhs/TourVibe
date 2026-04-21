@@ -10,7 +10,7 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  const { session, label } = await requireDashboardSession();
+  const { session, label, allowedMenus } = await requireDashboardSession();
 
   const { unread } = db
     .prepare(
@@ -39,6 +39,7 @@ export default async function DashboardLayout({
           avatar: session.user.image,
         }}
         unreadNotifications={unread}
+        allowedMenus={allowedMenus}
       />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

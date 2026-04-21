@@ -15,6 +15,7 @@ import {
   UsersIcon,
   TicketIcon,
   PaletteIcon,
+  ShieldCheckIcon,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -36,6 +37,7 @@ import {
 export function AppSidebar({
   user,
   unreadNotifications = 0,
+  allowedMenus = null,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -45,6 +47,7 @@ export function AppSidebar({
     avatar?: string | null;
   };
   unreadNotifications?: number;
+  allowedMenus?: string[] | null;
 }) {
   const pathname = usePathname();
 
@@ -56,13 +59,20 @@ export function AppSidebar({
     { label: "Drivers", href: "/dashboard/drivers", icon: BusFrontIcon, adminOnly: true },
     { label: "Vehicles", href: "/dashboard/vehicles", icon: CarFrontIcon, adminOnly: true },
     { label: "Users", href: "/dashboard/users", icon: UsersIcon, adminOnly: true },
+    { label: "Roles & Permissions", href: "/dashboard/roles", icon: ShieldCheckIcon, adminOnly: true },
     { label: "Live Tracking", href: "/dashboard/tracking", icon: NavigationIcon },
     { label: "Notifications", href: "/dashboard/notifications", icon: BellIcon },
-    { label: "Appearance", href: "/dashboard/appearance", icon: PaletteIcon },
+    { label: "Appearance", href: "/dashboard/appearance", icon: PaletteIcon, adminOnly: true },
     { label: "Account", href: "/dashboard/account", icon: CircleUserRoundIcon },
   ];
 
   const filteredMenuItems = menuItems.filter((item) => {
+    // If dynamic permissions are provided, use them
+    if (allowedMenus) {
+      return allowedMenus.includes(item.label);
+    }
+
+    // Default hardcoded logic
     if (item.adminOnly && user.role !== "Super Admin") return false;
     if (item.label === "Reviews" && user.role === "Driver") return false;
     return true;

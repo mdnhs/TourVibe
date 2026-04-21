@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { AppearanceForm } from "./appearance-form";
 import {
@@ -7,8 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { requireDashboardSession } from "@/lib/dashboard";
 
-export default function AppearancePage() {
+export default async function AppearancePage() {
+  const { isSuperAdmin } = await requireDashboardSession();
+
+  if (!isSuperAdmin) {
+    redirect("/dashboard");
+  }
+
   return (
     <>
       <SiteHeader title="Appearance" subtitle="Customize the dashboard appearance" />
