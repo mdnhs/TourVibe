@@ -95,6 +95,7 @@ export const MENU_ITEMS = [
   { label: "Roles & Permissions",adminOnly: true  },
   { label: "Live Tracking",      adminOnly: false },
   { label: "Notifications",      adminOnly: false },
+  { label: "Blog",               adminOnly: true  },
   { label: "Appearance",         adminOnly: true  },
   { label: "SEO",                adminOnly: true  },
   { label: "Account",            adminOnly: false },

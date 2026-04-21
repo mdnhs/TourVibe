@@ -155,3 +155,27 @@ db.exec(`
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS blog_post (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    excerpt TEXT,
+    content TEXT NOT NULL DEFAULT '',
+    coverImage TEXT NOT NULL DEFAULT '',
+    authorId TEXT NOT NULL,
+    authorName TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'draft',
+    tags TEXT NOT NULL DEFAULT '',
+    metaTitle TEXT NOT NULL DEFAULT '',
+    metaDescription TEXT NOT NULL DEFAULT '',
+    publishedAt DATETIME,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (authorId) REFERENCES user(id) ON DELETE CASCADE
+  )
+`);
+
+try { db.exec("ALTER TABLE blog_post ADD COLUMN excerpt TEXT"); } catch (e) {}
+try { db.exec("ALTER TABLE blog_post ADD COLUMN publishedAt DATETIME"); } catch (e) {}

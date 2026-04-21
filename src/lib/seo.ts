@@ -123,6 +123,31 @@ export function buildWebSiteSchema(s: SeoSettings) {
   };
 }
 
+export function buildBlogPostSchema(
+  s: SeoSettings,
+  post: {
+    title: string;
+    excerpt: string | null;
+    coverImage: string;
+    authorName: string;
+    publishedAt: string | null;
+    slug: string;
+  }
+) {
+  if (!s.enableJsonLd) return null;
+  const url = s.siteUrl ? `${s.siteUrl}/blog/${post.slug}` : undefined;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || undefined,
+    image: post.coverImage || undefined,
+    author: { "@type": "Person", name: post.authorName },
+    datePublished: post.publishedAt || undefined,
+    url,
+  };
+}
+
 export function buildTourSchema(
   s: SeoSettings,
   tour: {

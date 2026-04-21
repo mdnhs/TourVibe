@@ -3,12 +3,13 @@ import { CarFront, MapPin, ArrowRight } from "lucide-react";
 
 const links = {
   Services: ["City Tours", "Airport Transfers", "Corporate Travel", "Private Chauffeur"],
-  Company: ["About Us", "Our Fleet", "Reviews", "Contact"],
+  Company: ["About Us", "Our Fleet", "Blog", "Reviews", "Contact"],
   Support: ["Help Center", "Terms of Service", "Privacy Policy", "Safety"],
 };
 
 const anchors: Record<string, string> = {
   "About Us": "/#about",
+  Blog: "/blog",
   Reviews: "/#reviews",
   Contact: "/#contact",
 };

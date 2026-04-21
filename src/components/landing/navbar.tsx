@@ -14,9 +14,8 @@ interface NavbarProps {
 const navLinks = [
   { label: "Home",    href: "/" },
   { label: "Tours",   href: "/tours" },
-  { label: "Services", href: "/#services" },
+  { label: "Blog",    href: "/blog" },
   { label: "About",   href: "/#about" },
-  { label: "Reviews", href: "/#reviews" },
   { label: "Contact", href: "/#contact" },
 ];
 
@@ -50,7 +49,7 @@ export function Navbar({ session }: NavbarProps) {
       { root: null, rootMargin: "-20% 0px -70% 0px", threshold: 0 },
     );
 
-    ["services", "about", "reviews", "contact"].forEach((id) => {
+    ["about", "contact"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
@@ -69,6 +68,7 @@ export function Navbar({ session }: NavbarProps) {
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/" && (activeHash === "" || activeHash === "#");
     if (href === "/tours") return pathname.startsWith("/tours");
+    if (href === "/blog") return pathname.startsWith("/blog");
     if (href.includes("#")) {
       const [, hash] = href.split("#");
       return pathname === "/" && activeHash === `#${hash}`;

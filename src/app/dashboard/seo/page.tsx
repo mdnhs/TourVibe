@@ -9,13 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireDashboardSession } from "@/lib/dashboard";
-import { getSeoSettings } from "./actions";
+import { getSeoSettings, getSitemapCustomEntries } from "./actions";
+import { SitemapEditor } from "./sitemap-editor";
 import { db } from "@/lib/db";
 import {
   FileText,
   Globe,
   Search,
   TrendingUp,
+  Map,
 } from "lucide-react";
 
 function StatCard({
@@ -51,13 +53,38 @@ export default async function SeoPage() {
   }
 
   const seoSettings = await getSeoSettings();
+  const sitemapCustomEntries = await getSitemapCustomEntries();
 
   const tourCount = (db.prepare("SELECT COUNT(*) as c FROM tour_package").get() as { c: number }).c;
   const vehicleCount = (db.prepare("SELECT COUNT(*) as c FROM vehicle").get() as { c: number }).c;
   const reviewCount = (db.prepare("SELECT COUNT(*) as c FROM review").get() as { c: number }).c;
 
-  // Estimate: tours page + home + each tour detail page
-  const indexablePages = 2 + tourCount;
+  const blogCount = (() => {
+    try {
+      return (db.prepare("SELECT COUNT(*) as c FROM blog_post WHERE status = 'published'").get() as { c: number }).c;
+    } catch { return 0; }
+  })();
+
+  const tourIds = (db.prepare("SELECT id, updatedAt FROM tour_package").all() as { id: string; updatedAt: string }[]);
+  const blogSlugs = (() => {
+    try {
+      return (db.prepare("SELECT slug, updatedAt FROM blog_post WHERE status = 'published'").all() as { slug: string; updatedAt: string }[]);
+    } catch { return []; }
+  })();
+
+  const base = seoSettings.siteUrl || "https://tourvibe.com";
+
+  // Build auto-generated entries list for the editor preview
+  const autoEntries = [
+    { url: base,             changeFrequency: "daily"   as const, priority: 1.0,  source: "home" },
+    { url: `${base}/tours`,  changeFrequency: "daily"   as const, priority: 0.9,  source: "tours index" },
+    { url: `${base}/blog`,   changeFrequency: "daily"   as const, priority: 0.85, source: "blog index" },
+    ...tourIds.map((t) => ({ url: `${base}/tours/${t.id}`,    changeFrequency: "weekly"  as const, priority: 0.8, source: "tour" })),
+    ...blogSlugs.map((p) => ({ url: `${base}/blog/${p.slug}`, changeFrequency: "monthly" as const, priority: 0.7, source: "blog post" })),
+  ];
+
+  // Estimate: tours page + home + blog + each tour/blog page
+  const indexablePages = 3 + tourCount + blogCount;
 
   return (
     <>
@@ -65,11 +92,12 @@ export default async function SeoPage() {
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
 
         {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 max-w-4xl">
-          <StatCard icon={FileText} label="Indexable Pages" value={indexablePages} sub="home + tours + listings" />
-          <StatCard icon={Globe} label="Tour Packages" value={tourCount} sub="each generates unique meta" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 max-w-5xl">
+          <StatCard icon={FileText} label="Indexable Pages" value={indexablePages} sub="in sitemap" />
+          <StatCard icon={Globe} label="Tour Packages" value={tourCount} sub="unique meta each" />
+          <StatCard icon={Map} label="Blog Posts" value={blogCount} sub="published articles" />
           <StatCard icon={Search} label="Reviews" value={reviewCount} sub="power rich snippets" />
-          <StatCard icon={TrendingUp} label="Vehicles" value={vehicleCount} sub="fleet structured data" />
+          <StatCard icon={TrendingUp} label="Vehicles" value={vehicleCount} sub="fleet data" />
         </div>
 
         <Card className="max-w-3xl">
@@ -82,6 +110,23 @@ export default async function SeoPage() {
           </CardHeader>
           <CardContent>
             <SeoForm initialData={seoSettings} />
+          </CardContent>
+        </Card>
+
+        {/* Sitemap editor */}
+        <Card className="max-w-4xl">
+          <CardHeader>
+            <CardTitle>Sitemap Manager</CardTitle>
+            <CardDescription>
+              Auto-generated URLs come from your content. Add custom URLs for any extra pages you want indexed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SitemapEditor
+              autoEntries={autoEntries}
+              customEntries={sitemapCustomEntries}
+              siteUrl={base}
+            />
           </CardContent>
         </Card>
 

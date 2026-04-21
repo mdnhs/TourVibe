@@ -16,6 +16,7 @@ import { Services } from "@/components/landing/services";
 import { LiveTrackingSection } from "@/components/landing/live-tracking";
 import { About } from "@/components/landing/about";
 import { Reviews } from "@/components/landing/reviews";
+import { BlogPreview } from "@/components/landing/blog-preview";
 import { Contact } from "@/components/landing/contact";
 import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
@@ -235,6 +236,26 @@ export default async function Home() {
     price: popularTours[0].price,
   } : undefined;
 
+  const blogPosts = db
+    .prepare(`
+      SELECT id, title, slug, excerpt, coverImage, authorName, tags, publishedAt, createdAt
+      FROM blog_post
+      WHERE status = 'published'
+      ORDER BY publishedAt DESC, createdAt DESC
+      LIMIT 3
+    `)
+    .all() as {
+      id: string;
+      title: string;
+      slug: string;
+      excerpt: string | null;
+      coverImage: string;
+      authorName: string;
+      tags: string;
+      publishedAt: string | null;
+      createdAt: string;
+    }[];
+
   return (
     <div className="min-h-screen text-slate-900">
       <Hero stats={stats} initialDrivers={liveDrivers} activeTour={activeTour} />
@@ -250,6 +271,8 @@ export default async function Home() {
       <About />
 
       <Reviews reviews={displayReviews} />
+
+      <BlogPreview posts={blogPosts} />
 
       <Contact />
     </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 import {
   BellIcon,
+  BookOpenIcon,
   BusFrontIcon,
   CarFrontIcon,
   CircleUserRoundIcon,
@@ -110,6 +111,12 @@ export function AppSidebar({
       label: "Notifications",
       href: "/dashboard/notifications",
       icon: BellIcon,
+    },
+    {
+      label: "Blog",
+      href: "/dashboard/blog",
+      icon: BookOpenIcon,
+      adminOnly: true,
     },
     {
       label: "Site Settings",

@@ -113,3 +113,39 @@ export async function updateSeoSettings(formData: FormData) {
   revalidatePath("/dashboard/seo");
   return { success: true };
 }
+
+// ── Sitemap custom entries ────────────────────────────────────────────────────
+
+export type ChangeFrequency =
+  | "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
+
+export interface SitemapEntry {
+  url: string;
+  priority: number;
+  changeFrequency: ChangeFrequency;
+}
+
+export async function getSitemapCustomEntries(): Promise<SitemapEntry[]> {
+  const row = db
+    .prepare("SELECT value FROM settings WHERE key = 'sitemap_custom'")
+    .get() as { value: string } | undefined;
+  if (!row) return [];
+  try { return JSON.parse(row.value) as SitemapEntry[]; } catch { return []; }
+}
+
+export async function updateSitemapCustomEntries(entries: SitemapEntry[]) {
+  const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
+  if (!isSuperAdmin && !allowedMenus?.includes("SEO")) return { error: "Unauthorized" };
+
+  // Sanitise: drop entries with empty URL
+  const clean = entries.filter((e) => e.url.trim() !== "");
+
+  db.prepare(`
+    INSERT INTO settings (key, value, updatedAt) VALUES ('sitemap_custom', ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updatedAt = CURRENT_TIMESTAMP
+  `).run(JSON.stringify(clean));
+
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/dashboard/seo");
+  return { success: true };
+}
