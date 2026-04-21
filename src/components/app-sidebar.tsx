@@ -133,7 +133,10 @@ export function AppSidebar({
 
   const filteredMenuItems = menuItems
     .filter((item) => {
-      // Default hardcoded logic (always check this first)
+      // When allowedMenus is set (custom role / builtin override), skip hardcoded
+      // adminOnly gate — allowedMenus is the sole authority for that session.
+      if (allowedMenus) return true;
+      // Default hardcoded rules for Super Admin / Driver / Tourist
       if (item.adminOnly && user.role !== "Super Admin") return false;
       if (item.label === "Reviews" && user.role === "Driver") return false;
       return true;
@@ -143,11 +146,12 @@ export function AppSidebar({
         return {
           ...item,
           items: item.items.filter((subItem) => {
-            // Check hardcoded logic for sub-items
+            if (allowedMenus) {
+              // allowedMenus is authoritative — show only what's explicitly granted
+              return allowedMenus.includes(subItem.label);
+            }
+            // Hardcoded sub-item rules
             if ((subItem as any).adminOnly && user.role !== "Super Admin")
-              return false;
-            // If dynamic permissions are provided, check them
-            if (allowedMenus && !allowedMenus.includes(subItem.label))
               return false;
             return true;
           }),
@@ -156,9 +160,8 @@ export function AppSidebar({
       return item;
     })
     .filter((item) => {
-      // If dynamic permissions are provided, use them
       if (allowedMenus) {
-        // Show if parent is explicitly allowed OR it has any allowed sub-items
+        // Keep top-level item if it's directly allowed OR has at least one allowed sub-item
         const isParentAllowed = allowedMenus.includes(item.label);
         const hasAllowedSubItems = item.items && item.items.length > 0;
         return isParentAllowed || hasAllowedSubItems;
@@ -166,7 +169,7 @@ export function AppSidebar({
       return true;
     })
     .filter((item) => {
-      // If it had sub-items but they were all filtered out, and it has no href of its own, hide it
+      // Drop parent-only items whose sub-items were all filtered out
       if (item.items && item.items.length === 0 && !item.href) return false;
       return true;
     });

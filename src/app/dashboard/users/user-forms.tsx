@@ -5,7 +5,6 @@ import { useTransition, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createUser, updateUser } from "./actions";
-import { roleLabels } from "@/lib/permissions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +28,6 @@ export function CreateUserForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [role, setRole] = useState<string>("tourist");
 
-  const allRoleLabels = { ...roleLabels, ...customRoles };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -49,13 +46,15 @@ export function CreateUserForm({
     });
   };
 
+  const hasCustomRoles = Object.keys(customRoles).length > 0;
+
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Full Name</Label>
         <Input id="name" name="name" placeholder="e.g. Jane Doe" required disabled={isPending} />
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" placeholder="e.g. jane@example.com" required disabled={isPending} />
@@ -73,11 +72,21 @@ export function CreateUserForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(allRoleLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
+            <SelectItem value="tourist">Tourist</SelectItem>
+            <SelectItem value="driver">Driver</SelectItem>
+            <SelectItem value="super_admin">Super Admin</SelectItem>
+            {hasCustomRoles && (
+              <>
+                <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground border-t mt-1 pt-2">
+                  Custom Roles
+                </div>
+                {Object.entries(customRoles).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -100,8 +109,6 @@ export function EditUserForm({
   const [isPending, startTransition] = useTransition();
   const [role, setRole] = useState<string>(user.role);
 
-  const allRoleLabels = { ...roleLabels, ...customRoles };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -123,29 +130,18 @@ export function EditUserForm({
     });
   };
 
+  const hasCustomRoles = Object.keys(customRoles).length > 0;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       <div className="space-y-2">
         <Label htmlFor="name">Full Name</Label>
-        <Input 
-          id="name" 
-          name="name" 
-          defaultValue={user.name} 
-          required 
-          disabled={isPending} 
-        />
+        <Input id="name" name="name" defaultValue={user.name} required disabled={isPending} />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input 
-          id="email" 
-          name="email" 
-          type="email"
-          defaultValue={user.email} 
-          required 
-          disabled={isPending} 
-        />
+        <Input id="email" name="email" type="email" defaultValue={user.email} required disabled={isPending} />
       </div>
 
       <div className="space-y-2">
@@ -155,11 +151,21 @@ export function EditUserForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(allRoleLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
+            <SelectItem value="tourist">Tourist</SelectItem>
+            <SelectItem value="driver">Driver</SelectItem>
+            <SelectItem value="super_admin">Super Admin</SelectItem>
+            {hasCustomRoles && (
+              <>
+                <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground border-t mt-1 pt-2">
+                  Custom Roles
+                </div>
+                {Object.entries(customRoles).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>

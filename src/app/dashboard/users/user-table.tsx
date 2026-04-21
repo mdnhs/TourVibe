@@ -125,11 +125,11 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
   const filteredData = React.useMemo(() => {
     let result = [...data];
 
-    // Filter by tab (roles)
-    if (tab === "super_admin" || tab === "driver" || tab === "tourist") {
-      result = result.filter((u) => u.role === tab);
-    } else if (tab === "banned") {
+    // Filter by tab — any role key or "banned"
+    if (tab === "banned") {
       result = result.filter((u) => u.banned);
+    } else if (tab !== "all") {
+      result = result.filter((u) => u.role === tab);
     }
 
     // Filter by search
@@ -273,11 +273,19 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     {
       accessorKey: "role",
       header: "Role",
-      cell: ({ row }) => (
-        <Badge variant="secondary" className="capitalize">
-          {roleLabels[row.original.role] || row.original.role}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        const role = row.original.role;
+        const isDefault = role in roleLabels;
+        const label = allRoleLabels[role] ?? role;
+        return (
+          <Badge
+            variant={isDefault ? "secondary" : "outline"}
+            className={isDefault ? "capitalize" : "capitalize border-violet-200 bg-violet-50 text-violet-700"}
+          >
+            {label}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: "status",
@@ -466,7 +474,7 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground uppercase">Role</p>
-                    <Badge variant="secondary">{roleLabels[activeUser.role]}</Badge>
+                    <Badge variant="secondary">{allRoleLabels[activeUser.role] ?? activeUser.role}</Badge>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground uppercase">Status</p>
@@ -519,36 +527,37 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
         {/* ── Toolbar ── */}
         <div className="flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4 flex-1">
-            <TabsList>
+            <TabsList className="h-auto flex-wrap gap-0.5">
               <TabsTrigger value="all">
                 All
-                <Badge variant="secondary" className="ml-1">
-                  {data.length}
-                </Badge>
+                <Badge variant="secondary" className="ml-1 text-[10px]">{data.length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="super_admin">
                 Admins
-                <Badge variant="secondary" className="ml-1">
-                  {data.filter((u) => u.role === "super_admin").length}
-                </Badge>
+                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.role === "super_admin").length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="driver">
                 Drivers
-                <Badge variant="secondary" className="ml-1">
-                  {data.filter((u) => u.role === "driver").length}
-                </Badge>
+                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.role === "driver").length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="tourist">
                 Tourists
-                <Badge variant="secondary" className="ml-1">
-                  {data.filter((u) => u.role === "tourist").length}
-                </Badge>
+                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.role === "tourist").length}</Badge>
               </TabsTrigger>
+              {/* Custom role tabs */}
+              {Object.keys(customRoles).map((roleKey) => {
+                const count = data.filter((u) => u.role === roleKey).length;
+                if (count === 0) return null;
+                return (
+                  <TabsTrigger key={roleKey} value={roleKey} className="text-violet-700">
+                    {customRoles[roleKey]}
+                    <Badge variant="outline" className="ml-1 text-[10px] border-violet-200 bg-violet-50 text-violet-700">{count}</Badge>
+                  </TabsTrigger>
+                );
+              })}
               <TabsTrigger value="banned">
                 Banned
-                <Badge variant="secondary" className="ml-1">
-                  {data.filter((u) => u.banned).length}
-                </Badge>
+                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.banned).length}</Badge>
               </TabsTrigger>
             </TabsList>
 

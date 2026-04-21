@@ -44,9 +44,9 @@ function StatCard({
 }
 
 export default async function SeoPage() {
-  const { isSuperAdmin } = await requireDashboardSession();
+  const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
 
-  if (!isSuperAdmin) {
+  if (!isSuperAdmin && !allowedMenus?.includes("SEO")) {
     redirect("/dashboard");
   }
 

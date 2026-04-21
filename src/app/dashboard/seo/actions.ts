@@ -71,8 +71,8 @@ export async function getSeoSettings(): Promise<SeoSettings> {
 }
 
 export async function updateSeoSettings(formData: FormData) {
-  const { isSuperAdmin } = await requireDashboardSession();
-  if (!isSuperAdmin) return { error: "Unauthorized" };
+  const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
+  if (!isSuperAdmin && !allowedMenus?.includes("SEO")) return { error: "Unauthorized" };
 
   const settings: SeoSettings = {
     siteTitle: (formData.get("siteTitle") as string) || "",
