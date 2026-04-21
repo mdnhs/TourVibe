@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { Compass, Headset, Map, Plane, Users } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { seededAdminCredentials } from "@/lib/seed";
+import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const s = getSeoSettingsSync();
+  return buildMetadata(s, { canonical: "/" });
+}
 import { Hero } from "@/components/landing/hero";
 import { PopularTours } from "@/components/landing/popular-tours";
 import { PopularCars } from "@/components/landing/popular-cars";

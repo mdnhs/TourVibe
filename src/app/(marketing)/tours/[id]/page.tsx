@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { Clock, Users, Star, ArrowLeft, Quote, MapPin } from "lucide-react";
@@ -5,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookingBar } from "./booking-bar";
 import { BookingButton } from "./booking-button";
+import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
 
 interface Tour {
   id: string;
@@ -30,6 +32,27 @@ interface Review {
 
 interface TourDetailsPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: TourDetailsPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const tour = db.prepare(`
+    SELECT tp.*,
+           (SELECT COUNT(*) FROM review WHERE tourPackageId = tp.id) as reviewCount,
+           (SELECT AVG(rating) FROM review WHERE tourPackageId = tp.id) as avgRating
+    FROM tour_package tp WHERE tp.id = ?
+  `).get(id) as Tour | undefined;
+  if (!tour) return {};
+  const s = getSeoSettingsSync();
+  return buildMetadata(s, {
+    title: tour.name,
+    description: tour.description
+      ? tour.description.slice(0, 155) + (tour.description.length > 155 ? "…" : "")
+      : `Book ${tour.name} — ${tour.duration}, up to ${tour.maxPersons} persons from $${tour.price}.`,
+    image: tour.thumbnail || undefined,
+    canonical: `/tours/${id}`,
+    type: "article",
+  });
 }
 
 const reviewAccents = [
@@ -63,8 +86,17 @@ export default async function TourDetailsPage({ params }: TourDetailsPageProps) 
   const galleryUrls = tour.gallery ? tour.gallery.split(",").map((u) => u.trim()).filter(Boolean) : [];
   const rating = tour.avgRating ? tour.avgRating.toFixed(1) : null;
 
+  const seoSettings = getSeoSettingsSync();
+  const tourSchema = buildTourSchema(seoSettings, tour);
+
   return (
     <>
+      {tourSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(tourSchema) }}
+        />
+      )}
     <div className="relative overflow-hidden pb-28">
       {/* ── Background glows ── */}
       <div className="pointer-events-none absolute inset-0 -z-10">
