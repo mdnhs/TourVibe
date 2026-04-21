@@ -27,6 +27,8 @@ export interface SeoSettings {
   robotsFollow: boolean;
   googleAnalyticsId: string;
   googleTagManagerId: string;
+  metaPixelId: string;
+  facebookCatalogUrl: string;
   // Verification
   googleSiteVerification: string;
   bingSiteVerification: string;
@@ -56,6 +58,8 @@ const defaults: SeoSettings = {
   robotsFollow: true,
   googleAnalyticsId: "",
   googleTagManagerId: "",
+  metaPixelId: "",
+  facebookCatalogUrl: "/api/feeds/facebook",
   googleSiteVerification: "",
   bingSiteVerification: "",
   yandexVerification: "",
@@ -93,6 +97,7 @@ export async function updateSeoSettings(formData: FormData) {
     robotsFollow: formData.get("robotsFollow") === "true",
     googleAnalyticsId: (formData.get("googleAnalyticsId") as string) || "",
     googleTagManagerId: (formData.get("googleTagManagerId") as string) || "",
+    metaPixelId: (formData.get("metaPixelId") as string) || "",
     googleSiteVerification: (formData.get("googleSiteVerification") as string) || "",
     bingSiteVerification: (formData.get("bingSiteVerification") as string) || "",
     yandexVerification: (formData.get("yandexVerification") as string) || "",

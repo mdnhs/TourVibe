@@ -21,6 +21,8 @@ const defaults: SeoSettings = {
   robotsFollow: true,
   googleAnalyticsId: "",
   googleTagManagerId: "",
+  metaPixelId: "",
+  facebookCatalogUrl: "/api/feeds/facebook",
   googleSiteVerification: "",
   bingSiteVerification: "",
   yandexVerification: "",

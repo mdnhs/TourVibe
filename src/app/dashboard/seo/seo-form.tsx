@@ -17,6 +17,7 @@ import {
   Code2,
   CheckCircle2,
   AlertCircle,
+  Copy,
 } from "lucide-react";
 
 function FieldHint({ children }: { children: React.ReactNode }) {
@@ -187,12 +188,19 @@ export function SeoForm({ initialData }: { initialData: SeoSettings }) {
     });
   };
 
+  const copyToClipboard = (text: string) => {
+    const fullUrl = `${window.location.origin}${text}`;
+    navigator.clipboard.writeText(fullUrl);
+    toast.success("URL copied to clipboard");
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       {/* Status strip */}
       <div className="flex flex-wrap gap-2 mb-6 p-3 rounded-lg bg-muted/50 border">
         <StatusBadge enabled={!!initialData.googleAnalyticsId} label="Google Analytics" />
         <StatusBadge enabled={!!initialData.googleTagManagerId} label="GTM" />
+        <StatusBadge enabled={!!initialData.metaPixelId} label="Meta Pixel" />
         <StatusBadge enabled={!!initialData.ogImage} label="OG Image" />
         <StatusBadge enabled={initialData.enableJsonLd} label="JSON-LD" />
         <StatusBadge enabled={initialData.robotsIndex} label="Indexed" />
@@ -275,7 +283,6 @@ export function SeoForm({ initialData }: { initialData: SeoSettings }) {
           </div>
         </TabsContent>
 
-        {/* ── SOCIAL ── */}
         <TabsContent value="social" className="space-y-4">
           <SectionHeading>Open Graph (Facebook, LinkedIn, WhatsApp)</SectionHeading>
           <TextFieldWithCount
@@ -412,6 +419,39 @@ export function SeoForm({ initialData }: { initialData: SeoSettings }) {
               placeholder="GTM-XXXXXXX"
             />
             <FieldHint>Starts with <code className="bg-muted px-1 rounded text-[10px]">GTM-</code>. Loads GTM in &lt;head&gt; and &lt;body&gt;.</FieldHint>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="metaPixelId">Meta Pixel ID</Label>
+            <Input
+              id="metaPixelId"
+              name="metaPixelId"
+              defaultValue={initialData.metaPixelId}
+              placeholder="XXXXXXXXXXXXXXXX"
+            />
+            <FieldHint>Enter your Meta Pixel ID to enable tracking.</FieldHint>
+          </div>
+
+          <SectionHeading>Feeds &amp; Catalogs</SectionHeading>
+          <div className="space-y-1.5">
+            <Label>Facebook Catalog Feed URL</Label>
+            <div className="flex gap-2">
+              <Input
+                readOnly
+                value={initialData.facebookCatalogUrl}
+                className="bg-muted font-mono text-[12px]"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => copyToClipboard(initialData.facebookCatalogUrl)}
+              >
+                <Copy className="size-4" />
+              </Button>
+            </div>
+            <FieldHint>
+              Use this URL in Facebook Commerce Manager to automatically sync your tour packages to your Facebook Catalog.
+            </FieldHint>
           </div>
         </TabsContent>
 
