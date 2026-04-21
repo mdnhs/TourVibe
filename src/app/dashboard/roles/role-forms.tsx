@@ -21,6 +21,7 @@ const AVAILABLE_MENUS = [
   "Live Tracking",
   "Notifications",
   "Appearance",
+  "SEO",
   "Account",
 ];
 
