@@ -24,6 +24,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tour ID is required" }, { status: 400 });
     }
 
+    // Phone is mandatory for booking
+    const userRow = db
+      .prepare("SELECT phone FROM user WHERE id = ?")
+      .get(session.user.id) as { phone: string | null } | undefined;
+    if (!userRow?.phone) {
+      return NextResponse.json(
+        { error: "PHONE_REQUIRED", message: "Please add a phone number to your account before booking." },
+        { status: 422 },
+      );
+    }
+
     const tour = db.prepare("SELECT * FROM tour_package WHERE id = ?").get(tourId) as any;
 
     if (!tour) {

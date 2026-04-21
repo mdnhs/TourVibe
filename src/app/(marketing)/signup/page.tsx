@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, MapPin, Star, Compass } from "lucide-react";
 
 import { SignUpForm } from "@/components/auth/sign-up-form";
+import { getServerSession } from "@/lib/session";
 
 const perks = [
   {
@@ -24,7 +26,13 @@ const perks = [
   },
 ];
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const session = await getServerSession();
+
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6">
       {/* ── Background glows ── */}

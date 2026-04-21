@@ -106,3 +106,33 @@ try {
 try {
   db.exec("ALTER TABLE review ADD COLUMN reviewerImage TEXT");
 } catch (e) {}
+
+try { db.exec("ALTER TABLE user ADD COLUMN phone TEXT"); } catch (e) {}
+try { db.exec("ALTER TABLE user ADD COLUMN lat REAL"); } catch (e) {}
+try { db.exec("ALTER TABLE user ADD COLUMN lng REAL"); } catch (e) {}
+try { db.exec("ALTER TABLE user ADD COLUMN locationName TEXT"); } catch (e) {}
+try { db.exec("ALTER TABLE user ADD COLUMN locationUpdatedAt DATETIME"); } catch (e) {}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS notification (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'general',
+    targetUserId TEXT,
+    createdBy TEXT NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (createdBy) REFERENCES user(id) ON DELETE CASCADE
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS notification_read (
+    notificationId TEXT NOT NULL,
+    userId TEXT NOT NULL,
+    readAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (notificationId, userId),
+    FOREIGN KEY (notificationId) REFERENCES notification(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
+  )
+`);

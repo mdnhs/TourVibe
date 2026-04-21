@@ -1,9 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, MapPin, Star } from "lucide-react";
 
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { getServerSession } from "@/lib/session";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getServerSession();
+
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6">
       {/* ── Background glows ── */}

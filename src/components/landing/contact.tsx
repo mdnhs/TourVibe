@@ -70,17 +70,11 @@ export function Contact() {
             {/* CTA buttons */}
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href="/signup"
+                href="/tours"
                 className="group inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-slate-900/30"
               >
                 Book a tour
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </a>
-              <a
-                href="/tours"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
-              >
-                Browse tours
               </a>
             </div>
 

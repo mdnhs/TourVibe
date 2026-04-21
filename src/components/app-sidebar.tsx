@@ -4,10 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
 import {
+  BellIcon,
   BusFrontIcon,
   CarFrontIcon,
+  CircleUserRoundIcon,
   LayoutDashboardIcon,
   MapIcon,
+  NavigationIcon,
   StarIcon,
   UsersIcon,
   TicketIcon,
@@ -22,6 +25,7 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -30,6 +34,7 @@ import {
 
 export function AppSidebar({
   user,
+  unreadNotifications = 0,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -38,54 +43,28 @@ export function AppSidebar({
     role: string;
     avatar?: string | null;
   };
+  unreadNotifications?: number;
 }) {
   const pathname = usePathname();
 
   const menuItems = [
-    {
-      label: "Overview",
-      href: "/dashboard",
-      icon: LayoutDashboardIcon,
-    },
-    {
-      label: "Bookings",
-      href: "/dashboard/bookings",
-      icon: TicketIcon,
-    },
-    {
-      label: "Tours",
-      href: "/dashboard/tours",
-      icon: MapIcon,
-      adminOnly: true,
-    },
-    {
-      label: "Reviews",
-      href: "/dashboard/reviews",
-      icon: StarIcon,
-    },
-    {
-      label: "Drivers",
-      href: "/dashboard/drivers",
-      icon: BusFrontIcon,
-      adminOnly: true,
-    },
-    {
-      label: "Vehicles",
-      href: "/dashboard/vehicles",
-      icon: CarFrontIcon,
-      adminOnly: true,
-    },
-    {
-      label: "Users",
-      href: "/dashboard/users",
-      icon: UsersIcon,
-      adminOnly: true,
-    },
+    { label: "Overview", href: "/dashboard", icon: LayoutDashboardIcon },
+    { label: "Bookings", href: "/dashboard/bookings", icon: TicketIcon },
+    { label: "Tours", href: "/dashboard/tours", icon: MapIcon, adminOnly: true },
+    { label: "Reviews", href: "/dashboard/reviews", icon: StarIcon },
+    { label: "Drivers", href: "/dashboard/drivers", icon: BusFrontIcon, adminOnly: true },
+    { label: "Vehicles", href: "/dashboard/vehicles", icon: CarFrontIcon, adminOnly: true },
+    { label: "Users", href: "/dashboard/users", icon: UsersIcon, adminOnly: true },
+    { label: "Live Tracking", href: "/dashboard/tracking", icon: NavigationIcon },
+    { label: "Notifications", href: "/dashboard/notifications", icon: BellIcon },
+    { label: "Account", href: "/dashboard/account", icon: CircleUserRoundIcon },
   ];
 
-  const filteredMenuItems = menuItems.filter(
-    (item) => !item.adminOnly || user.role === "Super Admin",
-  );
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.adminOnly && user.role !== "Super Admin") return false;
+    if (item.label === "Reviews" && user.role === "Driver") return false;
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
@@ -113,6 +92,7 @@ export function AppSidebar({
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
                     : pathname.startsWith(item.href);
+                const isNotif = item.href === "/dashboard/notifications";
 
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -124,6 +104,11 @@ export function AppSidebar({
                       <Icon />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
+                    {isNotif && unreadNotifications > 0 && (
+                      <SidebarMenuBadge>
+                        {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                      </SidebarMenuBadge>
+                    )}
                   </SidebarMenuItem>
                 );
               })}

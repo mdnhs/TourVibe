@@ -6,9 +6,11 @@ import { Hero } from "@/components/landing/hero";
 import { PopularTours } from "@/components/landing/popular-tours";
 import { PopularCars } from "@/components/landing/popular-cars";
 import { Services } from "@/components/landing/services";
+import { LiveTrackingSection } from "@/components/landing/live-tracking";
 import { About } from "@/components/landing/about";
 import { Reviews } from "@/components/landing/reviews";
 import { Contact } from "@/components/landing/contact";
+import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
 export default async function Home() {
   // Fetch real-time statistics
@@ -157,6 +159,18 @@ export default async function Home() {
       }
     | undefined;
 
+  // Live driver locations for tracking section
+  const liveDrivers = db
+    .prepare(
+      `SELECT u.id, u.name, u.image, u.lat, u.lng, u.locationName, u.locationUpdatedAt,
+              v.make as vehicleMake, v.model as vehicleModel, v.licensePlate as vehicleLicense
+       FROM user u
+       LEFT JOIN vehicle v ON v.driverId = u.id
+       WHERE u.role = 'driver' AND u.lat IS NOT NULL AND u.lng IS NOT NULL
+       ORDER BY u.locationUpdatedAt DESC`,
+    )
+    .all() as DriverLocation[];
+
   // Fetch one driver for the flagship ride display
   const flagshipDriver = db
     .prepare(
@@ -215,6 +229,8 @@ export default async function Home() {
       <PopularCars cars={popularCars} />
 
       <Services services={services} />
+
+      <LiveTrackingSection initialDrivers={liveDrivers} />
 
       <About />
 

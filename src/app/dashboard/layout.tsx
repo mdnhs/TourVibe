@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { db } from "@/lib/db";
 
 export default async function DashboardLayout({
   children,
@@ -10,6 +11,17 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const { session, label } = await requireDashboardSession();
+
+  const { unread } = db
+    .prepare(
+      `SELECT COUNT(*) as unread
+       FROM notification n
+       WHERE (n.targetUserId IS NULL OR n.targetUserId = ?)
+         AND n.id NOT IN (
+           SELECT notificationId FROM notification_read WHERE userId = ?
+         )`,
+    )
+    .get(session.user.id, session.user.id) as { unread: number };
 
   return (
     <SidebarProvider
@@ -26,6 +38,7 @@ export default async function DashboardLayout({
           role: label,
           avatar: session.user.image,
         }}
+        unreadNotifications={unread}
       />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

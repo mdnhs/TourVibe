@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { ReviewTable } from "./review-table";
 import { Button } from "@/components/ui/button";
+import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
   title: "Review Management | TourVibe",
@@ -30,31 +31,31 @@ export default async function ReviewPage() {
     ORDER BY r.createdAt DESC
   `).all() as any[];
 
-  // Fetch all tour packages for the creation form
-  const tourPackages = db.prepare("SELECT id, name FROM tour_package").all() as { id: string, name: string }[];
-
   return (
-    <div className="flex flex-col gap-6 py-6">
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reviews</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage and view tour package reviews.
-          </p>
+    <>
+      <SiteHeader title="Review Management" subtitle="Manage and view tour package reviews" />
+      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-bold tracking-tight">Reviews</h2>
+            <p className="text-muted-foreground">
+              Overview of all tour package reviews.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/dashboard/reviews/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Review
+            </Link>
+          </Button>
         </div>
-        <Button asChild size="sm">
-          <Link href="/dashboard/reviews/new">
-            <Plus className="mr-2 size-4" />
-            Add Review
-          </Link>
-        </Button>
-      </div>
 
-      <ReviewTable 
-        reviews={reviews} 
-        currentUserId={currentUserId} 
-        isSuperAdmin={isSuperAdmin} 
-      />
-    </div>
+        <ReviewTable 
+          reviews={reviews} 
+          currentUserId={currentUserId} 
+          isSuperAdmin={isSuperAdmin} 
+        />
+      </div>
+    </>
   );
 }

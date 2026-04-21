@@ -37,6 +37,15 @@ export function BookingButton({ tourId }: BookingButtonProps) {
 
       if (data.url) {
         window.location.href = data.url;
+      } else if (data.error === "PHONE_REQUIRED") {
+        toast.error("Phone number required", {
+          description: "Add your phone number in Account settings to book.",
+          action: {
+            label: "Go to Account",
+            onClick: () => router.push("/dashboard/account"),
+          },
+          duration: 6000,
+        });
       } else {
         toast.error(data.error || "Failed to initiate booking");
       }

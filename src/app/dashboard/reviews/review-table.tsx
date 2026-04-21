@@ -266,25 +266,30 @@ export function ReviewTable({
   const columns: ColumnDef<Review>[] = [
     {
       id: "select",
+      size: 40,
       header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
+        <div className="flex items-center justify-center w-10">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        </div>
       ),
       cell: ({ row }) => {
         const canManage = isSuperAdmin || row.original.userId === currentUserId;
         return (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            disabled={!canManage}
-            aria-label="Select row"
-          />
+          <div className="flex items-center justify-center w-10">
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              disabled={!canManage}
+              aria-label="Select row"
+            />
+          </div>
         );
       },
       enableSorting: false,
@@ -293,27 +298,31 @@ export function ReviewTable({
     {
       accessorKey: "tourPackageName",
       header: "Tour Package",
+      size: 200,
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.tourPackageName}</div>
+        <div className="font-medium truncate w-[200px]" title={row.original.tourPackageName}>
+          {row.original.tourPackageName}
+        </div>
       ),
     },
     {
       accessorKey: "userName",
       header: "User",
+      size: 220,
       cell: ({ row }) => {
         const review = row.original;
         const name = review.reviewerName || review.userName;
         const image = review.reviewerImage || review.userImage;
 
         return (
-          <div className="flex items-center gap-2">
-            <Avatar className="size-8">
+          <div className="flex items-center gap-2 w-[220px]">
+            <Avatar className="size-8 flex-shrink-0">
               <AvatarImage src={image || ""} />
               <AvatarFallback>{name?.[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{name}</span>
-              <span className="text-xs text-muted-foreground">
+            <div className="flex flex-col truncate">
+              <span className="text-sm font-medium truncate">{name}</span>
+              <span className="text-[11px] text-muted-foreground truncate">
                 {review.userEmail}
               </span>
             </div>
@@ -324,13 +333,19 @@ export function ReviewTable({
     {
       accessorKey: "rating",
       header: "Rating",
-      cell: ({ row }) => <StarRating rating={row.original.rating} />,
+      size: 100,
+      cell: ({ row }) => (
+        <div className="w-[100px]">
+          <StarRating rating={row.original.rating} />
+        </div>
+      ),
     },
     {
       accessorKey: "comment",
       header: "Comment",
+      size: 300,
       cell: ({ row }) => (
-        <div className="max-w-[300px] truncate text-muted-foreground italic">
+        <div className="w-[300px] truncate text-muted-foreground italic text-xs" title={row.original.comment || ""}>
           {row.original.comment || "No comment"}
         </div>
       ),
@@ -338,57 +353,63 @@ export function ReviewTable({
     {
       accessorKey: "createdAt",
       header: "Date",
+      size: 100,
       cell: ({ row }) => (
-        <div>{new Date(row.original.createdAt).toLocaleDateString()}</div>
+        <div className="w-[100px] text-xs text-muted-foreground">
+          {new Date(row.original.createdAt).toLocaleDateString()}
+        </div>
       ),
     },
     {
       id: "actions",
       header: "Action",
+      size: 60,
       enableHiding: false,
       cell: ({ row }) => {
         const review = row.original;
         const canManage = isSuperAdmin || review.userId === currentUserId;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  className="size-8 text-muted-foreground"
-                  size="icon"
-                >
-                  <MoreHorizontal className="size-4" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setViewId(review.id)}>
-                <Eye className="mr-2 size-4" />
-                View Details
-              </DropdownMenuItem>
-              {canManage && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/reviews/${review.id}/edit`}>
-                      <Pencil className="mr-2 size-4" />
-                      Edit
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => handleDelete(review.id)}
+          <div className="flex justify-center w-10">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="size-8 text-muted-foreground"
+                    size="icon"
                   >
-                    <Trash className="mr-2 size-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    <MoreHorizontal className="size-4" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={() => setViewId(review.id)}>
+                  <Eye className="mr-2 size-4" />
+                  View Details
+                </DropdownMenuItem>
+                {canManage && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/reviews/${review.id}/edit`}>
+                        <Pencil className="mr-2 size-4" />
+                        Edit
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => handleDelete(review.id)}
+                    >
+                      <Trash className="mr-2 size-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
