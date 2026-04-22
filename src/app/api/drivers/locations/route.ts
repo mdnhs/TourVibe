@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export interface DriverLocation {
   id: string;
@@ -15,16 +15,40 @@ export interface DriverLocation {
 }
 
 export async function GET() {
-  const drivers = db
-    .prepare(
-      `SELECT u.id, u.name, u.image, u.lat, u.lng, u.locationName, u.locationUpdatedAt,
-              v.make as vehicleMake, v.model as vehicleModel, v.licensePlate as vehicleLicense
-       FROM user u
-       LEFT JOIN vehicle v ON v.driverId = u.id
-       WHERE u.role = 'driver' AND u.lat IS NOT NULL AND u.lng IS NOT NULL
-       ORDER BY u.locationUpdatedAt DESC`,
-    )
-    .all() as DriverLocation[];
+  const users = await prisma.user.findMany({
+    where: {
+      role: "driver",
+      lat: { not: null },
+      lng: { not: null },
+    },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      lat: true,
+      lng: true,
+      locationName: true,
+      locationUpdatedAt: true,
+      vehicles: {
+        take: 1,
+        select: { make: true, model: true, licensePlate: true },
+      },
+    },
+    orderBy: { locationUpdatedAt: "desc" },
+  });
+
+  const drivers: DriverLocation[] = users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    image: u.image,
+    lat: u.lat!,
+    lng: u.lng!,
+    locationName: u.locationName,
+    locationUpdatedAt: u.locationUpdatedAt?.toISOString() ?? null,
+    vehicleMake: u.vehicles[0]?.make ?? null,
+    vehicleModel: u.vehicles[0]?.model ?? null,
+    vehicleLicense: u.vehicles[0]?.licensePlate ?? null,
+  }));
 
   return NextResponse.json({ drivers });
 }

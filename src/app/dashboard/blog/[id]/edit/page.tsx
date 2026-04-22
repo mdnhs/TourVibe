@@ -24,7 +24,9 @@ export default async function EditBlogPostPage({
   }
 
   const { id } = await params;
-  const post = db.prepare("SELECT * FROM blog_post WHERE id = ?").get(id) as any;
+  const post = await db.blogPost.findUnique({
+    where: { id },
+  });
 
   if (!post) notFound();
 

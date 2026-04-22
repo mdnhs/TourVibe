@@ -15,11 +15,19 @@ export async function GET() {
   const settings = await getSeoSettings();
   const siteUrl = settings.siteUrl || "https://example.com";
   
-  const tours = db.prepare(`
-    SELECT id, name, description, price, thumbnail, updatedAt 
-    FROM tour_package 
-    ORDER BY createdAt DESC
-  `).all() as TourPackage[];
+  const tours = await db.tourPackage.findMany({
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      thumbnail: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
 
   const items = tours.map((tour) => {
     const tourUrl = `${siteUrl}/tours/${tour.id}`;

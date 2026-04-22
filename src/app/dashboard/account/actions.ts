@@ -2,24 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
 
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession } from "@/lib/dashboard";
-
-async function saveUpload(file: File): Promise<string> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(uploadDir, { recursive: true });
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const name = `avatar-${crypto.randomUUID()}.${ext}`;
-  await fs.writeFile(path.join(uploadDir, name), buffer);
-  return `/uploads/${name}`;
-}
 
 export async function updateProfile(formData: FormData) {
   const { session } = await requireDashboardSession();
@@ -33,7 +20,7 @@ export async function updateProfile(formData: FormData) {
   let imageUrl: string | undefined;
   if (avatarFile && avatarFile.size > 0) {
     try {
-      imageUrl = await saveUpload(avatarFile);
+      imageUrl = await uploadToCloudinary(avatarFile, "tourvibe/avatars");
     } catch {
       return { error: "Failed to upload avatar." };
     }
@@ -46,9 +33,10 @@ export async function updateProfile(formData: FormData) {
       body: { name, image: imageUrl },
     });
 
-    db.prepare(
-      "UPDATE user SET phone = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?",
-    ).run(phone || null, session.user.id);
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { phone: phone || null },
+    });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -58,8 +46,6 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function updatePassword(formData: FormData) {
-  const { session } = await requireDashboardSession();
-
   const currentPassword = (formData.get("currentPassword") as string)?.trim();
   const newPassword = (formData.get("newPassword") as string)?.trim();
   const confirmPassword = (formData.get("confirmPassword") as string)?.trim();
@@ -77,11 +63,7 @@ export async function updatePassword(formData: FormData) {
   try {
     await auth.api.changePassword({
       headers: await headers(),
-      body: {
-        currentPassword,
-        newPassword,
-        revokeOtherSessions: false,
-      },
+      body: { currentPassword, newPassword, revokeOtherSessions: false },
     });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Incorrect current password." };

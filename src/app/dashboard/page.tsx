@@ -9,18 +9,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 
 export default async function DashboardOverviewPage() {
   const { session, label, highlights } = await requireDashboardSession();
 
+  const [tourCount, vehicleCount, driverCount, userCount, avgRatingResult] = await Promise.all([
+    prisma.tourPackage.count(),
+    prisma.vehicle.count(),
+    prisma.user.count({ where: { role: "driver" } }),
+    prisma.user.count(),
+    prisma.review.aggregate({ _avg: { rating: true } }),
+  ]);
+
   const stats = {
-    tourCount: (db.prepare("SELECT COUNT(*) as count FROM tour_package").get() as { count: number }).count,
-    vehicleCount: (db.prepare("SELECT COUNT(*) as count FROM vehicle").get() as { count: number }).count,
-    driverCount: (db.prepare("SELECT COUNT(*) as count FROM user WHERE role = ?").get("driver") as { count: number }).count,
-    userCount: (db.prepare("SELECT COUNT(*) as count FROM user").get() as { count: number }).count,
-    avgRating: (db.prepare("SELECT AVG(rating) as avg FROM review").get() as { avg: number | null }).avg || 0,
+    tourCount,
+    vehicleCount,
+    driverCount,
+    userCount,
+    avgRating: avgRatingResult._avg.rating ?? 0,
   };
 
   return (

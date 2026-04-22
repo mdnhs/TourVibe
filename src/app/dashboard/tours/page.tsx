@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { TourTable, TourPackage } from "./tour-table";
 
@@ -19,22 +19,21 @@ export default async function ToursPage() {
     redirect("/dashboard");
   }
 
-  // Fetch tour packages with assigned vehicle counts and IDs
-  const tours = db.prepare(`
-    SELECT 
-      tp.id, tp.name, tp.description, tp.price, tp.duration, tp.maxPersons, tp.thumbnail, tp.gallery, tp.createdAt, tp.updatedAt,
-      COUNT(tpv.vehicleId) as vehicleCount,
-      GROUP_CONCAT(tpv.vehicleId) as assignedVehicles
-    FROM tour_package tp
-    LEFT JOIN tour_package_vehicle tpv ON tp.id = tpv.tourPackageId
-    GROUP BY tp.id
-    ORDER BY tp.createdAt DESC
-  `).all() as TourPackage[];
+  const [rawTours, vehicles] = await Promise.all([
+    prisma.tourPackage.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { vehicles: { select: { vehicleId: true } } },
+    }),
+    prisma.vehicle.findMany({ select: { id: true, make: true, model: true, licensePlate: true } }),
+  ]);
 
-  // Fetch all vehicles for the assignment form
-  const vehicles = db.prepare(`
-    SELECT id, make, model, licensePlate FROM vehicle
-  `).all() as { id: string; make: string; model: string; licensePlate: string }[];
+  const tours: TourPackage[] = rawTours.map((t) => ({
+    ...t,
+    createdAt: t.createdAt.toISOString(),
+    updatedAt: t.updatedAt.toISOString(),
+    vehicleCount: t.vehicles.length,
+    assignedVehicles: t.vehicles.map((v) => v.vehicleId).join(","),
+  }));
 
   return (
     <>

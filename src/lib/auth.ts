@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin } from "better-auth/plugins";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { ac, roles } from "@/lib/permissions";
 
 const appUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
@@ -14,7 +15,9 @@ export const auth = betterAuth({
   baseURL: appUrl,
   secret: authSecret,
   trustedOrigins: [appUrl],
-  database: db,
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

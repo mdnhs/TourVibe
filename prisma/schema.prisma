@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── better-auth tables ────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+
+  // better-auth admin plugin
+  role      String?
+  banned    Boolean?
+  banReason String?
+  banExpires DateTime?
+
+  // app-specific fields
+  phone             String?
+  lat               Float?
+  lng               Float?
+  locationName      String?
+  locationUpdatedAt DateTime?
+
+  sessions Session[]
+  accounts Account[]
+
+  vehicles              Vehicle[]          @relation("DriverVehicles")
+  reviews               Review[]           @relation("UserReviews")
+  bookings              Booking[]          @relation("UserBookings")
+  createdNotifications  Notification[]     @relation("NotificationCreator")
+  notificationReads     NotificationRead[] @relation("NotificationReads")
+  blogPosts             BlogPost[]         @relation("BlogAuthor")
+  targetedNotifications Notification[]     @relation("NotificationTarget")
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime
+  updatedAt      DateTime
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+// ── app tables ────────────────────────────────────────────────────────────────
+
+model Vehicle {
+  id           String   @id
+  make         String
+  model        String
+  year         Int
+  licensePlate String   @unique
+  driverId     String?
+  thumbnail    String   @default("")
+  gallery      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  driver       User?                @relation("DriverVehicles", fields: [driverId], references: [id], onDelete: SetNull)
+  tourPackages TourPackageVehicle[]
+
+  @@map("vehicle")
+}
+
+model TourPackage {
+  id          String   @id
+  name        String
+  description String?
+  price       Float
+  duration    String
+  maxPersons  Int      @default(1)
+  thumbnail   String   @default("")
+  gallery     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vehicles TourPackageVehicle[]
+  reviews  Review[]
+  bookings Booking[]
+
+  @@map("tour_package")
+}
+
+model TourPackageVehicle {
+  tourPackageId String
+  vehicleId     String
+
+  tourPackage TourPackage @relation(fields: [tourPackageId], references: [id], onDelete: Cascade)
+  vehicle     Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@id([tourPackageId, vehicleId])
+  @@map("tour_package_vehicle")
+}
+
+model Review {
+  id            String   @id
+  tourPackageId String
+  userId        String
+  rating        Int
+  comment       String?
+  reviewerName  String?
+  reviewerImage String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tourPackage TourPackage @relation(fields: [tourPackageId], references: [id], onDelete: Cascade)
+  user        User        @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("review")
+}
+
+model Booking {
+  id              String   @id
+  userId          String
+  tourPackageId   String
+  amount          Float
+  currency        String   @default("usd")
+  status          String   @default("pending")
+  stripeSessionId String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user        User        @relation("UserBookings", fields: [userId], references: [id], onDelete: Cascade)
+  tourPackage TourPackage @relation(fields: [tourPackageId], references: [id], onDelete: Cascade)
+
+  @@map("booking")
+}
+
+model Notification {
+  id           String   @id
+  title        String
+  body         String
+  type         String   @default("general")
+  targetUserId String?
+  createdBy    String
+  createdAt    DateTime @default(now())
+
+  creator    User               @relation("NotificationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  targetUser User?              @relation("NotificationTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  reads      NotificationRead[]
+
+  @@map("notification")
+}
+
+model NotificationRead {
+  notificationId String
+  userId         String
+  readAt         DateTime @default(now())
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation("NotificationReads", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([notificationId, userId])
+  @@map("notification_read")
+}
+
+model CustomRole {
+  id          String   @id
+  name        String   @unique
+  description String?
+  permissions String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("custom_role")
+}
+
+model Settings {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model BlogPost {
+  id              String    @id
+  title           String
+  slug            String    @unique
+  excerpt         String?
+  content         String    @default("")
+  coverImage      String    @default("")
+  authorId        String
+  authorName      String    @default("")
+  status          String    @default("draft")
+  tags            String    @default("")
+  metaTitle       String    @default("")
+  metaDescription String    @default("")
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  author User @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("blog_post")
+}

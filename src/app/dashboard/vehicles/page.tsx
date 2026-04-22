@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { SiteHeader } from "@/components/site-header";
 import {
   Card,
@@ -19,16 +19,24 @@ export default async function VehiclesPage() {
     redirect("/dashboard");
   }
 
-  const vehicles = db.prepare(`
-    SELECT v.*, u.name as driverName, u.email as driverEmail
-    FROM vehicle v
-    LEFT JOIN user u ON v.driverId = u.id
-    ORDER BY v.createdAt DESC
-  `).all() as Vehicle[];
+  const [rawVehicles, drivers] = await Promise.all([
+    prisma.vehicle.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { driver: { select: { name: true, email: true } } },
+    }),
+    prisma.user.findMany({
+      where: { role: "driver" },
+      select: { id: true, name: true, email: true },
+    }),
+  ]);
 
-  const drivers = db.prepare(`
-    SELECT id, name, email FROM user WHERE role = 'driver'
-  `).all() as { id: string; name: string; email: string }[];
+  const vehicles: Vehicle[] = rawVehicles.map((v) => ({
+    ...v,
+    createdAt: v.createdAt.toISOString(),
+    updatedAt: v.updatedAt.toISOString(),
+    driverName: v.driver?.name ?? null,
+    driverEmail: v.driver?.email ?? null,
+  }));
 
   return (
     <>

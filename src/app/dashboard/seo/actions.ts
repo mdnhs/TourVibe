@@ -1,39 +1,33 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { revalidatePath } from "next/cache";
 
 export interface SeoSettings {
-  // General
   siteTitle: string;
   titleTemplate: string;
   description: string;
   keywords: string;
   siteUrl: string;
-  // Open Graph
   ogTitle: string;
   ogDescription: string;
   ogImage: string;
   ogSiteName: string;
   ogType: string;
-  // Twitter
   twitterCard: string;
   twitterSite: string;
   twitterCreator: string;
   twitterImage: string;
-  // Technical
   robotsIndex: boolean;
   robotsFollow: boolean;
   googleAnalyticsId: string;
   googleTagManagerId: string;
   metaPixelId: string;
   facebookCatalogUrl: string;
-  // Verification
   googleSiteVerification: string;
   bingSiteVerification: string;
   yandexVerification: string;
-  // Structured Data
   orgName: string;
   orgLogo: string;
   enableJsonLd: boolean;
@@ -69,7 +63,7 @@ const defaults: SeoSettings = {
 };
 
 export async function getSeoSettings(): Promise<SeoSettings> {
-  const row = db.prepare("SELECT value FROM settings WHERE key = 'seo'").get() as { value: string } | undefined;
+  const row = await prisma.settings.findUnique({ where: { key: "seo" } });
   if (!row) return defaults;
   return { ...defaults, ...JSON.parse(row.value) };
 }
@@ -106,20 +100,16 @@ export async function updateSeoSettings(formData: FormData) {
     enableJsonLd: formData.get("enableJsonLd") === "true",
   };
 
-  db.prepare(`
-    INSERT INTO settings (key, value, updatedAt)
-    VALUES ('seo', ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(key) DO UPDATE SET
-      value = excluded.value,
-      updatedAt = CURRENT_TIMESTAMP
-  `).run(JSON.stringify(settings));
+  await prisma.settings.upsert({
+    where: { key: "seo" },
+    create: { key: "seo", value: JSON.stringify(settings) },
+    update: { value: JSON.stringify(settings) },
+  });
 
   revalidatePath("/", "layout");
   revalidatePath("/dashboard/seo");
   return { success: true };
 }
-
-// ── Sitemap custom entries ────────────────────────────────────────────────────
 
 export type ChangeFrequency =
   | "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
@@ -131,9 +121,7 @@ export interface SitemapEntry {
 }
 
 export async function getSitemapCustomEntries(): Promise<SitemapEntry[]> {
-  const row = db
-    .prepare("SELECT value FROM settings WHERE key = 'sitemap_custom'")
-    .get() as { value: string } | undefined;
+  const row = await prisma.settings.findUnique({ where: { key: "sitemap_custom" } });
   if (!row) return [];
   try { return JSON.parse(row.value) as SitemapEntry[]; } catch { return []; }
 }
@@ -142,13 +130,13 @@ export async function updateSitemapCustomEntries(entries: SitemapEntry[]) {
   const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
   if (!isSuperAdmin && !allowedMenus?.includes("SEO")) return { error: "Unauthorized" };
 
-  // Sanitise: drop entries with empty URL
   const clean = entries.filter((e) => e.url.trim() !== "");
 
-  db.prepare(`
-    INSERT INTO settings (key, value, updatedAt) VALUES ('sitemap_custom', ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updatedAt = CURRENT_TIMESTAMP
-  `).run(JSON.stringify(clean));
+  await prisma.settings.upsert({
+    where: { key: "sitemap_custom" },
+    create: { key: "sitemap_custom", value: JSON.stringify(clean) },
+    update: { value: JSON.stringify(clean) },
+  });
 
   revalidatePath("/sitemap.xml");
   revalidatePath("/dashboard/seo");

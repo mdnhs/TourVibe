@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 
 export type BookingStatus = "pending" | "paid" | "cancelled";
@@ -14,9 +14,7 @@ export async function updateBookingStatus(id: string, status: BookingStatus) {
   if (!valid.includes(status)) return { error: "Invalid status" };
 
   try {
-    db.prepare(
-      "UPDATE booking SET status = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?",
-    ).run(status, id);
+    await prisma.booking.update({ where: { id }, data: { status } });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -28,18 +26,17 @@ export async function updateBookingStatus(id: string, status: BookingStatus) {
 export async function cancelOwnBooking(id: string) {
   const { session } = await requireDashboardSession();
 
-  const booking = db
-    .prepare("SELECT userId, status FROM booking WHERE id = ?")
-    .get(id) as { userId: string; status: string } | undefined;
+  const booking = await prisma.booking.findUnique({
+    where: { id },
+    select: { userId: true, status: true },
+  });
 
   if (!booking) return { error: "Booking not found" };
   if (booking.userId !== session.user.id) return { error: "Unauthorized" };
   if (booking.status === "cancelled") return { error: "Already cancelled" };
 
   try {
-    db.prepare(
-      "UPDATE booking SET status = 'cancelled', updatedAt = CURRENT_TIMESTAMP WHERE id = ?",
-    ).run(id);
+    await prisma.booking.update({ where: { id }, data: { status: "cancelled" } });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }

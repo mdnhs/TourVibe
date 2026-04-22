@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 interface BookingRow {
   id: string;
@@ -27,17 +27,29 @@ export async function GET(
 
   const { bookingId } = await params;
 
-  const booking = db
-    .prepare(
-      `SELECT b.id, b.amount, b.currency, b.status, b.createdAt,
-              tp.name as tourName, tp.duration as tourDuration, tp.thumbnail as tourThumbnail,
-              u.name as userName, u.email as userEmail, u.id as userId
-       FROM booking b
-       JOIN tour_package tp ON b.tourPackageId = tp.id
-       JOIN user u ON b.userId = u.id
-       WHERE b.id = ?`,
-    )
-    .get(bookingId) as BookingRow | undefined;
+  const raw = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      tourPackage: { select: { name: true, duration: true, thumbnail: true } },
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+
+  const booking: BookingRow | undefined = raw
+    ? {
+        id: raw.id,
+        amount: raw.amount,
+        currency: raw.currency,
+        status: raw.status,
+        createdAt: raw.createdAt.toISOString(),
+        tourName: raw.tourPackage.name,
+        tourDuration: raw.tourPackage.duration,
+        tourThumbnail: raw.tourPackage.thumbnail,
+        userName: raw.user.name,
+        userEmail: raw.user.email,
+        userId: raw.user.id,
+      }
+    : undefined;
 
   if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });

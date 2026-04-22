@@ -3,31 +3,34 @@ import { db } from "@/lib/db";
 import { getSeoSettingsSync } from "@/lib/seo";
 import type { SitemapEntry } from "@/app/dashboard/seo/actions";
 
-function getCustomEntries(): SitemapEntry[] {
-  const row = db
-    .prepare("SELECT value FROM settings WHERE key = 'sitemap_custom'")
-    .get() as { value: string } | undefined;
+async function getCustomEntries(): Promise<SitemapEntry[]> {
+  const row = await db.settings.findUnique({
+    where: { key: 'sitemap_custom' }
+  });
   if (!row) return [];
   try { return JSON.parse(row.value) as SitemapEntry[]; } catch { return []; }
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const s = getSeoSettingsSync();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const s = await getSeoSettingsSync();
   const base = s.siteUrl || "https://tourvibe.com";
 
-  const tours = db
-    .prepare("SELECT id, updatedAt FROM tour_package ORDER BY updatedAt DESC")
-    .all() as { id: string; updatedAt: string }[];
+  const tours = await db.tourPackage.findMany({
+    select: { id: true, updatedAt: true },
+    orderBy: { updatedAt: 'desc' }
+  });
 
-  const blogPosts = (() => {
+  const blogPosts = await (async () => {
     try {
-      return db
-        .prepare("SELECT slug, updatedAt FROM blog_post WHERE status = 'published' ORDER BY updatedAt DESC")
-        .all() as { slug: string; updatedAt: string }[];
+      return await db.blogPost.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' }
+      });
     } catch { return []; }
   })();
 
-  const customEntries = getCustomEntries();
+  const customEntries = await getCustomEntries();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base,             lastModified: new Date(), changeFrequency: "daily",   priority: 1    },

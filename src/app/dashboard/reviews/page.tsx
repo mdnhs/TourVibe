@@ -18,18 +18,26 @@ export default async function ReviewPage() {
   const currentUserId = session.user.id;
 
   // Fetch reviews with tour package and user info
-  const reviews = db.prepare(`
-    SELECT 
-      r.*, 
-      tp.name as tourPackageName,
-      u.name as userName,
-      u.email as userEmail,
-      u.image as userImage
-    FROM review r
-    JOIN tour_package tp ON r.tourPackageId = tp.id
-    JOIN user u ON r.userId = u.id
-    ORDER BY r.createdAt DESC
-  `).all() as any[];
+  const reviews = await db.review.findMany({
+    include: {
+      tourPackage: {
+        select: { name: true }
+      },
+      user: {
+        select: { name: true, email: true, image: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Flatten for the table component which expects tourPackageName etc.
+  const flattenedReviews = reviews.map(r => ({
+    ...r,
+    tourPackageName: r.tourPackage.name,
+    userName: r.user.name,
+    userEmail: r.user.email,
+    userImage: r.user.image
+  }));
 
   return (
     <>
@@ -51,7 +59,7 @@ export default async function ReviewPage() {
         </div>
 
         <ReviewTable 
-          reviews={reviews} 
+          reviews={flattenedReviews} 
           currentUserId={currentUserId} 
           isSuperAdmin={isSuperAdmin} 
         />

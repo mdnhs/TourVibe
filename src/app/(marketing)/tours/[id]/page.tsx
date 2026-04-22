@@ -36,13 +36,31 @@ interface TourDetailsPageProps {
 
 export async function generateMetadata({ params }: TourDetailsPageProps): Promise<Metadata> {
   const { id } = await params;
-  const tour = db.prepare(`
-    SELECT tp.*,
-           (SELECT COUNT(*) FROM review WHERE tourPackageId = tp.id) as reviewCount,
-           (SELECT AVG(rating) FROM review WHERE tourPackageId = tp.id) as avgRating
-    FROM tour_package tp WHERE tp.id = ?
-  `).get(id) as Tour | undefined;
-  if (!tour) return {};
+  const tourData = await db.tourPackage.findUnique({
+    where: { id },
+    include: {
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
+    },
+  });
+
+  if (!tourData) return {};
+
+  const reviewCount = tourData.reviews.length;
+  const avgRating =
+    reviewCount > 0
+      ? tourData.reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+      : null;
+
+  const tour = {
+    ...tourData,
+    reviewCount,
+    avgRating,
+  } as Tour;
+
   const s = getSeoSettingsSync();
   return buildMetadata(s, {
     title: tour.name,
@@ -65,23 +83,52 @@ const reviewAccents = [
 export default async function TourDetailsPage({ params }: TourDetailsPageProps) {
   const { id } = await params;
 
-  const tour = db.prepare(`
-    SELECT tp.*,
-           (SELECT COUNT(*) FROM review WHERE tourPackageId = tp.id) as reviewCount,
-           (SELECT AVG(rating) FROM review WHERE tourPackageId = tp.id) as avgRating
-    FROM tour_package tp
-    WHERE tp.id = ?
-  `).get(id) as Tour;
+  const tourData = await db.tourPackage.findUnique({
+    where: { id },
+    include: {
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
+    },
+  });
 
-  if (!tour) notFound();
+  if (!tourData) notFound();
 
-  const reviews = db.prepare(`
-    SELECT r.*, u.name as userName, u.image as userImage
-    FROM review r
-    JOIN user u ON r.userId = u.id
-    WHERE r.tourPackageId = ?
-    ORDER BY r.createdAt DESC
-  `).all(id) as Review[];
+  const reviewCount = tourData.reviews.length;
+  const avgRating =
+    reviewCount > 0
+      ? tourData.reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+      : null;
+
+  const tour = {
+    ...tourData,
+    reviewCount,
+    avgRating,
+  } as Tour;
+
+  const reviewsData = await db.review.findMany({
+    where: { tourPackageId: id },
+    include: {
+      user: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const reviews = reviewsData.map((r) => ({
+    ...r,
+    userName: r.user.name,
+    userImage: r.user.image,
+    createdAt: r.createdAt.toISOString(),
+  })) as Review[];
 
   const galleryUrls = tour.gallery ? tour.gallery.split(",").map((u) => u.trim()).filter(Boolean) : [];
   const rating = tour.avgRating ? tour.avgRating.toFixed(1) : null;

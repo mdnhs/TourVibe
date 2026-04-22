@@ -35,33 +35,50 @@ interface ToursPageProps {
 export default async function ToursPage({ searchParams }: ToursPageProps) {
   const { q, minPrice, maxPrice, sort } = await toursSearchParamsCache.parse(searchParams);
 
-  let query = `
-    SELECT tp.*,
-           (SELECT COUNT(*) FROM review WHERE tourPackageId = tp.id) as reviewCount,
-           (SELECT AVG(rating) FROM review WHERE tourPackageId = tp.id) as avgRating
-    FROM tour_package tp
-    WHERE 1=1
-  `;
-  const dbParams: (string | number)[] = [];
-
+  const where: any = {};
   if (q) {
-    query += ` AND (tp.name LIKE ? OR tp.description LIKE ?)`;
-    dbParams.push(`%${q}%`, `%${q}%`);
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+    ];
   }
-  if (minPrice !== null) {
-    query += ` AND tp.price >= ?`;
-    dbParams.push(minPrice);
+  if (minPrice !== null || maxPrice !== null) {
+    where.price = {};
+    if (minPrice !== null) where.price.gte = minPrice;
+    if (maxPrice !== null) where.price.lte = maxPrice;
   }
-  if (maxPrice !== null) {
-    query += ` AND tp.price <= ?`;
-    dbParams.push(maxPrice);
-  }
-  if (sort === "price-asc")       query += ` ORDER BY tp.price ASC`;
-  else if (sort === "price-desc") query += ` ORDER BY tp.price DESC`;
-  else if (sort === "name-asc")   query += ` ORDER BY tp.name ASC`;
-  else                            query += ` ORDER BY tp.createdAt DESC`;
 
-  const tours = db.prepare(query).all(...dbParams) as Tour[];
+  const orderBy: any = {};
+  if (sort === "price-asc") orderBy.price = "asc";
+  else if (sort === "price-desc") orderBy.price = "desc";
+  else if (sort === "name-asc") orderBy.name = "asc";
+  else orderBy.createdAt = "desc";
+
+  const toursRaw = await db.tourPackage.findMany({
+    where,
+    orderBy,
+    include: {
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
+    },
+  });
+
+  const tours = toursRaw.map((t) => {
+    const reviewCount = t.reviews.length;
+    const avgRating =
+      reviewCount > 0
+        ? t.reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+        : null;
+    return {
+      ...t,
+      description: t.description || "",
+      reviewCount,
+      avgRating,
+    };
+  }) as Tour[];
 
   return (
     <div className="relative overflow-hidden">

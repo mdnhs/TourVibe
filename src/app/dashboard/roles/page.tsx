@@ -92,22 +92,23 @@ export default async function RolesPage() {
   const { isSuperAdmin } = await requireDashboardSession();
   if (!isSuperAdmin) redirect("/dashboard");
 
-  const customRoles = db
-    .prepare("SELECT * FROM custom_role ORDER BY createdAt DESC")
-    .all() as { id: string; name: string; description: string; permissions: string; createdAt: string }[];
+  const customRoles = await db.customRole.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
 
   const userCounts = await getRoleUserCounts();
 
   // Load any admin overrides for driver + tourist
-  function readOverride(roleKey: string): CustomRolePermissions | null {
-    const row = db.prepare("SELECT value FROM settings WHERE key = ?")
-      .get(`role_override_${roleKey}`) as { value: string } | undefined;
+  async function readOverride(roleKey: string): Promise<CustomRolePermissions | null> {
+    const row = await db.settings.findUnique({
+      where: { key: `role_override_${roleKey}` }
+    });
     if (!row) return null;
     try { return parseRolePermissions(row.value); } catch { return null; }
   }
   const builtinOverrides: Record<string, CustomRolePermissions | null> = {
-    driver:  readOverride("driver"),
-    tourist: readOverride("tourist"),
+    driver:  await readOverride("driver"),
+    tourist: await readOverride("tourist"),
   };
 
   return (

@@ -55,22 +55,22 @@ export default async function SeoPage() {
   const seoSettings = await getSeoSettings();
   const sitemapCustomEntries = await getSitemapCustomEntries();
 
-  const tourCount = (db.prepare("SELECT COUNT(*) as c FROM tour_package").get() as { c: number }).c;
-  const vehicleCount = (db.prepare("SELECT COUNT(*) as c FROM vehicle").get() as { c: number }).c;
-  const reviewCount = (db.prepare("SELECT COUNT(*) as c FROM review").get() as { c: number }).c;
+  const tourCount = await db.tourPackage.count();
+  const vehicleCount = await db.vehicle.count();
+  const reviewCount = await db.review.count();
 
-  const blogCount = (() => {
-    try {
-      return (db.prepare("SELECT COUNT(*) as c FROM blog_post WHERE status = 'published'").get() as { c: number }).c;
-    } catch { return 0; }
-  })();
+  const blogCount = await db.blogPost.count({
+    where: { status: "published" },
+  });
 
-  const tourIds = (db.prepare("SELECT id, updatedAt FROM tour_package").all() as { id: string; updatedAt: string }[]);
-  const blogSlugs = (() => {
-    try {
-      return (db.prepare("SELECT slug, updatedAt FROM blog_post WHERE status = 'published'").all() as { slug: string; updatedAt: string }[]);
-    } catch { return []; }
-  })();
+  const tourIds = await db.tourPackage.findMany({
+    select: { id: true, updatedAt: true },
+  });
+
+  const blogSlugs = await db.blogPost.findMany({
+    where: { status: "published" },
+    select: { slug: true, updatedAt: true },
+  });
 
   const base = seoSettings.siteUrl || "https://tourvibe.com";
 

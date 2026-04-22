@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { requireDashboardSession } from "@/lib/dashboard";
-import { UserTable, User } from "./user-table";
+import { UserTable, type User } from "./user-table";
 import { CreateUserForm } from "./user-forms";
 import {
   Dialog,
@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { roleLabels } from "@/lib/permissions";
 
 export default async function UsersPage() {
   const { session, isSuperAdmin } = await requireDashboardSession();
@@ -28,22 +27,35 @@ export default async function UsersPage() {
     redirect("/dashboard");
   }
 
-  const allUsers = db
-    .prepare(
-      "SELECT id, name, email, role, banned, banReason, createdAt FROM user ORDER BY createdAt DESC",
-    )
-    .all() as Array<{
-      id: string;
-      name: string;
-      email: string;
-      role: keyof typeof roleLabels | string;
-      banned: number;
-      banReason: string | null;
-      createdAt: string;
-    }>;
+  const allUsersRaw = await db.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      banned: true,
+      banReason: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
-  const customRoles = db.prepare("SELECT name FROM custom_role").all() as { name: string }[];
-  const customRoleLabels = Object.fromEntries(customRoles.map(r => [r.name, r.name]));
+  const allUsers: User[] = allUsersRaw.map((user) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role || "tourist",
+    banned: !!user.banned,
+    banReason: user.banReason,
+    createdAt: user.createdAt.toISOString(),
+  }));
+
+  const customRoles = await db.customRole.findMany({
+    select: { name: true },
+  });
+  const customRoleLabels = Object.fromEntries(
+    customRoles.map((r) => [r.name, r.name]),
+  );
 
   return (
     <>
@@ -82,10 +94,7 @@ export default async function UsersPage() {
             <div className="p-6">
                <UserTable 
                 currentUserId={session.user.id}
-                users={allUsers.map((user) => ({
-                  ...user,
-                  banned: Boolean(user.banned),
-                }))} 
+                users={allUsers} 
                 customRoles={customRoleLabels}
               />
             </div>

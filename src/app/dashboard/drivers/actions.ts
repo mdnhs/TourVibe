@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { auth } from "@/lib/auth";
 
@@ -20,16 +20,8 @@ export async function createDriver(formData: FormData) {
   }
 
   try {
-    await auth.api.signUpEmail({
-      body: {
-        name,
-        email,
-        password,
-      },
-    });
-
-    // Manually update the role to driver
-    db.prepare("UPDATE user SET role = ? WHERE email = ?").run("driver", email);
+    await auth.api.signUpEmail({ body: { name, email, password } });
+    await prisma.user.update({ where: { email }, data: { role: "driver" } });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -46,31 +38,18 @@ export async function updateDriver(id: string, formData: FormData) {
   const email = formData.get("email") as string;
   const newPassword = formData.get("password") as string;
 
-  if (!name || !email) {
-    return { error: "Name and email are required." };
-  }
+  if (!name || !email) return { error: "Name and email are required." };
 
   try {
-    // Update basic info
     await auth.api.updateUser({
       headers: await headers(),
-      body: {
-        userId: id,
-        data: {
-          name,
-          email,
-        },
-      },
+      body: { userId: id, data: { name, email } },
     });
 
-    // Update password if provided
     if (newPassword && newPassword.length >= 8) {
       await auth.api.setUserPassword({
         headers: await headers(),
-        body: {
-          userId: id,
-          newPassword: newPassword,
-        },
+        body: { userId: id, newPassword },
       });
     }
   } catch (err: unknown) {
@@ -86,13 +65,8 @@ export async function deleteDriver(id: string) {
   if (!isSuperAdmin) throw new Error("Unauthorized");
 
   try {
-    // Check if driver has assigned vehicles
-    const assignedVehicles = db.prepare("SELECT id FROM vehicle WHERE driverId = ?").all(id);
-    if (assignedVehicles.length > 0) {
-      db.prepare("UPDATE vehicle SET driverId = NULL WHERE driverId = ?").run(id);
-    }
-
-    db.prepare("DELETE FROM user WHERE id = ?").run(id);
+    await prisma.vehicle.updateMany({ where: { driverId: id }, data: { driverId: null } });
+    await prisma.user.delete({ where: { id } });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -104,17 +78,11 @@ export async function deleteDriver(id: string) {
 export async function deleteDrivers(ids: string[]) {
   const { isSuperAdmin } = await requireDashboardSession();
   if (!isSuperAdmin) throw new Error("Unauthorized");
-
   if (ids.length === 0) return { error: "No IDs provided" };
 
   try {
-    const placeholders = ids.map(() => "?").join(",");
-    
-    // Unassign vehicles first
-    db.prepare(`UPDATE vehicle SET driverId = NULL WHERE driverId IN (${placeholders})`).run(...ids);
-    
-    // Delete users
-    db.prepare(`DELETE FROM user WHERE id IN (${placeholders})`).run(...ids);
+    await prisma.vehicle.updateMany({ where: { driverId: { in: ids } }, data: { driverId: null } });
+    await prisma.user.deleteMany({ where: { id: { in: ids } } });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }

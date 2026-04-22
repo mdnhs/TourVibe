@@ -17,22 +17,42 @@ export default async function NotificationsPage() {
 
   if (isSuperAdmin) {
     // Admin: all sent notifications with read counts + user list for targeting
-    const notifications = db
-      .prepare(
-        `SELECT n.*,
-                u.name as targetUserName,
-                COUNT(nr.userId) as readCount
-         FROM notification n
-         LEFT JOIN user u ON n.targetUserId = u.id
-         LEFT JOIN notification_read nr ON nr.notificationId = n.id
-         GROUP BY n.id
-         ORDER BY n.createdAt DESC`,
-      )
-      .all() as AdminNotification[];
+    const notificationsRaw = await db.notification.findMany({
+      include: {
+        targetUser: {
+          select: { name: true },
+        },
+        _count: {
+          select: { reads: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
-    const users = db
-      .prepare("SELECT id, name, email FROM user WHERE role != 'super_admin' ORDER BY name")
-      .all() as { id: string; name: string; email: string }[];
+    const notifications: AdminNotification[] = notificationsRaw.map((n) => ({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      type: n.type,
+      targetUserId: n.targetUserId,
+      targetUserName: n.targetUser?.name || null,
+      createdAt: n.createdAt.toISOString(),
+      readCount: n._count.reads,
+    }));
+
+    const users = await db.user.findMany({
+      where: {
+        role: {
+          not: "super_admin",
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+      orderBy: { name: "asc" },
+    });
 
     return (
       <>
@@ -71,34 +91,25 @@ export default async function NotificationsPage() {
   }
 
   // Regular user: their inbox (broadcast + targeted)
-  type RawNotif = {
-    id: string;
-    title: string;
-    body: string;
-    type: string;
-    createdAt: string;
-    isRead: number;
-  };
+  const notificationsRaw = await db.notification.findMany({
+    where: {
+      OR: [{ targetUserId: null }, { targetUserId: session.user.id }],
+    },
+    include: {
+      reads: {
+        where: { userId: session.user.id },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
-  const notifications = db
-    .prepare(
-      `SELECT n.id, n.title, n.body, n.type, n.createdAt,
-              CASE WHEN nr.userId IS NOT NULL THEN 1 ELSE 0 END as isRead
-       FROM notification n
-       LEFT JOIN notification_read nr
-         ON nr.notificationId = n.id AND nr.userId = ?
-       WHERE n.targetUserId IS NULL OR n.targetUserId = ?
-       ORDER BY n.createdAt DESC`,
-    )
-    .all(session.user.id, session.user.id) as RawNotif[];
-
-  const inbox: NotificationItem[] = notifications.map((n) => ({
+  const inbox: NotificationItem[] = notificationsRaw.map((n) => ({
     id: n.id,
     title: n.title,
     body: n.body,
     type: n.type,
-    createdAt: n.createdAt,
-    isRead: n.isRead === 1,
+    createdAt: n.createdAt.toISOString(),
+    isRead: n.reads.length > 0,
   }));
 
   const unreadCount = inbox.filter((n) => !n.isRead).length;

@@ -10,15 +10,16 @@ const seedUser = {
 let seedPromise: Promise<void> | null = null;
 
 async function createSeedUser() {
-  const existingUser = db
-    .prepare("SELECT id FROM user WHERE email = ?")
-    .get(seedUser.email) as { id: string } | undefined;
+  const existingUser = await db.user.findUnique({
+    where: { email: seedUser.email },
+    select: { id: true },
+  });
 
   if (existingUser) {
-    db.prepare("UPDATE user SET role = ? WHERE id = ?").run(
-      "super_admin",
-      existingUser.id,
-    );
+    await db.user.update({
+      where: { id: existingUser.id },
+      data: { role: "super_admin" },
+    });
     return;
   }
 
@@ -26,10 +27,10 @@ async function createSeedUser() {
     body: seedUser,
   });
 
-  db.prepare("UPDATE user SET role = ? WHERE email = ?").run(
-    "super_admin",
-    seedUser.email,
-  );
+  await db.user.update({
+    where: { email: seedUser.email },
+    data: { role: "super_admin" },
+  });
 }
 
 export async function ensureSeededSuperAdmin() {

@@ -31,9 +31,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const s = getSeoSettingsSync();
-  const post = db
-    .prepare("SELECT * FROM blog_post WHERE slug = ? AND status = 'published'")
-    .get(slug) as BlogPost | undefined;
+  const post = await db.blogPost.findFirst({
+    where: {
+      slug: slug,
+      status: "published",
+    },
+  });
 
   if (!post) return buildMetadata(s, { title: "Post Not Found" });
 
@@ -54,21 +57,36 @@ export default async function BlogPostPage({
   const { slug } = await params;
   const s = getSeoSettingsSync();
 
-  const post = db
-    .prepare("SELECT * FROM blog_post WHERE slug = ? AND status = 'published'")
-    .get(slug) as BlogPost | undefined;
+  const post = await db.blogPost.findFirst({
+    where: {
+      slug: slug,
+      status: "published",
+    },
+  });
 
   if (!post) notFound();
 
-  const relatedPosts = db
-    .prepare(`
-      SELECT id, title, slug, excerpt, coverImage, authorName, publishedAt, createdAt, tags
-      FROM blog_post
-      WHERE status = 'published' AND id != ?
-      ORDER BY publishedAt DESC, createdAt DESC
-      LIMIT 3
-    `)
-    .all(post.id) as Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "coverImage" | "authorName" | "publishedAt" | "createdAt" | "tags">[];
+  const relatedPosts = await db.blogPost.findMany({
+    where: {
+      status: "published",
+      NOT: {
+        id: post.id,
+      },
+    },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    take: 3,
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+      authorName: true,
+      publishedAt: true,
+      createdAt: true,
+      tags: true,
+    },
+  });
 
   const jsonLdSchema = buildBlogPostSchema(s, post);
 

@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { DriverTable, Driver } from "./driver-table";
 import { CreateDriverForm } from "./driver-forms";
@@ -27,20 +27,27 @@ export default async function DriversPage() {
     redirect("/dashboard");
   }
 
-  const drivers = db.prepare(`
-    SELECT 
-      u.id, 
-      u.name, 
-      u.email, 
-      u.createdAt,
-      v.id as vehicleId,
-      v.make || ' ' || v.model as vehicleName,
-      v.licensePlate as vehiclePlate
-    FROM user u
-    LEFT JOIN vehicle v ON u.id = v.driverId
-    WHERE u.role = 'driver'
-    ORDER BY u.createdAt DESC
-  `).all() as Driver[];
+  const rawDrivers = await prisma.user.findMany({
+    where: { role: "driver" },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+      vehicles: { take: 1, select: { id: true, make: true, model: true, licensePlate: true } },
+    },
+  });
+
+  const drivers: Driver[] = rawDrivers.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    createdAt: u.createdAt.toISOString(),
+    vehicleId: u.vehicles[0]?.id ?? null,
+    vehicleName: u.vehicles[0] ? `${u.vehicles[0].make} ${u.vehicles[0].model}` : null,
+    vehiclePlate: u.vehicles[0]?.licensePlate ?? null,
+  }));
 
   return (
     <>

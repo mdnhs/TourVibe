@@ -16,9 +16,14 @@ export default async function NewTourPage() {
   }
 
   // Fetch all vehicles for the assignment form
-  const vehicles = db.prepare(`
-    SELECT id, make, model, licensePlate FROM vehicle
-  `).all() as { id: string; make: string; model: string; licensePlate: string }[];
+  const vehicles = await db.vehicle.findMany({
+    select: {
+      id: true,
+      make: true,
+      model: true,
+      licensePlate: true,
+    },
+  });
 
   return (
     <>

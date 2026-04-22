@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import crypto from "node:crypto";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 
 export type NotificationType =
@@ -24,12 +24,17 @@ export async function sendNotification(formData: FormData) {
 
   if (!title || !body) return { error: "Title and message are required." };
 
-  const id = crypto.randomUUID();
   try {
-    db.prepare(
-      `INSERT INTO notification (id, title, body, type, targetUserId, createdBy)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-    ).run(id, title, body, type, targetUserId, session.user.id);
+    await prisma.notification.create({
+      data: {
+        id: crypto.randomUUID(),
+        title,
+        body,
+        type,
+        targetUserId,
+        createdBy: session.user.id,
+      },
+    });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -42,7 +47,7 @@ export async function deleteNotification(id: string) {
   const { isSuperAdmin } = await requireDashboardSession();
   if (!isSuperAdmin) return { error: "Unauthorized" };
 
-  db.prepare("DELETE FROM notification WHERE id = ?").run(id);
+  await prisma.notification.delete({ where: { id } });
   revalidatePath("/dashboard/notifications");
   return { success: true };
 }
@@ -50,10 +55,11 @@ export async function deleteNotification(id: string) {
 export async function markAsRead(notificationId: string) {
   const { session } = await requireDashboardSession();
 
-  db.prepare(
-    `INSERT OR IGNORE INTO notification_read (notificationId, userId)
-     VALUES (?, ?)`,
-  ).run(notificationId, session.user.id);
+  await prisma.notificationRead.upsert({
+    where: { notificationId_userId: { notificationId, userId: session.user.id } },
+    create: { notificationId, userId: session.user.id },
+    update: {},
+  });
 
   revalidatePath("/dashboard/notifications");
   return { success: true };
@@ -61,23 +67,20 @@ export async function markAsRead(notificationId: string) {
 
 export async function markAllAsRead() {
   const { session } = await requireDashboardSession();
+  const userId = session.user.id;
 
-  const unread = db
-    .prepare(
-      `SELECT n.id FROM notification n
-       WHERE (n.targetUserId IS NULL OR n.targetUserId = ?)
-         AND n.id NOT IN (
-           SELECT notificationId FROM notification_read WHERE userId = ?
-         )`,
-    )
-    .all(session.user.id, session.user.id) as { id: string }[];
+  const unread = await prisma.notification.findMany({
+    where: {
+      OR: [{ targetUserId: null }, { targetUserId: userId }],
+      reads: { none: { userId } },
+    },
+    select: { id: true },
+  });
 
-  const insert = db.prepare(
-    "INSERT OR IGNORE INTO notification_read (notificationId, userId) VALUES (?, ?)",
-  );
-  for (const row of unread) {
-    insert.run(row.id, session.user.id);
-  }
+  await prisma.notificationRead.createMany({
+    data: unread.map((n) => ({ notificationId: n.id, userId })),
+    skipDuplicates: true,
+  });
 
   revalidatePath("/dashboard/notifications");
   return { success: true };

@@ -15,13 +15,10 @@ export default async function NewVehiclePage() {
     redirect("/dashboard");
   }
 
-  const drivers = db
-    .prepare(
-      `
-    SELECT id, name, email FROM user WHERE role = 'driver'
-  `,
-    )
-    .all() as { id: string; name: string; email: string }[];
+  const drivers = await db.user.findMany({
+    where: { role: "driver" },
+    select: { id: true, name: true, email: true },
+  });
 
   return (
     <>

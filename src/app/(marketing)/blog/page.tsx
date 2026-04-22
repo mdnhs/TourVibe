@@ -30,14 +30,27 @@ const cardColors = [
 ];
 
 export default async function BlogListPage() {
-  const posts = db
-    .prepare(`
-      SELECT id, title, slug, excerpt, coverImage, authorName, tags, publishedAt, createdAt
-      FROM blog_post
-      WHERE status = 'published'
-      ORDER BY publishedAt DESC, createdAt DESC
-    `)
-    .all() as BlogPost[];
+  const postsRaw = await db.blogPost.findMany({
+    where: { status: "published" },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+      authorName: true,
+      tags: true,
+      publishedAt: true,
+      createdAt: true,
+    },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+  });
+
+  const posts: BlogPost[] = postsRaw.map((post) => ({
+    ...post,
+    publishedAt: post.publishedAt?.toISOString() ?? null,
+    createdAt: post.createdAt.toISOString(),
+  }));
 
   return (
     <div className="min-h-screen">

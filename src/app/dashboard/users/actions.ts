@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { requireDashboardSession } from "@/lib/dashboard";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { roleLabels } from "@/lib/permissions";
 
 export async function createUser(formData: FormData) {
@@ -23,12 +23,7 @@ export async function createUser(formData: FormData) {
   try {
     const response = await auth.api.createUser({
       headers: await headers(),
-      body: {
-        name,
-        email,
-        password,
-        role,
-      },
+      body: { name, email, password, role },
     });
 
     if (response.error) {
@@ -51,43 +46,15 @@ export async function updateUser(id: string, formData: FormData) {
   const role = formData.get("role") as keyof typeof roleLabels;
   const newPassword = formData.get("password") as string;
 
-  if (!name || !email || !role) {
-    return { error: "Name, email and role are required." };
-  }
+  if (!name || !email || !role) return { error: "Name, email and role are required." };
 
   try {
     const requestHeaders = await headers();
+    await auth.api.updateUser({ headers: requestHeaders, body: { userId: id, data: { name, email } } });
+    await auth.api.setRole({ headers: requestHeaders, body: { userId: id, role } });
 
-    // Update basic info
-    await auth.api.updateUser({
-      headers: requestHeaders,
-      body: {
-        userId: id,
-        data: {
-          name,
-          email,
-        },
-      },
-    });
-
-    // Update role
-    await auth.api.setRole({
-      headers: requestHeaders,
-      body: {
-        userId: id,
-        role: role,
-      },
-    });
-
-    // Update password if provided
     if (newPassword && newPassword.length >= 8) {
-      await auth.api.setUserPassword({
-        headers: requestHeaders,
-        body: {
-          userId: id,
-          newPassword: newPassword,
-        },
-      });
+      await auth.api.setUserPassword({ headers: requestHeaders, body: { userId: id, newPassword } });
     }
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
@@ -104,10 +71,7 @@ export async function banUser(id: string, reason?: string) {
   try {
     await auth.api.banUser({
       headers: await headers(),
-      body: {
-        userId: id,
-        banReason: reason || "Account disabled by super admin.",
-      },
+      body: { userId: id, banReason: reason || "Account disabled by super admin." },
     });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
@@ -122,12 +86,7 @@ export async function unbanUser(id: string) {
   if (!isSuperAdmin) throw new Error("Unauthorized");
 
   try {
-    await auth.api.unbanUser({
-      headers: await headers(),
-      body: {
-        userId: id,
-      },
-    });
+    await auth.api.unbanUser({ headers: await headers(), body: { userId: id } });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -142,11 +101,8 @@ export async function deleteUser(id: string) {
   if (id === session.user.id) return { error: "You cannot delete yourself." };
 
   try {
-    // Unassign from vehicles if driver
-    db.prepare("UPDATE vehicle SET driverId = NULL WHERE driverId = ?").run(id);
-    
-    // Delete from db directly
-    db.prepare("DELETE FROM user WHERE id = ?").run(id);
+    await prisma.vehicle.updateMany({ where: { driverId: id }, data: { driverId: null } });
+    await prisma.user.delete({ where: { id } });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -159,17 +115,12 @@ export async function deleteUsers(ids: string[]) {
   const { session, isSuperAdmin } = await requireDashboardSession();
   if (!isSuperAdmin) throw new Error("Unauthorized");
 
-  const filteredIds = ids.filter(id => id !== session.user.id);
+  const filteredIds = ids.filter((id) => id !== session.user.id);
   if (filteredIds.length === 0) return { error: "No valid IDs provided." };
 
   try {
-    const placeholders = filteredIds.map(() => "?").join(",");
-    
-    // Unassign vehicles
-    db.prepare(`UPDATE vehicle SET driverId = NULL WHERE driverId IN (${placeholders})`).run(...filteredIds);
-    
-    // Delete users
-    db.prepare(`DELETE FROM user WHERE id IN (${placeholders})`).run(...filteredIds);
+    await prisma.vehicle.updateMany({ where: { driverId: { in: filteredIds } }, data: { driverId: null } });
+    await prisma.user.deleteMany({ where: { id: { in: filteredIds } } });
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }

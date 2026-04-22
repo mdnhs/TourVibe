@@ -17,22 +17,63 @@ export default async function TrackingPage() {
   const { session, role, isSuperAdmin } = await requireDashboardSession();
   const isDriver = role === "driver";
 
-  const initialDrivers = db
-    .prepare(
-      `SELECT u.id, u.name, u.image, u.lat, u.lng, u.locationName, u.locationUpdatedAt,
-              v.make as vehicleMake, v.model as vehicleModel, v.licensePlate as vehicleLicense
-       FROM user u
-       LEFT JOIN vehicle v ON v.driverId = u.id
-       WHERE u.role = 'driver' AND u.lat IS NOT NULL AND u.lng IS NOT NULL
-       ORDER BY u.locationUpdatedAt DESC`,
-    )
-    .all() as DriverLocation[];
+  const users = await db.user.findMany({
+    where: {
+      role: "driver",
+      lat: { not: null },
+      lng: { not: null },
+    },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      lat: true,
+      lng: true,
+      locationName: true,
+      locationUpdatedAt: true,
+      vehicles: {
+        take: 1,
+        select: { make: true, model: true, licensePlate: true },
+      },
+    },
+    orderBy: { locationUpdatedAt: "desc" },
+  });
+
+  const initialDrivers: DriverLocation[] = users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    image: u.image,
+    lat: u.lat!,
+    lng: u.lng!,
+    locationName: u.locationName,
+    locationUpdatedAt: u.locationUpdatedAt?.toISOString() ?? null,
+    vehicleMake: u.vehicles[0]?.make ?? null,
+    vehicleModel: u.vehicles[0]?.model ?? null,
+    vehicleLicense: u.vehicles[0]?.licensePlate ?? null,
+  }));
 
   let driverRow: DriverRow | null = null;
   if (isDriver) {
-    driverRow = db
-      .prepare("SELECT id, lat, lng, locationName, locationUpdatedAt FROM user WHERE id = ?")
-      .get(session.user.id) as DriverRow | null;
+    const u = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        lat: true,
+        lng: true,
+        locationName: true,
+        locationUpdatedAt: true,
+      },
+    });
+
+    if (u) {
+      driverRow = {
+        id: u.id,
+        lat: u.lat,
+        lng: u.lng,
+        locationName: u.locationName,
+        locationUpdatedAt: u.locationUpdatedAt?.toISOString() ?? null,
+      };
+    }
   }
 
   const subtitle = isSuperAdmin
@@ -55,15 +96,16 @@ export default async function TrackingPage() {
               locationUpdatedAt={driverRow.locationUpdatedAt}
             />
             <div className="h-[calc(100vh-22rem)] min-h-[360px]">
-              <TrackingClient initialDrivers={initialDrivers} hideDirections={true} />
+              <TrackingClient
+                initialDrivers={initialDrivers}
+                hideDirections={true}
+              />
             </div>
           </>
         )}
 
         {/* Admin / Tourist: directions panel + map side by side */}
-        {!isDriver && (
-          <TrackingClient initialDrivers={initialDrivers} />
-        )}
+        {!isDriver && <TrackingClient initialDrivers={initialDrivers} />}
       </div>
     </>
   );

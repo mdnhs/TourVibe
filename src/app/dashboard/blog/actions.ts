@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession } from "@/lib/dashboard";
 
 function slugify(title: string): string {
@@ -14,16 +13,6 @@ function slugify(title: string): string {
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .trim();
-}
-
-async function saveFile(file: File): Promise<string> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(uploadDir, { recursive: true });
-  const uniqueName = `${crypto.randomUUID()}-${file.name.replace(/\s+/g, "-")}`;
-  await fs.writeFile(path.join(uploadDir, uniqueName), buffer);
-  return `/uploads/${uniqueName}`;
 }
 
 async function checkAuth() {
@@ -50,20 +39,32 @@ export async function createBlogPost(formData: FormData) {
     const metaDescription = (formData.get("metaDescription") as string)?.trim() || "";
     const status = (formData.get("status") as string) === "published" ? "published" : "draft";
 
-    // Handle cover image — file upload takes priority
     const coverImageFile = formData.get("coverImageFile") as File | null;
     let coverImage = (formData.get("coverImage") as string)?.trim() || "";
     if (coverImageFile && coverImageFile.size > 0) {
-      coverImage = await saveFile(coverImageFile);
+      coverImage = await uploadToCloudinary(coverImageFile, "tourvibe/blog");
     }
 
     const id = crypto.randomUUID();
-    const publishedAt = status === "published" ? new Date().toISOString() : null;
+    const publishedAt = status === "published" ? new Date() : null;
 
-    db.prepare(`
-      INSERT INTO blog_post (id, title, slug, excerpt, content, coverImage, authorId, authorName, status, tags, metaTitle, metaDescription, publishedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, title, slug, excerpt, content, coverImage, session.user.id, session.user.name ?? "", status, tags, metaTitle, metaDescription, publishedAt);
+    await prisma.blogPost.create({
+      data: {
+        id,
+        title,
+        slug,
+        excerpt,
+        content,
+        coverImage,
+        authorId: session.user.id,
+        authorName: session.user.name ?? "",
+        status,
+        tags,
+        metaTitle,
+        metaDescription,
+        publishedAt,
+      },
+    });
 
     revalidatePath("/dashboard/blog");
     revalidatePath("/blog");
@@ -91,29 +92,29 @@ export async function updateBlogPost(id: string, formData: FormData) {
     const metaDescription = (formData.get("metaDescription") as string)?.trim() || "";
     const status = (formData.get("status") as string) === "published" ? "published" : "draft";
 
-    // Handle cover image — new upload takes priority, then existing value, then DB value
-    const coverImageFile = formData.get("coverImageFile") as File | null;
-    const existing = db.prepare("SELECT coverImage, status, publishedAt FROM blog_post WHERE id = ?")
-      .get(id) as { coverImage: string; status: string; publishedAt: string | null } | undefined;
+    const existing = await prisma.blogPost.findUnique({
+      where: { id },
+      select: { coverImage: true, status: true, publishedAt: true },
+    });
     if (!existing) return { error: "Post not found" };
 
+    const coverImageFile = formData.get("coverImageFile") as File | null;
     let coverImage = (formData.get("coverImage") as string)?.trim() || existing.coverImage || "";
     if (coverImageFile && coverImageFile.size > 0) {
-      coverImage = await saveFile(coverImageFile);
+      coverImage = await uploadToCloudinary(coverImageFile, "tourvibe/blog");
     }
 
     let publishedAt = existing.publishedAt;
     if (status === "published" && !publishedAt) {
-      publishedAt = new Date().toISOString();
+      publishedAt = new Date();
     } else if (status === "draft") {
       publishedAt = null;
     }
 
-    db.prepare(`
-      UPDATE blog_post
-      SET title = ?, slug = ?, excerpt = ?, content = ?, coverImage = ?, status = ?, tags = ?, metaTitle = ?, metaDescription = ?, publishedAt = ?, updatedAt = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(title, slug, excerpt, content, coverImage, status, tags, metaTitle, metaDescription, publishedAt, id);
+    await prisma.blogPost.update({
+      where: { id },
+      data: { title, slug, excerpt, content, coverImage, status, tags, metaTitle, metaDescription, publishedAt },
+    });
 
     revalidatePath("/dashboard/blog");
     revalidatePath("/blog");
@@ -128,7 +129,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
 export async function deleteBlogPost(id: string) {
   try {
     await checkAuth();
-    db.prepare("DELETE FROM blog_post WHERE id = ?").run(id);
+    await prisma.blogPost.delete({ where: { id } });
     revalidatePath("/dashboard/blog");
     revalidatePath("/blog");
     revalidatePath("/");
@@ -143,8 +144,7 @@ export async function deleteBlogPosts(ids: string[]) {
   if (ids.length === 0) return { error: "No IDs provided" };
   try {
     await checkAuth();
-    const placeholders = ids.map(() => "?").join(",");
-    db.prepare(`DELETE FROM blog_post WHERE id IN (${placeholders})`).run(...ids);
+    await prisma.blogPost.deleteMany({ where: { id: { in: ids } } });
     revalidatePath("/dashboard/blog");
     revalidatePath("/blog");
     revalidatePath("/");
@@ -158,15 +158,16 @@ export async function deleteBlogPosts(ids: string[]) {
 export async function toggleBlogPostStatus(id: string) {
   try {
     await checkAuth();
-    const post = db.prepare("SELECT status, publishedAt FROM blog_post WHERE id = ?")
-      .get(id) as { status: string; publishedAt: string | null } | undefined;
+    const post = await prisma.blogPost.findUnique({
+      where: { id },
+      select: { status: true, publishedAt: true },
+    });
     if (!post) return { error: "Post not found" };
 
     const newStatus = post.status === "published" ? "draft" : "published";
-    const publishedAt = newStatus === "published" ? (post.publishedAt ?? new Date().toISOString()) : null;
+    const publishedAt = newStatus === "published" ? (post.publishedAt ?? new Date()) : null;
 
-    db.prepare(`UPDATE blog_post SET status = ?, publishedAt = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`)
-      .run(newStatus, publishedAt, id);
+    await prisma.blogPost.update({ where: { id }, data: { status: newStatus, publishedAt } });
 
     revalidatePath("/dashboard/blog");
     revalidatePath("/blog");

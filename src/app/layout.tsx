@@ -8,7 +8,7 @@ import { getSeoSettingsSync, buildMetadata, buildOrganizationSchema, buildWebSit
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
   return buildMetadata(s);
 }
 
@@ -18,7 +18,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   await ensureSeededSuperAdmin();
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
 
   const orgSchema = buildOrganizationSchema(s);
   const webSiteSchema = buildWebSiteSchema(s);

@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { requireDashboardSession } from "@/lib/dashboard";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({
   children,
@@ -12,16 +12,12 @@ export default async function DashboardLayout({
 }) {
   const { session, label, allowedMenus } = await requireDashboardSession();
 
-  const { unread } = db
-    .prepare(
-      `SELECT COUNT(*) as unread
-       FROM notification n
-       WHERE (n.targetUserId IS NULL OR n.targetUserId = ?)
-         AND n.id NOT IN (
-           SELECT notificationId FROM notification_read WHERE userId = ?
-         )`,
-    )
-    .get(session.user.id, session.user.id) as { unread: number };
+  const unread = await prisma.notification.count({
+    where: {
+      OR: [{ targetUserId: null }, { targetUserId: session.user.id }],
+      reads: { none: { userId: session.user.id } },
+    },
+  });
 
   return (
     <SidebarProvider

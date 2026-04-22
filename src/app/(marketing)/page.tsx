@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Compass, Headset, Map, Plane, Users } from "lucide-react";
 
 import { db } from "@/lib/db";
-import { seededAdminCredentials } from "@/lib/seed";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,49 +21,50 @@ import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
 export default async function Home() {
   // Fetch real-time statistics
+  const [tourCount, reviewCount, avgRatingResult, vehicleCount, touristCount] = await Promise.all([
+    db.tourPackage.count(),
+    db.review.count(),
+    db.review.aggregate({
+      _avg: {
+        rating: true,
+      },
+    }),
+    db.vehicle.count(),
+    db.user.count({
+      where: { role: "tourist" },
+    }),
+  ]);
+
   const statsData = {
-    tourCount: (
-      db.prepare("SELECT COUNT(*) as count FROM tour_package").get() as {
-        count: number;
-      }
-    ).count,
-    reviewCount: (
-      db.prepare("SELECT COUNT(*) as count FROM review").get() as {
-        count: number;
-      }
-    ).count,
-    avgRating:
-      (
-        db.prepare("SELECT AVG(rating) as avg FROM review").get() as {
-          avg: number | null;
-        }
-      ).avg || 0,
-    vehicleCount: (
-      db.prepare("SELECT COUNT(*) as count FROM vehicle").get() as {
-        count: number;
-      }
-    ).count,
-    touristCount: (
-      db
-        .prepare("SELECT COUNT(*) as count FROM user WHERE role = 'tourist'")
-        .get() as {
-        count: number;
-      }
-    ).count,
+    tourCount,
+    reviewCount,
+    avgRating: avgRatingResult._avg.rating || 0,
+    vehicleCount,
+    touristCount,
   };
 
   // Fetch dynamic reviews
-  const dynamicReviews = db
-    .prepare(
-      `
-    SELECT r.comment as quote, u.name, u.role, r.rating
-    FROM review r
-    JOIN user u ON r.userId = u.id
-    ORDER BY r.createdAt DESC
-    LIMIT 3
-  `,
-    )
-    .all() as { quote: string; name: string; role: string; rating: number }[];
+  const dynamicReviewsRaw = await db.review.findMany({
+    take: 3,
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+          role: true,
+        },
+      },
+    },
+  });
+
+  const dynamicReviews = dynamicReviewsRaw.map((r) => ({
+    quote: r.comment || "",
+    name: r.user.name,
+    role: r.user.role || "tourist",
+    rating: r.rating,
+  }));
 
   // Fallback if no reviews exist
   const displayReviews =
@@ -96,97 +96,96 @@ export default async function Home() {
         ];
 
   // Fetch popular tours with avg rating and review count
-  const popularTours = db
-    .prepare(
-      `
+  interface PopularTourRaw {
+    id: string;
+    name: string;
+    description: string | null;
+    price: number;
+    duration: string;
+    maxPersons: number;
+    thumbnail: string;
+    avgRating: number | null;
+    reviewCount: bigint;
+  }
+
+  const popularToursRaw = (await db.$queryRaw`
     SELECT
-      tp.id, tp.name, tp.description, tp.price, tp.duration, tp.maxPersons, tp.thumbnail,
-      AVG(r.rating) as avgRating,
-      COUNT(r.id) as reviewCount
+      tp.id, tp.name, tp.description, tp.price, tp.duration, "tp"."maxPersons", tp.thumbnail,
+      AVG(r.rating) as "avgRating",
+      COUNT(r.id) as "reviewCount"
     FROM tour_package tp
-    LEFT JOIN review r ON r.tourPackageId = tp.id
+    LEFT JOIN review r ON r."tourPackageId" = tp.id
     GROUP BY tp.id
-    ORDER BY reviewCount DESC, tp.createdAt DESC
+    ORDER BY "reviewCount" DESC, tp."createdAt" DESC
     LIMIT 6
-  `,
-    )
-    .all() as {
-      id: string;
-      name: string;
-      description: string | null;
-      price: number;
-      duration: string;
-      maxPersons: number;
-      thumbnail: string;
-      avgRating: number | null;
-      reviewCount: number;
-    }[];
+  `) as PopularTourRaw[];
+
+  const popularTours = popularToursRaw.map(t => ({
+    ...t,
+    reviewCount: Number(t.reviewCount),
+  }));
 
   // Fetch popular cars ordered by tour appearances
-  const popularCars = db
-    .prepare(
-      `
-    SELECT
-      v.id, v.make, v.model, v.year, v.licensePlate, v.thumbnail,
-      COUNT(tpv.tourPackageId) as tourCount
-    FROM vehicle v
-    LEFT JOIN tour_package_vehicle tpv ON tpv.vehicleId = v.id
-    GROUP BY v.id
-    ORDER BY tourCount DESC, v.createdAt DESC
-    LIMIT 6
-  `,
-    )
-    .all() as {
-      id: string;
-      make: string;
-      model: string;
-      year: number;
-      licensePlate: string;
-      thumbnail: string;
-      tourCount: number;
-    }[];
+  interface PopularCarRaw {
+    id: string;
+    make: string;
+    model: string;
+    year: number;
+    licensePlate: string;
+    thumbnail: string;
+    tourCount: bigint;
+  }
 
-  // Fetch a flagship ride (the latest tour package)
-  const flagshipTour = db
-    .prepare(
-      `
-    SELECT tp.name, tp.price, tp.duration, tp.maxPersons,
-           (SELECT COUNT(*) FROM tour_package_vehicle WHERE tourPackageId = tp.id) as vehicleCount
-    FROM tour_package tp
-    ORDER BY tp.createdAt DESC
-    LIMIT 1
-  `,
-    )
-    .get() as
-    | {
-        name: string;
-        price: number;
-        duration: string;
-        maxPersons: number;
-        vehicleCount: number;
-      }
-    | undefined;
+  const popularCarsRaw = (await db.$queryRaw`
+    SELECT
+      v.id, v.make, v.model, v.year, v."licensePlate", v.thumbnail,
+      COUNT(tpv."tourPackageId") as "tourCount"
+    FROM vehicle v
+    LEFT JOIN tour_package_vehicle tpv ON tpv."vehicleId" = v.id
+    GROUP BY v.id
+    ORDER BY "tourCount" DESC, v."createdAt" DESC
+    LIMIT 6
+  `) as PopularCarRaw[];
+
+  const popularCars = popularCarsRaw.map(c => ({
+    ...c,
+    tourCount: Number(c.tourCount),
+  }));
 
   // Live driver locations for tracking section
-  const liveDrivers = db
-    .prepare(
-      `SELECT u.id, u.name, u.image, u.lat, u.lng, u.locationName, u.locationUpdatedAt,
-              v.make as vehicleMake, v.model as vehicleModel, v.licensePlate as vehicleLicense
-       FROM user u
-       LEFT JOIN vehicle v ON v.driverId = u.id
-       WHERE u.role = 'driver' AND u.lat IS NOT NULL AND u.lng IS NOT NULL
-       ORDER BY u.locationUpdatedAt DESC`,
-    )
-    .all() as DriverLocation[];
+  const liveDriversRaw = await db.user.findMany({
+    where: {
+      role: "driver",
+      lat: { not: null },
+      lng: { not: null },
+    },
+    include: {
+      vehicles: {
+        take: 1,
+        select: {
+          make: true,
+          model: true,
+          licensePlate: true,
+        },
+      },
+    },
+    orderBy: {
+      locationUpdatedAt: "desc",
+    },
+  });
 
-  // Fetch one driver for the flagship ride display
-  const flagshipDriver = db
-    .prepare(
-      `
-    SELECT name FROM user WHERE role = 'driver' LIMIT 1
-  `,
-    )
-    .get() as { name: string } | undefined;
+  const liveDrivers: DriverLocation[] = liveDriversRaw.map((u) => ({
+    id: u.id,
+    name: u.name,
+    image: u.image,
+    lat: u.lat!,
+    lng: u.lng!,
+    locationName: u.locationName,
+    locationUpdatedAt: u.locationUpdatedAt?.toISOString() || null,
+    vehicleMake: u.vehicles[0]?.make || null,
+    vehicleModel: u.vehicles[0]?.model || null,
+    vehicleLicense: u.vehicles[0]?.licensePlate || null,
+  }));
 
   const services = [
     {
@@ -236,25 +235,25 @@ export default async function Home() {
     price: popularTours[0].price,
   } : undefined;
 
-  const blogPosts = db
-    .prepare(`
-      SELECT id, title, slug, excerpt, coverImage, authorName, tags, publishedAt, createdAt
-      FROM blog_post
-      WHERE status = 'published'
-      ORDER BY publishedAt DESC, createdAt DESC
-      LIMIT 3
-    `)
-    .all() as {
-      id: string;
-      title: string;
-      slug: string;
-      excerpt: string | null;
-      coverImage: string;
-      authorName: string;
-      tags: string;
-      publishedAt: string | null;
-      createdAt: string;
-    }[];
+  const blogPosts = await db.blogPost.findMany({
+    where: { status: "published" },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+      authorName: true,
+      tags: true,
+      publishedAt: true,
+      createdAt: true,
+    },
+    orderBy: [
+      { publishedAt: "desc" },
+      { createdAt: "desc" },
+    ],
+    take: 3,
+  });
 
   return (
     <div className="min-h-screen text-slate-900">

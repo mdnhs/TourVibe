@@ -24,12 +24,14 @@ export default async function BlogPage() {
     );
   }
 
-  const posts = db.prepare(`
-    SELECT * FROM blog_post ORDER BY createdAt DESC
-  `).all() as any[];
+  const posts = await db.blogPost.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-  const draftCount = posts.filter((p: any) => p.status === "draft").length;
-  const publishedCount = posts.filter((p: any) => p.status === "published").length;
+  const draftCount = posts.filter((p) => p.status === "draft").length;
+  const publishedCount = posts.filter((p) => p.status === "published").length;
 
   return (
     <>

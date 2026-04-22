@@ -2,27 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession } from "@/lib/dashboard";
-
-async function saveFile(file: File): Promise<string> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  try {
-    await fs.mkdir(uploadDir, { recursive: true });
-  } catch (err) {}
-
-  const uniqueName = `${crypto.randomUUID()}-${file.name.replace(/\s+/g, "-")}`;
-  const filePath = path.join(uploadDir, uniqueName);
-  await fs.writeFile(filePath, buffer);
-
-  return `/uploads/${uniqueName}`;
-}
 
 export async function createVehicle(formData: FormData) {
   const { isSuperAdmin } = await requireDashboardSession();
@@ -34,7 +17,7 @@ export async function createVehicle(formData: FormData) {
   const licensePlate = formData.get("licensePlate") as string;
   const driverIdStr = formData.get("driverId") as string | null;
   const driverId = driverIdStr === "none" ? null : driverIdStr;
-  
+
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
 
@@ -45,25 +28,33 @@ export async function createVehicle(formData: FormData) {
   const id = crypto.randomUUID();
 
   try {
-    const thumbnailUrl = await saveFile(thumbnailFile);
-    
+    const thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/vehicles");
+
     const galleryUrls: string[] = [];
     for (const file of galleryFiles) {
       if (file.size > 0) {
-        const url = await saveFile(file);
-        galleryUrls.push(url);
+        galleryUrls.push(await uploadToCloudinary(file, "tourvibe/vehicles"));
       }
     }
 
-    db.prepare(`
-      INSERT INTO vehicle (id, make, model, year, licensePlate, driverId, thumbnail, gallery)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, make, model, year, licensePlate, driverId || null, thumbnailUrl, galleryUrls.join(","));
-  } catch (err: unknown) {
-    if (err && typeof err === "object" && "code" in err && err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    await prisma.vehicle.create({
+      data: {
+        id,
+        make,
+        model,
+        year,
+        licensePlate,
+        driverId: driverId || null,
+        thumbnail: thumbnailUrl,
+        gallery: galleryUrls.join(","),
+      },
+    });
+  } catch (err: any) {
+    console.error("Error in createVehicle:", err);
+    if (err instanceof Error && err.message.includes("Unique constraint")) {
       return { error: "License plate already exists" };
     }
-    return { error: err instanceof Error ? err.message : "Unknown error" };
+    return { error: err?.message || "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");
@@ -80,10 +71,10 @@ export async function updateVehicle(id: string, formData: FormData) {
   const licensePlate = formData.get("licensePlate") as string;
   const driverIdStr = formData.get("driverId") as string | null;
   const driverId = driverIdStr === "none" ? null : driverIdStr;
-  
+
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
-  
+
   const existingThumbnail = formData.get("existingThumbnail") as string;
   const existingGallery = formData.get("existingGallery") as string;
 
@@ -94,32 +85,31 @@ export async function updateVehicle(id: string, formData: FormData) {
   try {
     let thumbnailUrl = existingThumbnail;
     if (thumbnailFile && thumbnailFile.size > 0) {
-      thumbnailUrl = await saveFile(thumbnailFile);
+      thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/vehicles");
     }
 
     const newGalleryUrls: string[] = [];
     for (const file of galleryFiles) {
       if (file.size > 0) {
-        const url = await saveFile(file);
-        newGalleryUrls.push(url);
+        newGalleryUrls.push(await uploadToCloudinary(file, "tourvibe/vehicles"));
       }
     }
-    
+
     const finalGallery = [
       ...existingGallery.split(",").filter(Boolean),
-      ...newGalleryUrls
+      ...newGalleryUrls,
     ].join(",");
 
-    db.prepare(`
-      UPDATE vehicle
-      SET make = ?, model = ?, year = ?, licensePlate = ?, driverId = ?, thumbnail = ?, gallery = ?, updatedAt = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(make, model, year, licensePlate, driverId || null, thumbnailUrl, finalGallery, id);
-  } catch (err: unknown) {
-    if (err && typeof err === "object" && "code" in err && err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    await prisma.vehicle.update({
+      where: { id },
+      data: { make, model, year, licensePlate, driverId: driverId || null, thumbnail: thumbnailUrl, gallery: finalGallery },
+    });
+  } catch (err: any) {
+    console.error("Error in updateVehicle:", err);
+    if (err instanceof Error && err.message.includes("Unique constraint")) {
       return { error: "License plate already exists" };
     }
-    return { error: err instanceof Error ? err.message : "Unknown error" };
+    return { error: err?.message || "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");
@@ -131,9 +121,10 @@ export async function deleteVehicle(id: string) {
   if (!isSuperAdmin) throw new Error("Unauthorized");
 
   try {
-    db.prepare("DELETE FROM vehicle WHERE id = ?").run(id);
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : "Unknown error" };
+    await prisma.vehicle.delete({ where: { id } });
+  } catch (err: any) {
+    console.error("Error in deleteVehicle:", err);
+    return { error: err?.message || "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");
@@ -147,10 +138,10 @@ export async function deleteVehicles(ids: string[]) {
   if (ids.length === 0) return { error: "No IDs provided" };
 
   try {
-    const placeholders = ids.map(() => "?").join(",");
-    db.prepare(`DELETE FROM vehicle WHERE id IN (${placeholders})`).run(...ids);
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : "Unknown error" };
+    await prisma.vehicle.deleteMany({ where: { id: { in: ids } } });
+  } catch (err: any) {
+    console.error("Error in deleteVehicles:", err);
+    return { error: err?.message || "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");

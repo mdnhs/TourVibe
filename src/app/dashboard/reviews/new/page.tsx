@@ -10,7 +10,9 @@ export default async function NewReviewPage() {
   const { isSuperAdmin } = await requireDashboardSession();
 
   // Fetch all tour packages for the creation form
-  const tourPackages = db.prepare("SELECT id, name FROM tour_package").all() as { id: string, name: string }[];
+  const tourPackages = await db.tourPackage.findMany({
+    select: { id: true, name: true }
+  });
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">

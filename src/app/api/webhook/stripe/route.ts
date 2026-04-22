@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -21,28 +21,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
-  // Handle the event
   switch (event.type) {
-    case "checkout.session.completed":
+    case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const metadata = session.metadata;
-
-      if (metadata?.bookingId) {
-        db.prepare("UPDATE booking SET status = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?")
-          .run("paid", metadata.bookingId);
+      if (session.metadata?.bookingId) {
+        await prisma.booking.update({
+          where: { id: session.metadata.bookingId },
+          data: { status: "paid" },
+        });
       }
       break;
-    
-    case "checkout.session.expired":
+    }
+    case "checkout.session.expired": {
       const expiredSession = event.data.object as Stripe.Checkout.Session;
-      const expiredMetadata = expiredSession.metadata;
-
-      if (expiredMetadata?.bookingId) {
-        db.prepare("UPDATE booking SET status = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?")
-          .run("cancelled", expiredMetadata.bookingId);
+      if (expiredSession.metadata?.bookingId) {
+        await prisma.booking.update({
+          where: { id: expiredSession.metadata.bookingId },
+          data: { status: "cancelled" },
+        });
       }
       break;
-
+    }
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

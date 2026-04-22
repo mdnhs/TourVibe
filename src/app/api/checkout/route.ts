@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import crypto from "node:crypto";
 
@@ -10,24 +10,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
-
+    const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { tourId } = await req.json();
-
     if (!tourId) {
       return NextResponse.json({ error: "Tour ID is required" }, { status: 400 });
     }
 
-    // Phone is mandatory for booking
-    const userRow = db
-      .prepare("SELECT phone FROM user WHERE id = ?")
-      .get(session.user.id) as { phone: string | null } | undefined;
+    const userRow = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { phone: true },
+    });
     if (!userRow?.phone) {
       return NextResponse.json(
         { error: "PHONE_REQUIRED", message: "Please add a phone number to your account before booking." },
@@ -35,8 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const tour = db.prepare("SELECT * FROM tour_package WHERE id = ?").get(tourId) as any;
-
+    const tour = await prisma.tourPackage.findUnique({ where: { id: tourId } });
     if (!tour) {
       return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     }
@@ -51,8 +46,10 @@ export async function POST(req: NextRequest) {
             currency: "usd",
             product_data: {
               name: tour.name,
-              description: tour.description,
-              images: tour.thumbnail ? [tour.thumbnail.startsWith("http") ? tour.thumbnail : `${process.env.NEXT_PUBLIC_APP_URL}${tour.thumbnail}`] : [],
+              description: tour.description ?? undefined,
+              images: tour.thumbnail
+                ? [tour.thumbnail.startsWith("http") ? tour.thumbnail : `${process.env.NEXT_PUBLIC_APP_URL}${tour.thumbnail}`]
+                : [],
             },
             unit_amount: Math.round(tour.price * 100),
           },
@@ -62,17 +59,19 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tours/${tourId}?cancelled=true`,
-      metadata: {
-        bookingId,
-        tourId,
-        userId: session.user.id,
-      },
+      metadata: { bookingId, tourId, userId: session.user.id },
     });
 
-    db.prepare(`
-      INSERT INTO booking (id, userId, tourPackageId, amount, status, stripeSessionId)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(bookingId, session.user.id, tourId, tour.price, "pending", stripeSession.id);
+    await prisma.booking.create({
+      data: {
+        id: bookingId,
+        userId: session.user.id,
+        tourPackageId: tourId,
+        amount: tour.price,
+        status: "pending",
+        stripeSessionId: stripeSession.id,
+      },
+    });
 
     return NextResponse.json({ url: stripeSession.url });
   } catch (error: any) {

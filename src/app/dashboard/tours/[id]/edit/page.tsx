@@ -18,24 +18,35 @@ export default async function EditTourPage({ params }: { params: Promise<{ id: s
   }
 
   // Fetch tour package with assigned vehicle IDs
-  const tour = db.prepare(`
-    SELECT 
-      tp.id, tp.name, tp.description, tp.price, tp.duration, tp.maxPersons, tp.thumbnail, tp.gallery, tp.createdAt, tp.updatedAt,
-      GROUP_CONCAT(tpv.vehicleId) as assignedVehicles
-    FROM tour_package tp
-    LEFT JOIN tour_package_vehicle tpv ON tp.id = tpv.tourPackageId
-    WHERE tp.id = ?
-    GROUP BY tp.id
-  `).get(id) as TourPackage | undefined;
+  const tourData = await db.tourPackage.findUnique({
+    where: { id },
+    include: {
+      vehicles: {
+        select: {
+          vehicleId: true,
+        },
+      },
+    },
+  });
 
-  if (!tour) {
+  if (!tourData) {
     notFound();
   }
 
+  const tour = {
+    ...tourData,
+    assignedVehicles: tourData.vehicles.map((v) => v.vehicleId).join(","),
+  } as TourPackage;
+
   // Fetch all vehicles for the assignment form
-  const vehicles = db.prepare(`
-    SELECT id, make, model, licensePlate FROM vehicle
-  `).all() as { id: string; make: string; model: string; licensePlate: string }[];
+  const vehicles = await db.vehicle.findMany({
+    select: {
+      id: true,
+      make: true,
+      model: true,
+      licensePlate: true,
+    },
+  });
 
   return (
     <>

@@ -23,9 +23,17 @@ interface UserRow {
 export default async function AccountPage() {
   const { session } = await requireDashboardSession();
 
-  const user = db
-    .prepare("SELECT id, name, email, image, phone, role FROM user WHERE id = ?")
-    .get(session.user.id) as UserRow;
+  const user = (await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      phone: true,
+      role: true,
+    },
+  })) as UserRow;
 
   return (
     <>

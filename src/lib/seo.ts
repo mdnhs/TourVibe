@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import type { SeoSettings } from "@/app/dashboard/seo/actions";
 
 const defaults: SeoSettings = {
@@ -31,8 +31,8 @@ const defaults: SeoSettings = {
   enableJsonLd: true,
 };
 
-export function getSeoSettingsSync(): SeoSettings {
-  const row = db.prepare("SELECT value FROM settings WHERE key = 'seo'").get() as { value: string } | undefined;
+export async function getSeoSettingsSync(): Promise<SeoSettings> {
+  const row = await prisma.settings.findUnique({ where: { key: "seo" } });
   if (!row) return defaults;
   return { ...defaults, ...JSON.parse(row.value) };
 }

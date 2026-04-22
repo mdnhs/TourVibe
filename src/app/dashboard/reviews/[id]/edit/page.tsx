@@ -13,21 +13,29 @@ export default async function EditReviewPage({ params }: { params: Promise<{ id:
   const userId = session.user.id;
 
   // Fetch review with tour package name
-  const review = db.prepare(`
-    SELECT 
-      r.*, 
-      tp.name as tourPackageName
-    FROM review r
-    JOIN tour_package tp ON r.tourPackageId = tp.id
-    WHERE r.id = ?
-  `).get(id) as any;
+  const reviewData = await db.review.findUnique({
+    where: { id },
+    include: {
+      tourPackage: {
+        select: { name: true }
+      }
+    }
+  });
 
-  if (!review) {
+  if (!reviewData) {
     notFound();
   }
 
+  // Flatten for the form
+  const review = {
+    ...reviewData,
+    tourPackageName: reviewData.tourPackage.name
+  };
+
   // Fetch all tour packages for the edit form
-  const tourPackages = db.prepare("SELECT id, name FROM tour_package").all() as { id: string, name: string }[];
+  const tourPackages = await db.tourPackage.findMany({
+    select: { id: true, name: true }
+  });
 
   // Check ownership if not admin
   if (!isSuperAdmin && review.userId !== userId) {
@@ -70,7 +78,7 @@ export default async function EditReviewPage({ params }: { params: Promise<{ id:
               <p className="text-xs font-medium text-muted-foreground uppercase">Date Created</p>
               <p className="text-sm font-semibold">{new Date(review.createdAt).toLocaleString()}</p>
             </div>
-            {review.updatedAt && review.updatedAt !== review.createdAt && (
+            {review.updatedAt && review.updatedAt.getTime() !== review.createdAt.getTime() && (
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground uppercase">Last Updated</p>
                 <p className="text-sm font-semibold">{new Date(review.updatedAt).toLocaleString()}</p>

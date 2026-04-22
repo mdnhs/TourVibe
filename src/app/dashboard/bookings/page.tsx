@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
@@ -18,28 +18,26 @@ export default async function BookingsPage({
 
   const { success } = await searchParams;
 
-  const bookings = isSuperAdmin
-    ? (db
-        .prepare(
-          `SELECT b.*, tp.name as tourName, tp.thumbnail as tourThumbnail, tp.duration as tourDuration,
-                  u.name as userName, u.email as userEmail, u.image as userImage
-           FROM booking b
-           JOIN tour_package tp ON b.tourPackageId = tp.id
-           JOIN user u ON b.userId = u.id
-           ORDER BY b.createdAt DESC`,
-        )
-        .all() as Booking[])
-    : (db
-        .prepare(
-          `SELECT b.*, tp.name as tourName, tp.thumbnail as tourThumbnail, tp.duration as tourDuration,
-                  u.name as userName, u.email as userEmail, u.image as userImage
-           FROM booking b
-           JOIN tour_package tp ON b.tourPackageId = tp.id
-           JOIN user u ON b.userId = u.id
-           WHERE b.userId = ?
-           ORDER BY b.createdAt DESC`,
-        )
-        .all(session.user.id) as Booking[]);
+  const rawBookings = await prisma.booking.findMany({
+    where: isSuperAdmin ? undefined : { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      tourPackage: { select: { name: true, thumbnail: true, duration: true } },
+      user: { select: { name: true, email: true, image: true } },
+    },
+  });
+
+  const bookings: Booking[] = rawBookings.map((b) => ({
+    ...b,
+    createdAt: b.createdAt.toISOString(),
+    updatedAt: b.updatedAt.toISOString(),
+    tourName: b.tourPackage.name,
+    tourThumbnail: b.tourPackage.thumbnail,
+    tourDuration: b.tourPackage.duration,
+    userName: b.user.name,
+    userEmail: b.user.email,
+    userImage: b.user.image,
+  }));
 
   return (
     <>
