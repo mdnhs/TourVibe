@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Compass, Headset, Map, Plane, Users } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = getSeoSettingsSync();
@@ -20,6 +20,8 @@ import { Contact } from "@/components/landing/contact";
 import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
 export default async function Home() {
+  const siteConfig = await getSiteConfig();
+
   // Fetch real-time statistics
   const [tourCount, reviewCount, avgRatingResult, vehicleCount, touristCount] = await Promise.all([
     db.tourPackage.count(),
@@ -188,36 +190,11 @@ export default async function Home() {
   }));
 
   const services = [
-    {
-      title: "Scenic Road Tours",
-      description:
-        "Explore breathtaking landscapes on handcrafted routes through Ireland's most iconic coastlines, mountains and countryside.",
-      icon: Compass,
-    },
-    {
-      title: "Airport Transfers",
-      description:
-        "Stress-free, punctual pickups and drop-offs at all major airports — so your journey starts and ends smoothly.",
-      icon: Plane,
-    },
-    {
-      title: "Group Adventures",
-      description:
-        "Shared experiences for families, friends and travel groups — with spacious vehicles and flexible departure times.",
-      icon: Users,
-    },
-    {
-      title: "Custom Itineraries",
-      description:
-        "Tell us your dream destinations and we'll craft a tailor-made route that fits your interests, time and budget.",
-      icon: Map,
-    },
-    {
-      title: "24/7 Guest Support",
-      description:
-        "Our team is always on call — whether you need a route change, local recommendation or emergency assistance.",
-      icon: Headset,
-    },
+    { title: siteConfig.service1Title, description: siteConfig.service1Description, icon: siteConfig.service1Icon },
+    { title: siteConfig.service2Title, description: siteConfig.service2Description, icon: siteConfig.service2Icon },
+    { title: siteConfig.service3Title, description: siteConfig.service3Description, icon: siteConfig.service3Icon },
+    { title: siteConfig.service4Title, description: siteConfig.service4Description, icon: siteConfig.service4Icon },
+    { title: siteConfig.service5Title, description: siteConfig.service5Description, icon: siteConfig.service5Icon },
   ];
 
   const stats = [
@@ -257,23 +234,56 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen text-slate-900">
-      <Hero stats={stats} initialDrivers={liveDrivers} activeTour={activeTour} />
+      <Hero
+        stats={stats}
+        initialDrivers={liveDrivers}
+        activeTour={activeTour}
+        heroImage={siteConfig.heroImage}
+        badgeText={siteConfig.heroBadgeText}
+        heroTitle={siteConfig.heroTitle}
+        heroTitleHighlight={siteConfig.heroTitleHighlight}
+        heroSubtitle={siteConfig.heroSubtitle}
+        popularTags={[
+          { label: siteConfig.heroTag1Label, emoji: siteConfig.heroTag1Emoji },
+          { label: siteConfig.heroTag2Label, emoji: siteConfig.heroTag2Emoji },
+          { label: siteConfig.heroTag3Label, emoji: siteConfig.heroTag3Emoji },
+        ]}
+      />
 
       <PopularTours tours={popularTours} />
 
       <PopularCars cars={popularCars} />
 
-      <Services services={services} />
+      <Services
+        services={services}
+        badgeText={siteConfig.servicesBadgeText}
+        sectionTitle={siteConfig.servicesSectionTitle}
+        sectionHighlight={siteConfig.servicesSectionHighlight}
+        sectionSubtitle={siteConfig.servicesSectionSubtitle}
+      />
 
       <LiveTrackingSection initialDrivers={liveDrivers} />
 
-      <About />
+      <About
+        title={siteConfig.aboutTitle}
+        titleHighlight={siteConfig.aboutTitleHighlight}
+        description={siteConfig.aboutDescription}
+        stats={[
+          { value: siteConfig.aboutStat1Value, label: siteConfig.aboutStat1Label },
+          { value: siteConfig.aboutStat2Value, label: siteConfig.aboutStat2Label },
+          { value: siteConfig.aboutStat3Value, label: siteConfig.aboutStat3Label },
+        ]}
+      />
 
       <Reviews reviews={displayReviews} />
 
       <BlogPreview posts={blogPosts} />
 
-      <Contact />
+      <Contact
+        email={siteConfig.contactEmail}
+        phone={siteConfig.contactPhone}
+        location={siteConfig.contactLocation}
+      />
     </div>
   );
 }

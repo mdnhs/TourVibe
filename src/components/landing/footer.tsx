@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CarFront, MapPin, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 const links = {
   Services: ["City Tours", "Airport Transfers", "Corporate Travel", "Private Chauffeur"],
@@ -14,7 +15,17 @@ const anchors: Record<string, string> = {
   Contact: "/#contact",
 };
 
-export function Footer() {
+export function Footer({
+  siteName = "TourVibe",
+  tagline = "Premium car tour management for modern travelers. Experience the island like never before.",
+  location = "Ireland, EU",
+  logoUrl,
+}: {
+  siteName?: string;
+  tagline?: string;
+  location?: string;
+  logoUrl?: string;
+}) {
   return (
     <footer className="relative overflow-hidden bg-slate-950 text-white">
       {/* ── Background glows ── */}
@@ -32,21 +43,22 @@ export function Footer() {
           {/* Brand column */}
           <div className="col-span-1 space-y-5 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
-                <CarFront className="size-5" />
+              <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105 overflow-hidden">
+                {logoUrl ? (
+                  <Image src={logoUrl} alt={siteName} width={36} height={36} className="object-cover" />
+                ) : (
+                  <CarFront className="size-5" />
+                )}
               </div>
-              <span className="font-heading text-xl font-extrabold tracking-tight">TourVibe</span>
+              <span className="font-heading text-xl font-extrabold tracking-tight">{siteName}</span>
             </Link>
 
-            <p className="text-sm leading-7 text-white/50">
-              Premium car tour management for modern travelers. Experience the
-              island like never before.
-            </p>
+            <p className="text-sm leading-7 text-white/50">{tagline}</p>
 
             {/* Location pill */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/50">
               <MapPin className="size-3.5 text-amber-400" />
-              Ireland, EU
+              {location}
             </div>
           </div>
 
@@ -79,7 +91,7 @@ export function Footer() {
         {/* ── Bottom bar ── */}
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row">
           <p className="text-sm text-white/35">
-            © {new Date().getFullYear()} TourVibe. All rights reserved.
+            © {new Date().getFullYear()} {siteName}. All rights reserved.
           </p>
           <div className="flex items-center gap-2">
             <div className="h-0.75 w-8 rounded-full bg-linear-to-r from-amber-400 to-orange-500" />

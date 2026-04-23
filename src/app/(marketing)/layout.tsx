@@ -1,13 +1,17 @@
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
 import { getServerSession } from "@/lib/session";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 export default async function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const sessionData = await getServerSession();
+  const [sessionData, siteConfig] = await Promise.all([
+    getServerSession(),
+    getSiteConfig(),
+  ]);
   const session = sessionData?.session ?? null;
 
   return (
@@ -58,9 +62,19 @@ export default async function MarketingLayout({
         />
       </div>
 
-      <Navbar session={session} />
+      <Navbar
+        session={session}
+        siteName={siteConfig.siteName}
+        tagline={siteConfig.tagline}
+        logoUrl={siteConfig.logoUrl || undefined}
+      />
       <main className="flex-grow">{children}</main>
-      <Footer />
+      <Footer
+        siteName={siteConfig.siteName}
+        tagline={siteConfig.footerTagline}
+        location={siteConfig.contactLocation}
+        logoUrl={siteConfig.logoUrl || undefined}
+      />
     </div>
   );
 }

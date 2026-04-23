@@ -1,0 +1,107 @@
+export interface SiteConfig {
+  siteName: string;
+  tagline: string;
+  logoUrl: string;
+  heroImage: string;
+  heroBadgeText: string;
+  heroTitle: string;
+  heroTitleHighlight: string;
+  heroSubtitle: string;
+  heroTag1Emoji: string;
+  heroTag1Label: string;
+  heroTag2Emoji: string;
+  heroTag2Label: string;
+  heroTag3Emoji: string;
+  heroTag3Label: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactLocation: string;
+  footerTagline: string;
+  aboutTitle: string;
+  aboutTitleHighlight: string;
+  aboutDescription: string;
+  aboutStat1Value: string;
+  aboutStat1Label: string;
+  aboutStat2Value: string;
+  aboutStat2Label: string;
+  aboutStat3Value: string;
+  aboutStat3Label: string;
+  // Services section
+  servicesBadgeText: string;
+  servicesSectionTitle: string;
+  servicesSectionHighlight: string;
+  servicesSectionSubtitle: string;
+  service1Title: string;
+  service1Description: string;
+  service1Icon: string;
+  service2Title: string;
+  service2Description: string;
+  service2Icon: string;
+  service3Title: string;
+  service3Description: string;
+  service3Icon: string;
+  service4Title: string;
+  service4Description: string;
+  service4Icon: string;
+  service5Title: string;
+  service5Description: string;
+  service5Icon: string;
+}
+
+export const siteConfigDefaults: SiteConfig = {
+  siteName: "TourVibe",
+  tagline: "Car-based tour management",
+  logoUrl: "",
+  heroImage: "/cover.jpg",
+  heroBadgeText: "Your Journey Starts Here",
+  heroTitle: "Discover Ireland.",
+  heroTitleHighlight: "Ireland.",
+  heroSubtitle:
+    "Book your next adventure with our curated selection of scenic road trips across the Emerald Isle.",
+  heroTag1Emoji: "🌊",
+  heroTag1Label: "Wild Atlantic Way",
+  heroTag2Emoji: "🏔️",
+  heroTag2Label: "Ring of Kerry",
+  heroTag3Emoji: "🌿",
+  heroTag3Label: "Cliffs of Moher",
+  contactEmail: "hello@tourvibe.ie",
+  contactPhone: "+353 1 800 0000",
+  contactLocation: "Dublin, Ireland",
+  footerTagline:
+    "Premium car tour management for modern travelers. Experience the island like never before.",
+  aboutTitle: "Born from a passion for unforgettable Irish roads.",
+  aboutTitleHighlight: "unforgettable",
+  aboutDescription:
+    "TourVibe was founded by a team of travel enthusiasts who believed that the real Ireland is best discovered from the window of a car — not a tour bus. Every route we offer has been personally driven, refined and handpicked for its scenery, culture and hidden surprises.",
+  aboutStat1Value: "8+",
+  aboutStat1Label: "Years operating",
+  aboutStat2Value: "50+",
+  aboutStat2Label: "Destinations",
+  aboutStat3Value: "98%",
+  aboutStat3Label: "Happy guests",
+  servicesBadgeText: "What We Offer",
+  servicesSectionTitle: "Every journey, perfectly arranged",
+  servicesSectionHighlight: "perfectly",
+  servicesSectionSubtitle:
+    "From scenic coastal drives to private airport transfers — we handle every detail so you can focus on the experience.",
+  service1Title: "Scenic Road Tours",
+  service1Description:
+    "Explore breathtaking landscapes on handcrafted routes through Ireland's most iconic coastlines, mountains and countryside.",
+  service1Icon: "Compass",
+  service2Title: "Airport Transfers",
+  service2Description:
+    "Stress-free, punctual pickups and drop-offs at all major airports — so your journey starts and ends smoothly.",
+  service2Icon: "Plane",
+  service3Title: "Group Adventures",
+  service3Description:
+    "Shared experiences for families, friends and travel groups — with spacious vehicles and flexible departure times.",
+  service3Icon: "Users",
+  service4Title: "Custom Itineraries",
+  service4Description:
+    "Tell us your dream destinations and we'll craft a tailor-made route that fits your interests, time and budget.",
+  service4Icon: "Map",
+  service5Title: "24/7 Guest Support",
+  service5Description:
+    "Our team is always on call — whether you need a route change, local recommendation or emergency assistance.",
+  service5Icon: "Headset",
+};

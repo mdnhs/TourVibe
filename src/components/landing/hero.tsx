@@ -170,6 +170,16 @@ export function Hero({
   stats,
   initialDrivers = [],
   activeTour,
+  heroImage = "/cover.jpg",
+  badgeText = "Your Journey Starts Here",
+  heroTitle = "Discover Ireland.",
+  heroTitleHighlight = "Ireland.",
+  heroSubtitle = "Book your next adventure with our curated selection of scenic road trips across the Emerald Isle.",
+  popularTags = [
+    { label: "Wild Atlantic Way", emoji: "🌊" },
+    { label: "Ring of Kerry", emoji: "🏔️" },
+    { label: "Cliffs of Moher", emoji: "🌿" },
+  ],
 }: {
   stats: { value: string; label: string }[];
   initialDrivers?: DriverLocation[];
@@ -180,6 +190,12 @@ export function Hero({
     reviewCount: number;
     price: number;
   };
+  heroImage?: string;
+  badgeText?: string;
+  heroTitle?: string;
+  heroTitleHighlight?: string;
+  heroSubtitle?: string;
+  popularTags?: { label: string; emoji: string }[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -196,7 +212,7 @@ export function Hero({
       {/* ── Full-bleed background cover image ── */}
       <div className="absolute inset-x-0 top-5 h-130 overflow-hidden mx-auto max-w-6xl rounded-[1.5rem]">
         <Image
-          src="/cover.jpg"
+          src={heroImage}
           alt=""
           fill
           priority
@@ -217,7 +233,7 @@ export function Hero({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
                 <span className="relative inline-flex size-2 rounded-full bg-amber-400" />
               </span>
-              Your Journey Starts Here
+              {badgeText}
             </div>
 
             {/* Headline */}
@@ -226,18 +242,24 @@ export function Hero({
               style={{ animationDelay: "100ms" }}
             >
               <h1 className="font-heading max-w-lg text-5xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl">
-                Discover{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10">Ireland.</span>
-                  <span
-                    className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-amber-400/70"
-                    aria-hidden="true"
-                  />
-                </span>
+                {heroTitleHighlight && heroTitle.includes(heroTitleHighlight) ? (
+                  <>
+                    {heroTitle.split(heroTitleHighlight)[0]}
+                    <span className="relative inline-block">
+                      <span className="relative z-10">{heroTitleHighlight}</span>
+                      <span
+                        className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-amber-400/70"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    {heroTitle.split(heroTitleHighlight).slice(1).join(heroTitleHighlight)}
+                  </>
+                ) : (
+                  heroTitle
+                )}
               </h1>
               <p className="max-w-md text-base leading-relaxed text-white/75">
-                Book your next adventure with our curated selection of scenic
-                road trips across the Emerald Isle.
+                {heroSubtitle}
               </p>
             </div>
 
@@ -275,11 +297,7 @@ export function Hero({
               <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35 mr-1 shrink-0">
                 Popular
               </span>
-              {[
-                { label: "Wild Atlantic Way", emoji: "🌊" },
-                { label: "Ring of Kerry", emoji: "🏔️" },
-                { label: "Cliffs of Moher", emoji: "🌿" },
-              ].map((tag, i) => (
+              {popularTags.filter(t => t.label).map((tag, i) => (
                 <button
                   key={tag.label}
                   onClick={() =>

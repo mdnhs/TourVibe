@@ -1,6 +1,20 @@
 import { ShieldCheck, Award, Heart, ArrowRight } from "lucide-react";
 
-export function About() {
+export function About({
+  title = "Born from a passion for unforgettable Irish roads.",
+  titleHighlight = "unforgettable",
+  description = "TourVibe was founded by a team of travel enthusiasts who believed that the real Ireland is best discovered from the window of a car — not a tour bus. Every route we offer has been personally driven, refined and handpicked for its scenery, culture and hidden surprises.",
+  stats = [
+    { value: "8+", label: "Years operating" },
+    { value: "50+", label: "Destinations" },
+    { value: "98%", label: "Happy guests" },
+  ],
+}: {
+  title?: string;
+  titleHighlight?: string;
+  description?: string;
+  stats?: { value: string; label: string }[];
+}) {
   return (
     <section id="about" className="relative overflow-hidden px-4 py-24 sm:px-6">
       {/* ── Background glows ── */}
@@ -28,28 +42,27 @@ export function About() {
             </div>
 
             <h2 className="mt-6 font-heading text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-              Born from a passion for{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10">unforgettable</span>
-                <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
-              </span>{" "}
-              Irish roads.
+              {titleHighlight && title.includes(titleHighlight) ? (
+                <>
+                  {title.split(titleHighlight)[0]}
+                  <span className="relative inline-block">
+                    <span className="relative z-10">{titleHighlight}</span>
+                    <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
+                  </span>
+                  {title.split(titleHighlight).slice(1).join(titleHighlight)}
+                </>
+              ) : (
+                title
+              )}
             </h2>
 
             <p className="mt-5 text-sm leading-7 text-white/60">
-              TourVibe was founded by a team of travel enthusiasts who believed that
-              the real Ireland is best discovered from the window of a car — not a
-              tour bus. Every route we offer has been personally driven, refined and
-              handpicked for its scenery, culture and hidden surprises.
+              {description}
             </p>
 
             {/* Stats row */}
             <div className="mt-8 grid grid-cols-3 gap-3">
-              {[
-                { value: "8+",   label: "Years operating" },
-                { value: "50+",  label: "Destinations" },
-                { value: "98%",  label: "Happy guests" },
-              ].map((s) => (
+              {stats.map((s) => (
                 <div key={s.label} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-center">
                   <p className="font-heading text-xl font-extrabold text-white leading-none">{s.value}</p>
                   <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-white/35">{s.label}</p>

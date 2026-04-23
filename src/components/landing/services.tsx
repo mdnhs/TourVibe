@@ -1,13 +1,21 @@
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, Compass, Plane, Users, Map, Headset, Car, Star, Shield, Clock, MapPin, Camera, Heart } from "lucide-react";
+
+const iconMap: Record<string, LucideIcon> = {
+  Compass, Plane, Users, Map, Headset, Car, Star, Shield, Clock, MapPin, Camera, Heart,
+};
 
 interface Service {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: string;
 }
 
 interface ServicesProps {
   services: Service[];
+  badgeText?: string;
+  sectionTitle?: string;
+  sectionHighlight?: string;
+  sectionSubtitle?: string;
 }
 
 const cardAccents = [
@@ -19,7 +27,30 @@ const cardAccents = [
   { bar: "from-fuchsia-400 to-violet-500", iconBg: "bg-fuchsia-400", glow: "bg-fuchsia-300/30", text: "text-fuchsia-700", lightBg: "bg-fuchsia-50", border: "border-fuchsia-200" },
 ];
 
-export function Services({ services }: ServicesProps) {
+function renderTitle(title: string, highlight: string) {
+  if (!highlight || !title.includes(highlight)) {
+    return <>{title}</>;
+  }
+  const parts = title.split(highlight);
+  return (
+    <>
+      {parts[0]}
+      <span className="relative inline-block">
+        <span className="relative z-10">{highlight}</span>
+        <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
+      </span>
+      {parts[1]}
+    </>
+  );
+}
+
+export function Services({
+  services,
+  badgeText = "What We Offer",
+  sectionTitle = "Every journey, perfectly arranged",
+  sectionHighlight = "perfectly",
+  sectionSubtitle = "From scenic coastal drives to private airport transfers — we handle every detail so you can focus on the experience.",
+}: ServicesProps) {
   const [featured, ...rest] = services;
   const featuredAccent = cardAccents[0];
 
@@ -42,7 +73,7 @@ export function Services({ services }: ServicesProps) {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-500 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-cyan-600" />
               </span>
-              What We Offer
+              {badgeText}
             </div>
 
             <h2
@@ -50,12 +81,7 @@ export function Services({ services }: ServicesProps) {
                          animate-in fade-in slide-in-from-left-4 duration-500"
               style={{ animationDelay: "80ms" }}
             >
-              Every journey,{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10">perfectly</span>
-                <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
-              </span>{" "}
-              arranged
+              {renderTitle(sectionTitle, sectionHighlight)}
             </h2>
           </div>
 
@@ -63,7 +89,7 @@ export function Services({ services }: ServicesProps) {
             className="max-w-sm text-sm leading-7 text-slate-500 animate-in fade-in slide-in-from-right-4 duration-500"
             style={{ animationDelay: "160ms" }}
           >
-            From scenic coastal drives to private airport transfers — we handle every detail so you can focus on the experience.
+            {sectionSubtitle}
           </p>
         </div>
 
@@ -72,7 +98,7 @@ export function Services({ services }: ServicesProps) {
 
           {/* Featured card — spans 2 cols */}
           {featured && (() => {
-            const Icon = featured.icon;
+            const Icon = iconMap[featured.icon] ?? Compass;
             return (
               <div
                 className="group animate-in fade-in slide-in-from-bottom-4 duration-500
@@ -118,7 +144,7 @@ export function Services({ services }: ServicesProps) {
 
           {/* Remaining cards */}
           {rest.map((service, i) => {
-            const Icon = service.icon;
+            const Icon = iconMap[service.icon] ?? Compass;
             const accent = cardAccents[(i + 1) % cardAccents.length];
 
             return (

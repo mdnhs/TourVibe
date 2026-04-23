@@ -20,6 +20,7 @@ import {
   SettingsIcon,
   ChevronRightIcon,
   SearchIcon,
+  SlidersHorizontalIcon,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -132,6 +133,11 @@ export function AppSidebar({
           label: "SEO",
           href: "/dashboard/seo",
           icon: SearchIcon,
+        },
+        {
+          label: "Site Config",
+          href: "/dashboard/site-config",
+          icon: SlidersHorizontalIcon,
         },
       ],
     },

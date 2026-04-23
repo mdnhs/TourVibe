@@ -5,10 +5,14 @@ import { CarFront, ArrowRight, Menu, X } from "lucide-react";
 import { Session } from "better-auth";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface NavbarProps {
   session: Session | null;
+  siteName?: string;
+  tagline?: string;
+  logoUrl?: string;
 }
 
 const navLinks = [
@@ -19,7 +23,7 @@ const navLinks = [
   { label: "Contact", href: "/#contact" },
 ];
 
-export function Navbar({ session }: NavbarProps) {
+export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based tour management", logoUrl }: NavbarProps) {
   const pathname = usePathname();
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
@@ -89,15 +93,19 @@ export function Navbar({ session }: NavbarProps) {
         <div className="flex items-center justify-between">
           {/* ── Logo ── */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
-              <CarFront className="size-[17px]" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105 overflow-hidden">
+              {logoUrl ? (
+                <Image src={logoUrl} alt={siteName} width={36} height={36} className="object-cover" />
+              ) : (
+                <CarFront className="size-[17px]" />
+              )}
             </div>
             <div className="hidden sm:block">
               <p className="font-heading text-[15px] font-extrabold leading-tight text-slate-900">
-                TourVibe
+                {siteName}
               </p>
               <p className="text-[10px] font-medium leading-tight text-slate-400 tracking-wide">
-                Car-based tour management
+                {tagline}
               </p>
             </div>
           </Link>

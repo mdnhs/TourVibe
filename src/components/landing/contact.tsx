@@ -1,33 +1,40 @@
 import { Mail, Phone, Headset, MapPin, ArrowRight } from "lucide-react";
 
-const contactItems = [
-  {
-    icon: Mail,
-    label: "Email Us",
-    value: "hello@tourvibe.ie",
-    accent: { iconBg: "bg-amber-400", bar: "from-amber-400 to-orange-500", glow: "bg-amber-300/20" },
-  },
-  {
-    icon: Phone,
-    label: "Call Us",
-    value: "+353 1 800 0000",
-    accent: { iconBg: "bg-cyan-400", bar: "from-cyan-400 to-sky-500", glow: "bg-cyan-300/20" },
-  },
-  {
-    icon: Headset,
-    label: "24/7 Support",
-    value: "Always on call for you",
-    accent: { iconBg: "bg-emerald-400", bar: "from-emerald-400 to-teal-500", glow: "bg-emerald-300/20" },
-  },
-  {
-    icon: MapPin,
-    label: "Based In",
-    value: "Dublin, Ireland",
-    accent: { iconBg: "bg-violet-400", bar: "from-violet-400 to-purple-500", glow: "bg-violet-300/20" },
-  },
-];
-
-export function Contact() {
+export function Contact({
+  email = "hello@tourvibe.ie",
+  phone = "+353 1 800 0000",
+  location = "Dublin, Ireland",
+}: {
+  email?: string;
+  phone?: string;
+  location?: string;
+}) {
+  const contactItems = [
+    {
+      icon: Mail,
+      label: "Email Us",
+      value: email,
+      accent: { iconBg: "bg-amber-400", bar: "from-amber-400 to-orange-500", glow: "bg-amber-300/20" },
+    },
+    {
+      icon: Phone,
+      label: "Call Us",
+      value: phone,
+      accent: { iconBg: "bg-cyan-400", bar: "from-cyan-400 to-sky-500", glow: "bg-cyan-300/20" },
+    },
+    {
+      icon: Headset,
+      label: "24/7 Support",
+      value: "Always on call for you",
+      accent: { iconBg: "bg-emerald-400", bar: "from-emerald-400 to-teal-500", glow: "bg-emerald-300/20" },
+    },
+    {
+      icon: MapPin,
+      label: "Based In",
+      value: location,
+      accent: { iconBg: "bg-violet-400", bar: "from-violet-400 to-purple-500", glow: "bg-violet-300/20" },
+    },
+  ];
   return (
     <section id="contact" className="relative overflow-hidden px-4 py-24 sm:px-6">
       {/* ── Background glows ── */}
