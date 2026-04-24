@@ -5,7 +5,7 @@ import { toursSearchParamsCache } from "./search-params";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
   return buildMetadata(s, {
     title: "Tour Packages",
     description: "Browse all available car tour packages — scenic routes, airport transfers, and custom itineraries.",

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, Star, Users, MapPin } from "lucide-react";
+import { ArrowRight, Clock, Star, Users, MapPin, Sparkles } from "lucide-react";
 
 interface PopularTour {
   id: string;
@@ -21,12 +21,60 @@ interface PopularToursProps {
 const categories = ["Coastal", "Heritage", "Mountain", "City", "Countryside", "Adventure"];
 
 const cardColors = [
-  { bar: "from-amber-400 to-orange-500",   glow: "bg-amber-300/25",   catBg: "bg-amber-400/90",   catText: "text-slate-950" },
-  { bar: "from-cyan-400 to-sky-500",       glow: "bg-cyan-300/25",    catBg: "bg-cyan-400/90",    catText: "text-slate-950" },
-  { bar: "from-emerald-400 to-teal-500",   glow: "bg-emerald-300/25", catBg: "bg-emerald-400/90", catText: "text-slate-950" },
-  { bar: "from-violet-400 to-purple-500",  glow: "bg-violet-300/25",  catBg: "bg-violet-400/90",  catText: "text-white" },
-  { bar: "from-rose-400 to-pink-500",      glow: "bg-rose-300/25",    catBg: "bg-rose-400/90",    catText: "text-white" },
-  { bar: "from-fuchsia-400 to-violet-500", glow: "bg-fuchsia-300/25", catBg: "bg-fuchsia-400/90", catText: "text-white" },
+  {
+    bar: "from-amber-400 to-orange-500",
+    glow: "bg-amber-400/20",
+    catBg: "bg-gradient-to-r from-amber-400 to-orange-500",
+    catText: "text-white",
+    btnFrom: "from-amber-500 to-orange-600",
+    btnShadow: "shadow-amber-500/30",
+    priceBadge: "from-amber-400/90 to-orange-500/90",
+  },
+  {
+    bar: "from-cyan-400 to-sky-500",
+    glow: "bg-cyan-400/20",
+    catBg: "bg-gradient-to-r from-cyan-400 to-sky-500",
+    catText: "text-white",
+    btnFrom: "from-cyan-500 to-sky-600",
+    btnShadow: "shadow-cyan-500/30",
+    priceBadge: "from-cyan-400/90 to-sky-500/90",
+  },
+  {
+    bar: "from-emerald-400 to-teal-500",
+    glow: "bg-emerald-400/20",
+    catBg: "bg-gradient-to-r from-emerald-400 to-teal-500",
+    catText: "text-white",
+    btnFrom: "from-emerald-500 to-teal-600",
+    btnShadow: "shadow-emerald-500/30",
+    priceBadge: "from-emerald-400/90 to-teal-500/90",
+  },
+  {
+    bar: "from-violet-400 to-purple-500",
+    glow: "bg-violet-400/20",
+    catBg: "bg-gradient-to-r from-violet-400 to-purple-500",
+    catText: "text-white",
+    btnFrom: "from-violet-500 to-purple-600",
+    btnShadow: "shadow-violet-500/30",
+    priceBadge: "from-violet-400/90 to-purple-500/90",
+  },
+  {
+    bar: "from-rose-400 to-pink-500",
+    glow: "bg-rose-400/20",
+    catBg: "bg-gradient-to-r from-rose-400 to-pink-500",
+    catText: "text-white",
+    btnFrom: "from-rose-500 to-pink-600",
+    btnShadow: "shadow-rose-500/30",
+    priceBadge: "from-rose-400/90 to-pink-500/90",
+  },
+  {
+    bar: "from-fuchsia-400 to-violet-500",
+    glow: "bg-fuchsia-400/20",
+    catBg: "bg-gradient-to-r from-fuchsia-400 to-violet-500",
+    catText: "text-white",
+    btnFrom: "from-fuchsia-500 to-violet-600",
+    btnShadow: "shadow-fuchsia-500/30",
+    priceBadge: "from-fuchsia-400/90 to-violet-500/90",
+  },
 ];
 
 export function PopularTours({ tours }: PopularToursProps) {
@@ -34,18 +82,18 @@ export function PopularTours({ tours }: PopularToursProps) {
 
   return (
     <section id="popular-tours" className="relative overflow-hidden px-4 py-24 sm:px-6">
-      {/* ── Background glows ── */}
+      {/* Background glows */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 right-1/4 size-96 rounded-full bg-cyan-300/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 size-96 rounded-full bg-amber-300/10 blur-3xl" />
+        <div className="absolute -top-32 right-1/4 size-96 rounded-full bg-cyan-300/12 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 size-96 rounded-full bg-amber-300/12 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 size-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/8 blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-6xl">
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700
-                            animate-in fade-in slide-in-from-left-4 duration-500">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 animate-in fade-in slide-in-from-left-4 duration-500">
               <span className="relative flex size-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-emerald-600" />
@@ -54,14 +102,13 @@ export function PopularTours({ tours }: PopularToursProps) {
             </div>
 
             <h2
-              className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl
-                         animate-in fade-in slide-in-from-left-4 duration-500"
+              className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
               style={{ animationDelay: "80ms" }}
             >
               Handpicked{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">adventures</span>
-                <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
+                <span className="relative z-10 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">adventures</span>
+                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 opacity-50" aria-hidden="true" />
               </span>{" "}
               across Ireland
             </h2>
@@ -76,8 +123,7 @@ export function PopularTours({ tours }: PopularToursProps) {
 
           <Link
             href="/tours"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800
-                       animate-in fade-in slide-in-from-right-4 duration-500"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/35 hover:from-indigo-500 hover:to-violet-500 animate-in fade-in slide-in-from-right-4 duration-500"
             style={{ animationDelay: "160ms" }}
           >
             Explore all tours
@@ -85,7 +131,7 @@ export function PopularTours({ tours }: PopularToursProps) {
           </Link>
         </div>
 
-        {/* ── Cards ── */}
+        {/* Cards */}
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {tours.map((tour, i) => {
             const accent = cardColors[i % cardColors.length];
@@ -99,7 +145,7 @@ export function PopularTours({ tours }: PopularToursProps) {
                 className="group animate-in fade-in slide-in-from-bottom-4 duration-500
                            relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white
                            shadow-lg shadow-slate-200/60
-                           transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80"
+                           transition-all hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-300/60"
               >
                 {/* Hover glow */}
                 <div className={`pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
@@ -114,21 +160,21 @@ export function PopularTours({ tours }: PopularToursProps) {
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="flex h-full flex-col items-center justify-center gap-3 bg-linear-to-br from-slate-100 to-slate-200">
+                    <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-slate-100 to-slate-200">
                       <MapPin className="size-10 text-slate-300" />
                       <span className="text-xs font-semibold text-slate-300">Ireland</span>
                     </div>
                   )}
 
                   {/* Dark gradient overlay */}
-                  <div className="absolute inset-0 bg-linear-to-t from-slate-950/60 via-slate-950/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/15 to-transparent" />
 
-                  {/* Category tag — top left */}
-                  <div className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm ${accent.catBg} ${accent.catText}`}>
+                  {/* Category tag */}
+                  <div className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm shadow-sm ${accent.catBg} ${accent.catText}`}>
                     {category}
                   </div>
 
-                  {/* Rating — top right */}
+                  {/* Rating */}
                   {rating && (
                     <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-slate-950 shadow-lg backdrop-blur-sm">
                       <Star className="size-3 fill-amber-400 text-amber-400" />
@@ -136,21 +182,22 @@ export function PopularTours({ tours }: PopularToursProps) {
                     </div>
                   )}
                   {!rating && (
-                    <div className="absolute right-3 top-3 rounded-full border border-emerald-300 bg-emerald-50/95 px-2.5 py-1 text-[10px] font-bold text-emerald-700 backdrop-blur-sm">
+                    <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-emerald-50/95 px-2.5 py-1 text-[10px] font-bold text-emerald-700 backdrop-blur-sm">
+                      <Sparkles className="size-2.5" />
                       New
                     </div>
                   )}
 
-                  {/* Price — bottom left */}
+                  {/* Price */}
                   <div className="absolute bottom-3 left-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-white/60">From</p>
-                    <p className="font-heading text-2xl font-extrabold leading-none text-white">
+                    <p className="font-heading text-2xl font-extrabold leading-none text-white drop-shadow">
                       ${tour.price.toLocaleString()}
                       <span className="text-xs font-normal text-white/60"> /person</span>
                     </p>
                   </div>
 
-                  {/* Duration — bottom right */}
+                  {/* Duration */}
                   <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm border border-white/20">
                     <Clock className="size-3" />
                     {tour.duration}
@@ -158,7 +205,7 @@ export function PopularTours({ tours }: PopularToursProps) {
                 </div>
 
                 {/* Top gradient bar */}
-                <div className={`h-1 w-full bg-linear-to-r ${accent.bar}`} />
+                <div className={`h-1 w-full bg-gradient-to-r ${accent.bar}`} />
 
                 {/* Content */}
                 <div className="flex flex-1 flex-col gap-3 p-5">
@@ -172,7 +219,7 @@ export function PopularTours({ tours }: PopularToursProps) {
                   </div>
 
                   {/* Includes row */}
-                  <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
+                  <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-slate-50 to-slate-50/80 px-3 py-2 border border-slate-100">
                     <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
                       <Users className="size-3.5 text-slate-400" />
                       Up to {tour.maxPersons} guests
@@ -191,7 +238,7 @@ export function PopularTours({ tours }: PopularToursProps) {
                   {/* CTA */}
                   <Link
                     href={`/tours/${tour.id}`}
-                    className="group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-slate-800"
+                    className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 ${accent.btnFrom} ${accent.btnShadow}`}
                   >
                     Book this tour
                     <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />

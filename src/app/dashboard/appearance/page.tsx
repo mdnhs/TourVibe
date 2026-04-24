@@ -1,37 +1,20 @@
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { AppearanceForm } from "./appearance-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { getThemeConfig } from "./actions";
 
 export default async function AppearancePage() {
   const { isSuperAdmin } = await requireDashboardSession();
+  if (!isSuperAdmin) redirect("/dashboard");
 
-  if (!isSuperAdmin) {
-    redirect("/dashboard");
-  }
+  const config = await getThemeConfig();
 
   return (
     <>
-      <SiteHeader title="Appearance" subtitle="Customize the dashboard appearance" />
-      <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 max-w-3xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
-              Customize the appearance of the dashboard. Automatically switch between day and night themes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AppearanceForm />
-          </CardContent>
-        </Card>
+      <SiteHeader title="Appearance" subtitle="Customize website theme" />
+      <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+        <AppearanceForm config={config} />
       </div>
     </>
   );

@@ -30,7 +30,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
   const post = await db.blogPost.findFirst({
     where: {
       slug: slug,
@@ -55,7 +55,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
 
   const post = await db.blogPost.findFirst({
     where: {

@@ -1,7 +1,8 @@
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_10kupJSgdrDt@ep-mute-sea-aofr7lgb-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+// Cache bust: 2026-04-24T12:05:00Z
+const DATABASE_URL = process.env.DATABASE_URL!;
 
 function createPrismaClient() {
   const maskedUrl = DATABASE_URL.replace(/:[^:@]+@/, ":****@");

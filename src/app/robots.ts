@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getSeoSettingsSync } from "@/lib/seo";
 
-export default function robots(): MetadataRoute.Robots {
-  const s = getSeoSettingsSync();
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const s = await getSeoSettingsSync();
   const base = s.siteUrl || "https://tourvibe.com";
 
   if (!s.robotsIndex) {

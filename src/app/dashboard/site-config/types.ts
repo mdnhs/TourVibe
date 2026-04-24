@@ -9,10 +9,13 @@ export interface SiteConfig {
   heroSubtitle: string;
   heroTag1Emoji: string;
   heroTag1Label: string;
+  heroTag1Url: string;
   heroTag2Emoji: string;
   heroTag2Label: string;
+  heroTag2Url: string;
   heroTag3Emoji: string;
   heroTag3Label: string;
+  heroTag3Url: string;
   contactEmail: string;
   contactPhone: string;
   contactLocation: string;
@@ -60,10 +63,13 @@ export const siteConfigDefaults: SiteConfig = {
     "Book your next adventure with our curated selection of scenic road trips across the Emerald Isle.",
   heroTag1Emoji: "🌊",
   heroTag1Label: "Wild Atlantic Way",
+  heroTag1Url: "",
   heroTag2Emoji: "🏔️",
   heroTag2Label: "Ring of Kerry",
+  heroTag2Url: "",
   heroTag3Emoji: "🌿",
   heroTag3Label: "Cliffs of Moher",
+  heroTag3Url: "",
   contactEmail: "hello@tourvibe.ie",
   contactPhone: "+353 1 800 0000",
   contactLocation: "Dublin, Ireland",

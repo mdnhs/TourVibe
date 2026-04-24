@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
   return buildMetadata(s, { title: "Blog", canonical: "/blog" });
 }
 

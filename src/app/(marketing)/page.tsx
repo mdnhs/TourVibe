@@ -5,7 +5,7 @@ import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
 import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
   return buildMetadata(s, { canonical: "/" });
 }
 import { Hero } from "@/components/landing/hero";
@@ -244,9 +244,9 @@ export default async function Home() {
         heroTitleHighlight={siteConfig.heroTitleHighlight}
         heroSubtitle={siteConfig.heroSubtitle}
         popularTags={[
-          { label: siteConfig.heroTag1Label, emoji: siteConfig.heroTag1Emoji },
-          { label: siteConfig.heroTag2Label, emoji: siteConfig.heroTag2Emoji },
-          { label: siteConfig.heroTag3Label, emoji: siteConfig.heroTag3Emoji },
+          { label: siteConfig.heroTag1Label, emoji: siteConfig.heroTag1Emoji, url: siteConfig.heroTag1Url },
+          { label: siteConfig.heroTag2Label, emoji: siteConfig.heroTag2Emoji, url: siteConfig.heroTag2Url },
+          { label: siteConfig.heroTag3Label, emoji: siteConfig.heroTag3Emoji, url: siteConfig.heroTag3Url },
         ]}
       />
 

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { revalidatePath } from "next/cache";
 import { type SiteConfig, siteConfigDefaults } from "./types";
+import { getIntegrations, invalidateIntegrationsCache, type IntegrationsConfig } from "@/lib/integrations";
 
 export async function getSiteConfig(): Promise<SiteConfig> {
   const row = await prisma.settings.findUnique({ where: { key: "site_config" } });
@@ -29,10 +30,13 @@ export async function updateSiteConfig(formData: FormData) {
     heroSubtitle: g("heroSubtitle"),
     heroTag1Emoji: g("heroTag1Emoji"),
     heroTag1Label: g("heroTag1Label"),
+    heroTag1Url: g("heroTag1Url"),
     heroTag2Emoji: g("heroTag2Emoji"),
     heroTag2Label: g("heroTag2Label"),
+    heroTag2Url: g("heroTag2Url"),
     heroTag3Emoji: g("heroTag3Emoji"),
     heroTag3Label: g("heroTag3Label"),
+    heroTag3Url: g("heroTag3Url"),
     contactEmail: g("contactEmail"),
     contactPhone: g("contactPhone"),
     contactLocation: g("contactLocation"),
@@ -75,5 +79,44 @@ export async function updateSiteConfig(formData: FormData) {
 
   revalidatePath("/", "layout");
   revalidatePath("/dashboard/site-config");
+  return { success: true };
+}
+
+export async function getIntegrationsConfig() {
+  const { isSuperAdmin } = await requireDashboardSession();
+  if (!isSuperAdmin) return null;
+
+  const cfg = await getIntegrations();
+  return {
+    cloudinaryCloudName: cfg.cloudinaryCloudName,
+    cloudinaryApiKey:    cfg.cloudinaryApiKey,
+    cloudinaryApiSecret: cfg.cloudinaryApiSecret,
+    stripeSecretKey:     cfg.stripeSecretKey,
+    stripeWebhookSecret: cfg.stripeWebhookSecret,
+  };
+}
+
+export async function saveIntegrationsConfig(formData: FormData) {
+  const { isSuperAdmin } = await requireDashboardSession();
+  if (!isSuperAdmin) return { error: "Unauthorized" };
+
+  const existing = await getIntegrations();
+  const g = (k: string) => (formData.get(k) as string | null)?.trim() || null;
+
+  const updated: IntegrationsConfig = {
+    cloudinaryCloudName: g("cloudinaryCloudName") ?? existing.cloudinaryCloudName,
+    cloudinaryApiKey:    g("cloudinaryApiKey")    ?? existing.cloudinaryApiKey,
+    cloudinaryApiSecret: g("cloudinaryApiSecret") ?? existing.cloudinaryApiSecret,
+    stripeSecretKey:     g("stripeSecretKey")     ?? existing.stripeSecretKey,
+    stripeWebhookSecret: g("stripeWebhookSecret") ?? existing.stripeWebhookSecret,
+  };
+
+  await prisma.settings.upsert({
+    where: { key: "integrations" },
+    create: { key: "integrations", value: JSON.stringify(updated) },
+    update: { value: JSON.stringify(updated) },
+  });
+
+  invalidateIntegrationsCache();
   return { success: true };
 }

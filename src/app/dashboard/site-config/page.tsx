@@ -2,14 +2,18 @@ import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDashboardSession } from "@/lib/dashboard";
-import { getSiteConfig } from "./actions";
+import { getSiteConfig, getIntegrationsConfig } from "./actions";
 import { SiteConfigForm } from "./site-config-form";
+import { IntegrationsForm } from "./integrations-form";
 
 export default async function SiteConfigPage() {
   const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
   if (!isSuperAdmin && !allowedMenus?.includes("Site Config")) redirect("/dashboard");
 
-  const config = await getSiteConfig();
+  const [config, integrationsStatus] = await Promise.all([
+    getSiteConfig(),
+    getIntegrationsConfig(),
+  ]);
 
   return (
     <>
@@ -26,6 +30,20 @@ export default async function SiteConfigPage() {
             <SiteConfigForm config={config} />
           </CardContent>
         </Card>
+
+        {integrationsStatus && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Integrations</CardTitle>
+              <CardDescription>
+                Cloudinary image hosting and Stripe payment credentials. Stored in the database — no redeploy needed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IntegrationsForm values={integrationsStatus} />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

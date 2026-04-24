@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: TourDetailsPageProps): Promis
     avgRating,
   } as Tour;
 
-  const s = getSeoSettingsSync();
+  const s = await getSeoSettingsSync();
   return buildMetadata(s, {
     title: tour.name,
     description: tour.description
@@ -133,7 +133,7 @@ export default async function TourDetailsPage({ params }: TourDetailsPageProps) 
   const galleryUrls = tour.gallery ? tour.gallery.split(",").map((u) => u.trim()).filter(Boolean) : [];
   const rating = tour.avgRating ? tour.avgRating.toFixed(1) : null;
 
-  const seoSettings = getSeoSettingsSync();
+  const seoSettings = await getSeoSettingsSync();
   const tourSchema = buildTourSchema(seoSettings, tour);
 
   return (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, CalendarIcon, ImageIcon, PenLine, UserIcon } from "lucide-react";
+import { ArrowRight, CalendarIcon, ImageIcon, PenLine, UserIcon, Sparkles } from "lucide-react";
 
 export type BlogPost = {
   id: string;
@@ -15,9 +15,30 @@ export type BlogPost = {
 };
 
 const cardAccents = [
-  { bar: "from-amber-400 to-orange-500",  tag: "bg-amber-50 border-amber-200 text-amber-700" },
-  { bar: "from-cyan-400 to-sky-500",      tag: "bg-cyan-50 border-cyan-200 text-cyan-700" },
-  { bar: "from-emerald-400 to-teal-500",  tag: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+  {
+    bar: "from-amber-400 to-orange-500",
+    glow: "bg-amber-400/20",
+    tagStyle: "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700",
+    metaBg: "bg-gradient-to-r from-amber-50/80 to-slate-50",
+    btnGrad: "from-amber-500 to-orange-600",
+    btnShadow: "shadow-amber-500/30",
+  },
+  {
+    bar: "from-indigo-400 to-violet-500",
+    glow: "bg-indigo-400/20",
+    tagStyle: "bg-gradient-to-r from-indigo-50 to-violet-50 border-indigo-200 text-indigo-700",
+    metaBg: "bg-gradient-to-r from-indigo-50/80 to-slate-50",
+    btnGrad: "from-indigo-500 to-violet-600",
+    btnShadow: "shadow-indigo-500/30",
+  },
+  {
+    bar: "from-emerald-400 to-teal-500",
+    glow: "bg-emerald-400/20",
+    tagStyle: "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700",
+    metaBg: "bg-gradient-to-r from-emerald-50/80 to-slate-50",
+    btnGrad: "from-emerald-500 to-teal-600",
+    btnShadow: "shadow-emerald-500/30",
+  },
 ];
 
 export function BlogPreview({ posts }: { posts: BlogPost[] }) {
@@ -26,8 +47,8 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
     <section id="blog" className="relative overflow-hidden px-4 py-24 sm:px-6">
       {/* Background glows */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-40 left-1/4 size-125 rounded-full bg-amber-300/10 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 size-96 rounded-full bg-cyan-300/10 blur-3xl" />
+        <div className="absolute -top-40 left-1/4 size-96 rounded-full bg-amber-300/10 blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 size-96 rounded-full bg-indigo-300/10 blur-3xl" />
         <div className="absolute top-1/2 -left-32 size-80 rounded-full bg-violet-300/8 blur-3xl" />
       </div>
 
@@ -35,8 +56,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
         {/* Section header */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-4">
-            {/* Pill badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-700 animate-in fade-in slide-in-from-left-4 duration-500">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-700 animate-in fade-in slide-in-from-left-4 duration-500">
               <span className="relative flex size-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-amber-600" />
@@ -50,8 +70,8 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
             >
               From{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">Our Blog</span>
-                <span className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60" aria-hidden="true" />
+                <span className="relative z-10 bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">Our Blog</span>
+                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-indigo-400/50 to-violet-400/50" aria-hidden="true" />
               </span>
             </h2>
 
@@ -65,7 +85,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
 
           <Link
             href="/blog"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800 animate-in fade-in slide-in-from-right-4 duration-500"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/35 hover:from-indigo-500 hover:to-violet-500 animate-in fade-in slide-in-from-right-4 duration-500"
             style={{ animationDelay: "160ms" }}
           >
             View All Posts
@@ -79,7 +99,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
             className="mt-12 flex flex-col items-center justify-center gap-5 rounded-[2rem] border border-dashed border-slate-200 bg-white/60 py-20 text-center backdrop-blur-sm animate-in fade-in duration-500"
             style={{ animationDelay: "200ms" }}
           >
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 shadow-sm">
               <PenLine className="size-8 text-slate-400" />
             </div>
             <div className="space-y-1.5">
@@ -109,8 +129,11 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                 <article
                   key={post.id}
                   style={{ animationDelay: `${200 + i * 80}ms` }}
-                  className="group animate-in fade-in slide-in-from-bottom-4 duration-500 relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-lg shadow-slate-200/60 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80"
+                  className="group animate-in fade-in slide-in-from-bottom-4 duration-500 relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-lg shadow-slate-200/60 transition-all hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-300/50"
                 >
+                  {/* Hover glow */}
+                  <div className={`pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
+
                   {/* Cover image */}
                   <div className="relative h-52 w-full shrink-0 overflow-hidden bg-slate-100">
                     {post.coverImage ? (
@@ -121,17 +144,25 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     ) : (
-                      <div className="flex h-full flex-col items-center justify-center gap-2 bg-linear-to-br from-slate-100 to-slate-200">
+                      <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-slate-100 to-slate-200">
                         <ImageIcon className="size-10 text-slate-300" />
                         <span className="text-xs font-medium text-slate-400">No cover</span>
                       </div>
                     )}
                     {/* Bottom gradient overlay */}
-                    <div className="absolute inset-0 bg-linear-to-t from-slate-950/40 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent" />
+
+                    {/* Sparkle badge */}
+                    {i === 0 && (
+                      <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-amber-400/95 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+                        <Sparkles className="size-2.5" />
+                        Featured
+                      </div>
+                    )}
                   </div>
 
                   {/* Accent bar */}
-                  <div className={`h-1 w-full shrink-0 bg-linear-to-r ${accent.bar}`} />
+                  <div className={`h-1 w-full shrink-0 bg-gradient-to-r ${accent.bar}`} />
 
                   {/* Body */}
                   <div className="flex flex-1 flex-col gap-3 p-5">
@@ -141,7 +172,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                         {tagList.slice(0, 2).map((tag) => (
                           <span
                             key={tag}
-                            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${accent.tag}`}
+                            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${accent.tagStyle}`}
                           >
                             {tag}
                           </span>
@@ -162,7 +193,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                     </div>
 
                     {/* Author + date */}
-                    <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
+                    <div className={`flex items-center gap-3 rounded-xl px-3 py-2 border border-slate-100 ${accent.metaBg}`}>
                       <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
                         <UserIcon className="size-3 text-slate-400" />
                         <span className="truncate max-w-20">{post.authorName || "TourVibe"}</span>
@@ -181,7 +212,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                     {/* CTA */}
                     <Link
                       href={`/blog/${post.slug}`}
-                      className="group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-slate-800"
+                      className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 ${accent.btnGrad} ${accent.btnShadow}`}
                     >
                       Read more
                       <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />

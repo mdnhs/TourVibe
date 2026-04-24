@@ -21,6 +21,7 @@ import {
   ChevronRightIcon,
   SearchIcon,
   SlidersHorizontalIcon,
+  InboxIcon,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -45,6 +46,7 @@ import {
 export function AppSidebar({
   user,
   unreadNotifications = 0,
+  unreadMessages = 0,
   allowedMenus = null,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
@@ -55,6 +57,7 @@ export function AppSidebar({
     avatar?: string | null;
   };
   unreadNotifications?: number;
+  unreadMessages?: number;
   allowedMenus?: string[] | null;
 }) {
   const pathname = usePathname();
@@ -112,6 +115,12 @@ export function AppSidebar({
       label: "Notifications",
       href: "/dashboard/notifications",
       icon: BellIcon,
+    },
+    {
+      label: "Messages",
+      href: "/dashboard/messages",
+      icon: InboxIcon,
+      adminOnly: true,
     },
     {
       label: "Blog",
@@ -189,19 +198,25 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="pb-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
+              className="data-[slot=sidebar-menu-button]:p-1.5! group/brand h-auto py-2"
               render={<Link href="/dashboard" />}
               tooltip="TourVibe"
             >
-              <CarFrontIcon className="size-5!" />
-              <span className="text-base font-semibold">TourVibe</span>
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/30">
+                <CarFrontIcon className="size-4! text-white" />
+              </div>
+              <div className="flex flex-col gap-0 leading-none">
+                <span className="text-sm font-bold tracking-tight">TourVibe</span>
+                <span className="text-[10px] font-medium text-muted-foreground/70 group-hover/brand:text-muted-foreground transition-colors">Admin Panel</span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <div className="mx-2 h-px bg-gradient-to-r from-transparent via-indigo-400/30 to-transparent dark:via-indigo-500/20" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -220,6 +235,7 @@ export function AppSidebar({
                     item.items?.some((sub) => pathname.startsWith(sub.href));
 
                 const isNotif = item.href === "/dashboard/notifications";
+                const isMessages = item.href === "/dashboard/messages";
 
                 return (
                   <SidebarMenuItem key={item.label}>
@@ -229,8 +245,11 @@ export function AppSidebar({
                           onClick={() => toggleMenu(item.label)}
                           isActive={isActive}
                           tooltip={item.label}
+                          className={isActive ? "sidebar-gradient-active text-primary font-medium" : ""}
                         >
-                          <Icon />
+                          <div className={`flex size-5 shrink-0 items-center justify-center rounded-md transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                            <Icon className="size-4" />
+                          </div>
                           <span>{item.label}</span>
                           <ChevronRightIcon
                             className={`ml-auto transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
@@ -243,6 +262,7 @@ export function AppSidebar({
                                 <SidebarMenuSubButton
                                   render={<Link href={subItem.href} />}
                                   isActive={pathname === subItem.href}
+                                  className={pathname === subItem.href ? "text-primary font-medium bg-primary/8" : ""}
                                 >
                                   {subItem.icon && (
                                     <subItem.icon className="size-4" />
@@ -260,15 +280,21 @@ export function AppSidebar({
                           render={<Link href={item.href!} />}
                           isActive={isActive}
                           tooltip={item.label}
+                          className={isActive ? "sidebar-gradient-active text-primary font-medium" : ""}
                         >
-                          <Icon />
+                          <div className={`flex size-5 shrink-0 items-center justify-center rounded-md transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                            <Icon className="size-4" />
+                          </div>
                           <span>{item.label}</span>
                         </SidebarMenuButton>
                         {isNotif && unreadNotifications > 0 && (
-                          <SidebarMenuBadge>
-                            {unreadNotifications > 99
-                              ? "99+"
-                              : unreadNotifications}
+                          <SidebarMenuBadge className="bg-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm shadow-violet-500/40">
+                            {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                          </SidebarMenuBadge>
+                        )}
+                        {isMessages && unreadMessages > 0 && (
+                          <SidebarMenuBadge className="bg-indigo-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm shadow-indigo-500/40">
+                            {unreadMessages > 99 ? "99+" : unreadMessages}
                           </SidebarMenuBadge>
                         )}
                       </>
@@ -281,7 +307,7 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarSeparator />
+        <div className="mx-2 h-px bg-gradient-to-r from-transparent via-indigo-400/30 to-transparent dark:via-indigo-500/20" />
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />

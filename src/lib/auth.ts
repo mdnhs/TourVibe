@@ -5,7 +5,7 @@ import { admin } from "better-auth/plugins";
 import { prisma } from "@/lib/prisma";
 import { ac, roles } from "@/lib/permissions";
 
-const appUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const authSecret =
   process.env.BETTER_AUTH_SECRET ??
   "tourvibe-dev-secret-change-me-please-replace-2026";

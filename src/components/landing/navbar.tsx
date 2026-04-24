@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CarFront, ArrowRight, Menu, X } from "lucide-react";
+import { CarFront, ArrowRight, Menu, X, Sparkles } from "lucide-react";
 import { Session } from "better-auth";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,7 +66,6 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
     };
   }, [pathname]);
 
-  // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const isActive = (href: string) => {
@@ -84,20 +83,21 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
     <div className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6">
       <header
         className={cn(
-          "mx-auto max-w-6xl rounded-full border px-4 py-2.5 transition-all duration-300",
+          "mx-auto max-w-6xl rounded-2xl border px-4 py-2.5 transition-all duration-300",
           scrolled
-            ? "border-white/80 bg-white/95 shadow-xl shadow-slate-900/10 backdrop-blur-lg"
-            : "border-white/60 bg-white/80 shadow-lg shadow-slate-900/6 backdrop-blur-md",
+            ? "border-white/90 bg-white/97 shadow-2xl shadow-slate-900/12 backdrop-blur-xl"
+            : "border-white/70 bg-white/85 shadow-lg shadow-slate-900/8 backdrop-blur-md",
         )}
       >
         <div className="flex items-center justify-between">
-          {/* ── Logo ── */}
+          {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105 overflow-hidden">
+            <div className="relative flex size-9 items-center justify-center rounded-xl overflow-hidden shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
               {logoUrl ? (
-                <Image src={logoUrl} alt={siteName} width={36} height={36} className="object-cover" />
+                <Image src={logoUrl} alt={siteName} width={36} height={36} className="relative object-cover" />
               ) : (
-                <CarFront className="size-[17px]" />
+                <CarFront className="relative size-[17px] text-white" />
               )}
             </div>
             <div className="hidden sm:block">
@@ -110,7 +110,7 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
             </div>
           </Link>
 
-          {/* ── Desktop nav ── */}
+          {/* Desktop nav */}
           <nav className="hidden items-center gap-0.5 md:flex">
             {navLinks.map((link) => {
               const active = isActive(link.href);
@@ -119,18 +119,19 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "group relative rounded-xl px-3.5 py-2 text-[13px] font-medium transition-all",
+                    "group relative rounded-xl px-3.5 py-2 text-[13px] font-medium transition-all duration-200",
                     active
-                      ? "bg-slate-100 text-slate-900"
+                      ? "bg-gradient-to-br from-indigo-50 to-violet-50 text-indigo-700"
                       : "text-slate-500 hover:bg-slate-100/70 hover:text-slate-900",
                   )}
                 >
                   {link.label}
-                  {/* Active / hover underline dot */}
                   <span
                     className={cn(
-                      "absolute bottom-1.5 left-1/2 -translate-x-1/2 h-1 rounded-full bg-amber-400 transition-all duration-200",
-                      active ? "w-1" : "w-0 group-hover:w-1",
+                      "absolute bottom-1.5 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all duration-200",
+                      active
+                        ? "w-4 bg-gradient-to-r from-indigo-500 to-violet-500"
+                        : "w-0 bg-gradient-to-r from-indigo-400 to-violet-400 group-hover:w-1",
                     )}
                   />
                 </Link>
@@ -138,12 +139,12 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
             })}
           </nav>
 
-          {/* ── CTA + mobile toggle ── */}
+          {/* CTA + mobile toggle */}
           <div className="flex items-center gap-2">
             {session ? (
               <Link
                 href="/dashboard"
-                className="group inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-[13px] font-bold text-slate-950 shadow-md shadow-amber-400/25 transition-all hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-amber-400/30"
+                className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
               >
                 Dashboard
                 <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -158,15 +159,15 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
                 </Link>
                 <Link
                   href="/signup"
-                  className="group inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800"
+                  className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:from-indigo-500 hover:to-violet-500"
                 >
-                  Sign Up
+                  <Sparkles className="size-3 opacity-80" />
+                  Get Started
                   <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </>
             )}
 
-            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen((o) => !o)}
               className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 md:hidden"
@@ -177,7 +178,7 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
           </div>
         </div>
 
-        {/* ── Mobile menu ── */}
+        {/* Mobile menu */}
         {mobileOpen && (
           <div className="mt-2.5 border-t border-slate-100 pt-3 pb-2 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
             <nav className="flex flex-col gap-0.5">
@@ -191,13 +192,13 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
                     className={cn(
                       "flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
                       active
-                        ? "bg-slate-100 text-slate-900"
+                        ? "bg-gradient-to-r from-indigo-50 to-violet-50 text-indigo-700"
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
                     )}
                   >
                     {link.label}
                     {active && (
-                      <span className="size-1.5 rounded-full bg-amber-400" />
+                      <span className="size-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" />
                     )}
                   </Link>
                 );
@@ -207,7 +208,7 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
             <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
               {session ? (
                 <Link href="/dashboard" className="flex-1">
-                  <button className="w-full rounded-xl bg-amber-400 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300">
+                  <button className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                     Dashboard
                   </button>
                 </Link>
@@ -219,8 +220,8 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
                     </button>
                   </Link>
                   <Link href="/signup" className="flex-1">
-                    <button className="w-full rounded-xl bg-slate-950 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800">
-                      Sign Up
+                    <button className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
+                      Get Started
                     </button>
                   </Link>
                 </>

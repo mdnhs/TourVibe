@@ -213,12 +213,17 @@ model CustomRole {
   @@map("custom_role")
 }
 
-model Settings {
-  key       String   @id
-  value     String
-  updatedAt DateTime @updatedAt
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  status    String   @default("unread")
+  createdAt DateTime @default(now())
 
-  @@map("settings")
+  @@map("contact_message")
 }
 
 model BlogPost {
@@ -241,4 +246,12 @@ model BlogPost {
   author User @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   @@map("blog_post")
+}
+
+model Settings {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
 }

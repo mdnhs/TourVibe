@@ -61,9 +61,12 @@ export default async function NotificationsPage() {
           subtitle="Send and manage platform notifications"
         />
         <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>Send Notification</CardTitle>
+          <Card className="overflow-hidden border-0 shadow-md">
+            <div className="h-1 w-full bg-linear-to-r from-violet-500 via-blue-500 to-cyan-400" />
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                Send Notification
+              </CardTitle>
               <CardDescription>
                 Broadcast to all users or target a specific person.
               </CardDescription>
@@ -73,9 +76,12 @@ export default async function NotificationsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Sent Notifications</CardTitle>
+          <Card className="overflow-hidden border-0 shadow-md">
+            <div className="h-1 w-full bg-linear-to-r from-emerald-500 via-teal-400 to-cyan-400" />
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                Sent Notifications
+              </CardTitle>
               <CardDescription>
                 {notifications.length} notification
                 {notifications.length !== 1 ? "s" : ""} sent so far.

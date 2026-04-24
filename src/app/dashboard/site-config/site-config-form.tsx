@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, SaveIcon } from "lucide-react";
 import { updateSiteConfig } from "./actions";
 import { type SiteConfig } from "./types";
+import { ImageUploadField } from "@/components/ui/image-upload";
 
 const ICON_OPTIONS = [
   "Compass", "Plane", "Users", "Map", "Headset",
@@ -117,11 +118,13 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
             defaultValue={config.tagline}
             hint="Short description under the logo."
           />
-          <Field
-            label="Logo URL"
+          <ImageUploadField
             name="logoUrl"
+            label="Logo"
             defaultValue={config.logoUrl}
             hint="Leave empty to use the default car icon."
+            folder="tourvibe/site-config/logo"
+            aspectRatio="square"
           />
           <Field
             label="Footer Tagline"
@@ -132,11 +135,13 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
 
         {/* ── Hero ── */}
         <TabsContent value="hero" className="space-y-4">
-          <Field
-            label="Hero Background Image URL"
+          <ImageUploadField
             name="heroImage"
+            label="Hero Background Image"
             defaultValue={config.heroImage}
-            hint='Use an absolute URL or a path like "/cover.jpg".'
+            hint='Upload or use an absolute URL. Defaults to "/cover.jpg".'
+            folder="tourvibe/site-config/hero"
+            aspectRatio="wide"
           />
           <Field
             label="Badge Text"
@@ -162,20 +167,24 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
             defaultValue={config.heroSubtitle}
             rows={2}
           />
-          <div>
-            <p className="mb-2 text-sm font-medium">Popular Tags (up to 3)</p>
-            <div className="grid grid-cols-[60px_1fr] gap-2 mb-2 items-end">
-              <Field label="Emoji" name="heroTag1Emoji" defaultValue={config.heroTag1Emoji} />
-              <Field label="Label" name="heroTag1Label" defaultValue={config.heroTag1Label} />
-            </div>
-            <div className="grid grid-cols-[60px_1fr] gap-2 mb-2 items-end">
-              <Field label="Emoji" name="heroTag2Emoji" defaultValue={config.heroTag2Emoji} />
-              <Field label="Label" name="heroTag2Label" defaultValue={config.heroTag2Label} />
-            </div>
-            <div className="grid grid-cols-[60px_1fr] gap-2 items-end">
-              <Field label="Emoji" name="heroTag3Emoji" defaultValue={config.heroTag3Emoji} />
-              <Field label="Label" name="heroTag3Label" defaultValue={config.heroTag3Label} />
-            </div>
+          <div className="space-y-3">
+            <p className="text-sm font-medium">Popular Tags (up to 3)</p>
+            <p className="text-[11px] text-muted-foreground -mt-1">Leave URL empty to search tours by label instead.</p>
+            {([1, 2, 3] as const).map((n) => (
+              <div key={n} className="rounded-lg border border-border/60 bg-muted/10 p-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground">Tag {n}</p>
+                <div className="grid grid-cols-[60px_1fr] gap-2 items-end">
+                  <Field label="Emoji" name={`heroTag${n}Emoji`} defaultValue={(config as SiteConfig)[`heroTag${n}Emoji` as keyof SiteConfig]} />
+                  <Field label="Label" name={`heroTag${n}Label`} defaultValue={(config as SiteConfig)[`heroTag${n}Label` as keyof SiteConfig]} />
+                </div>
+                <Field
+                  label="Custom URL"
+                  name={`heroTag${n}Url`}
+                  defaultValue={(config as SiteConfig)[`heroTag${n}Url` as keyof SiteConfig]}
+                  hint='e.g. /tours?type=coastal or https://example.com'
+                />
+              </div>
+            ))}
           </div>
         </TabsContent>
 

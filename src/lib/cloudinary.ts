@@ -1,15 +1,22 @@
 import { v2 as cloudinary } from "cloudinary";
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
-  api_key: process.env.CLOUDINARY_API_KEY!,
-  api_secret: process.env.CLOUDINARY_API_SECRET!,
-});
+import { getIntegrations } from "@/lib/integrations";
 
 export async function uploadToCloudinary(
   file: File,
   folder = "tourvibe",
 ): Promise<string> {
+  const cfg = await getIntegrations();
+
+  if (!cfg.cloudinaryCloudName || !cfg.cloudinaryApiKey || !cfg.cloudinaryApiSecret) {
+    throw new Error("Cloudinary credentials not configured. Set them in Site Config → Integrations.");
+  }
+
+  cloudinary.config({
+    cloud_name: cfg.cloudinaryCloudName,
+    api_key:    cfg.cloudinaryApiKey,
+    api_secret: cfg.cloudinaryApiSecret,
+  });
+
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 

@@ -3,13 +3,18 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import crypto from "node:crypto";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16" as any,
-});
+import { getIntegrations } from "@/lib/integrations";
 
 export async function POST(req: NextRequest) {
   try {
+    const integrations = await getIntegrations();
+    if (!integrations.stripeSecretKey) {
+      return NextResponse.json({ error: "Stripe not configured." }, { status: 503 });
+    }
+    const stripe = new Stripe(integrations.stripeSecretKey, {
+      apiVersion: "2023-10-16" as any,
+    });
+
     const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

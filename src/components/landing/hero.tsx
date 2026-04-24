@@ -176,9 +176,9 @@ export function Hero({
   heroTitleHighlight = "Ireland.",
   heroSubtitle = "Book your next adventure with our curated selection of scenic road trips across the Emerald Isle.",
   popularTags = [
-    { label: "Wild Atlantic Way", emoji: "🌊" },
-    { label: "Ring of Kerry", emoji: "🏔️" },
-    { label: "Cliffs of Moher", emoji: "🌿" },
+    { label: "Wild Atlantic Way", emoji: "🌊", url: "" },
+    { label: "Ring of Kerry", emoji: "🏔️", url: "" },
+    { label: "Cliffs of Moher", emoji: "🌿", url: "" },
   ],
 }: {
   stats: { value: string; label: string }[];
@@ -195,7 +195,7 @@ export function Hero({
   heroTitle?: string;
   heroTitleHighlight?: string;
   heroSubtitle?: string;
-  popularTags?: { label: string; emoji: string }[];
+  popularTags?: { label: string; emoji: string; url?: string }[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -297,20 +297,39 @@ export function Hero({
               <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35 mr-1 shrink-0">
                 Popular
               </span>
-              {popularTags.filter(t => t.label).map((tag, i) => (
-                <button
-                  key={tag.label}
-                  onClick={() =>
-                    router.push(`/tours?q=${encodeURIComponent(tag.label)}`)
-                  }
-                  style={{ animationDelay: `${320 + i * 60}ms` }}
-                  className="group animate-in fade-in slide-in-from-bottom-2 duration-500 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:bg-amber-400/15 hover:text-white hover:shadow-lg hover:shadow-amber-400/10 active:scale-95"
-                >
-                  <span className="text-sm leading-none">{tag.emoji}</span>
-                  {tag.label}
-                  <ChevronRight className="size-3 text-white/25 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
-                </button>
-              ))}
+              {popularTags.filter(t => t.label).map((tag, i) => {
+                const href = tag.url?.trim() || `/tours?q=${encodeURIComponent(tag.label)}`;
+                const tagClass = "group animate-in fade-in slide-in-from-bottom-2 duration-500 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:bg-amber-400/15 hover:text-white hover:shadow-lg hover:shadow-amber-400/10 active:scale-95";
+                const inner = (
+                  <>
+                    <span className="text-sm leading-none">{tag.emoji}</span>
+                    {tag.label}
+                    <ChevronRight className="size-3 text-white/25 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
+                  </>
+                );
+                const isExternal = tag.url?.startsWith("http");
+                return isExternal ? (
+                  <a
+                    key={tag.label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ animationDelay: `${320 + i * 60}ms` }}
+                    className={tagClass}
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <button
+                    key={tag.label}
+                    onClick={() => router.push(href)}
+                    style={{ animationDelay: `${320 + i * 60}ms` }}
+                    className={tagClass}
+                  >
+                    {inner}
+                  </button>
+                );
+              })}
             </div>
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
