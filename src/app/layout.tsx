@@ -47,15 +47,6 @@ export default async function RootLayout({
         {s.yandexVerification && (
           <meta name="yandex-verification" content={s.yandexVerification} />
         )}
-
-        {/* JSON-LD Structured Data — safe in <head> per React 19 */}
-        {schemas.map((schema, i) => (
-          <script
-            key={i}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-          />
-        ))}
       </head>
 
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
@@ -88,14 +79,24 @@ export default async function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-          scriptProps={{ async: true }}
         >
           <NuqsAdapter>
             <TooltipProvider>{children}</TooltipProvider>
           </NuqsAdapter>
         </ThemeProvider>
 
-        {/* Google Tag Manager — next/script avoids React 19 script warning */}
+        {/* JSON-LD Structured Data — next/script is better outside <head> */}
+        {schemas.map((schema, i) => (
+          <Script
+            key={i}
+            id={`schema-${i}`}
+            type="application/ld+json"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
+
+        {/* Google Tag Manager */}
         {s.googleTagManagerId && (
           <Script
             id="gtm"

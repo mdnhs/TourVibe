@@ -27,7 +27,7 @@ export async function submitContactForm(formData: FormData) {
   return { success: true };
 }
 
-export async function updateMessageStatus(id: string, status: "read" | "replied") {
+export async function updateMessageStatus(id: string, status: "unread" | "read" | "replied") {
   await requireDashboardSession();
   await prisma.contactMessage.update({ where: { id }, data: { status } });
   revalidatePath("/dashboard/messages");
@@ -36,5 +36,22 @@ export async function updateMessageStatus(id: string, status: "read" | "replied"
 export async function deleteMessage(id: string) {
   await requireDashboardSession();
   await prisma.contactMessage.delete({ where: { id } });
+  revalidatePath("/dashboard/messages");
+}
+
+export async function bulkUpdateStatus(ids: string[], status: "read" | "replied") {
+  await requireDashboardSession();
+  await prisma.contactMessage.updateMany({
+    where: { id: { in: ids } },
+    data: { status },
+  });
+  revalidatePath("/dashboard/messages");
+}
+
+export async function bulkDeleteMessages(ids: string[]) {
+  await requireDashboardSession();
+  await prisma.contactMessage.deleteMany({
+    where: { id: { in: ids } },
+  });
   revalidatePath("/dashboard/messages");
 }

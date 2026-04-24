@@ -1,5 +1,13 @@
+"use client";
+
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
+import { authClient } from "@/lib/auth-client";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function SiteHeader({
   title,
@@ -8,12 +16,19 @@ export function SiteHeader({
   title: string;
   subtitle: string;
 }) {
+  const router = useRouter();
   const date = new Date().toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+
+  async function handleSignOut() {
+    await authClient.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-10 flex h-(--header-height) shrink-0 flex-col transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -30,10 +45,31 @@ export function SiteHeader({
             </div>
           </div>
 
-          <div className="hidden items-center gap-2 sm:flex">
-            <div className="flex items-center gap-2 rounded-full border border-indigo-200/60 bg-indigo-50/60 px-3 py-1.5 text-xs text-indigo-700/80 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300/70">
-              <span className="inline-block size-1.5 animate-pulse rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-              <span className="font-semibold">{date}</span>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 lg:flex mr-2">
+              <div className="flex items-center gap-2 rounded-full border border-indigo-200/60 bg-indigo-50/60 px-3 py-1.5 text-[10px] text-indigo-700/80 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300/70">
+                <span className="inline-block size-1.5 animate-pulse rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                <span className="font-semibold">{date}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <ModeToggle />
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon-sm" 
+                    className="size-8 rounded-full border border-border/40 bg-background/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="size-4" />
+                    <span className="sr-only">Sign out</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Sign out</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>

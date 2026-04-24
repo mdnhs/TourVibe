@@ -2,74 +2,37 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { ColumnDef } from "@tanstack/react-table";
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  ChevronDown,
   ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Eye,
-  LayoutIcon,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
   Star,
   Trash,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
-
-import { deleteReview, deleteReviews } from "./actions";
+import { useQueryState, parseAsString } from "nuqs";
 import Link from "next/link";
 import { DateRangePicker } from "./date-range-picker";
 import { DateRange } from "react-day-picker";
 import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 
-import { Badge } from "@/components/ui/badge";
+import { deleteReview, deleteReviews } from "./actions";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { DataTable, DataTableColumnHeader } from "@/components/ui/data-table";
 
 export type Review = {
   id: string;
@@ -117,27 +80,12 @@ export function ReviewTable({
 }: ReviewTableProps) {
   const router = useRouter();
   const [data, setData] = React.useState<Review[]>(() => reviews);
+  const [isPending, startTransition] = React.useTransition();
+  const [viewId, setViewId] = useQueryState("view", { shallow: true });
 
   React.useEffect(() => {
     setData(reviews);
   }, [reviews]);
-
-  const [search, setSearch] = useQueryState(
-    "search",
-    parseAsString.withDefault("").withOptions({ shallow: true }),
-  );
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
-  );
-  const [pageSize, setPageSize] = useQueryState(
-    "size",
-    parseAsInteger.withDefault(10).withOptions({ shallow: true }),
-  );
-  const [ratingFilter, setRatingFilter] = useQueryState(
-    "rating",
-    parseAsString.withDefault("all").withOptions({ shallow: true }),
-  );
 
   const [from, setFrom] = useQueryState(
     "from",
@@ -161,62 +109,9 @@ export function ReviewTable({
     setTo(range?.to ? range.to.toISOString() : null);
   };
 
-  const [viewId, setViewId] = useQueryState("view", { shallow: true });
-
   const activeReview = React.useMemo(() => {
     return data.find((r) => r.id === viewId);
   }, [data, viewId]);
-
-  const filteredData = React.useMemo(() => {
-    let result = [...data];
-
-    if (search) {
-      const s = search.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.tourPackageName.toLowerCase().includes(s) ||
-          r.userName.toLowerCase().includes(s) ||
-          r.userEmail.toLowerCase().includes(s) ||
-          (r.comment && r.comment.toLowerCase().includes(s)),
-      );
-    }
-
-    if (ratingFilter !== "all") {
-      const r = parseInt(ratingFilter);
-      result = result.filter((review) => review.rating === r);
-    }
-
-    if (dateRange?.from) {
-      const start = startOfDay(dateRange.from);
-      const end = dateRange.to
-        ? endOfDay(dateRange.to)
-        : endOfDay(dateRange.from);
-      result = result.filter((review) => {
-        const date = new Date(review.createdAt);
-        return isWithinInterval(date, { start, end });
-      });
-    }
-
-    return result;
-  }, [data, search, ratingFilter, dateRange]);
-
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-
-  const [isPending, startTransition] = React.useTransition();
-
-  const pagination = React.useMemo(
-    () => ({
-      pageIndex: page - 1,
-      pageSize: pageSize,
-    }),
-    [page, pageSize],
-  );
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this review?")) {
@@ -226,28 +121,6 @@ export function ReviewTable({
           toast.error(result.error);
         } else {
           toast.success("Review deleted successfully");
-          setData((prev) => prev.filter((r) => r.id !== id));
-          router.refresh();
-        }
-      });
-    }
-  };
-
-  const handleBulkDelete = () => {
-    const selectedIds = Object.keys(rowSelection);
-    if (selectedIds.length === 0) return;
-
-    if (
-      confirm(`Are you sure you want to delete ${selectedIds.length} reviews?`)
-    ) {
-      startTransition(async () => {
-        const result = await deleteReviews(selectedIds);
-        if (result?.error) {
-          toast.error(result.error);
-        } else {
-          toast.success("Reviews deleted successfully");
-          setData((prev) => prev.filter((r) => !selectedIds.includes(r.id)));
-          setRowSelection({});
           router.refresh();
         }
       });
@@ -263,33 +136,40 @@ export function ReviewTable({
     return counts;
   }, [data]);
 
+  const filteredByDate = React.useMemo(() => {
+    if (!dateRange?.from) return data;
+    const start = startOfDay(dateRange.from);
+    const end = dateRange.to
+      ? endOfDay(dateRange.to)
+      : endOfDay(dateRange.from);
+    return data.filter((review) => {
+      const date = new Date(review.createdAt);
+      return isWithinInterval(date, { start, end });
+    });
+  }, [data, dateRange]);
+
   const columns: ColumnDef<Review>[] = [
     {
       id: "select",
-      size: 40,
       header: ({ table }) => (
-        <div className="flex items-center justify-center w-10">
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        </div>
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
       ),
       cell: ({ row }) => {
         const canManage = isSuperAdmin || row.original.userId === currentUserId;
         return (
-          <div className="flex items-center justify-center w-10">
-            <Checkbox
-              checked={row.getIsSelected()}
-              onCheckedChange={(value) => row.toggleSelected(!!value)}
-              disabled={!canManage}
-              aria-label="Select row"
-            />
-          </div>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            disabled={!canManage}
+            aria-label="Select row"
+          />
         );
       },
       enableSorting: false,
@@ -297,25 +177,27 @@ export function ReviewTable({
     },
     {
       accessorKey: "tourPackageName",
-      header: "Tour Package",
-      size: 200,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Tour Package" />
+      ),
       cell: ({ row }) => (
-        <div className="font-medium truncate w-[200px]" title={row.original.tourPackageName}>
+        <div className="font-medium truncate max-w-[200px]" title={row.original.tourPackageName}>
           {row.original.tourPackageName}
         </div>
       ),
     },
     {
       accessorKey: "userName",
-      header: "User",
-      size: 220,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="User" />
+      ),
       cell: ({ row }) => {
         const review = row.original;
         const name = review.reviewerName || review.userName;
         const image = review.reviewerImage || review.userImage;
 
         return (
-          <div className="flex items-center gap-2 w-[220px]">
+          <div className="flex items-center gap-2">
             <Avatar className="size-8 flex-shrink-0">
               <AvatarImage src={image || ""} />
               <AvatarFallback>{name?.[0]}</AvatarFallback>
@@ -332,131 +214,90 @@ export function ReviewTable({
     },
     {
       accessorKey: "rating",
-      header: "Rating",
-      size: 100,
-      cell: ({ row }) => (
-        <div className="w-[100px]">
-          <StarRating rating={row.original.rating} />
-        </div>
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Rating" />
       ),
+      cell: ({ row }) => <StarRating rating={row.original.rating} />,
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id).toString());
+      },
     },
     {
       accessorKey: "comment",
       header: "Comment",
-      size: 300,
       cell: ({ row }) => (
-        <div className="w-[300px] truncate text-muted-foreground italic text-xs" title={row.original.comment || ""}>
+        <div className="max-w-[300px] truncate text-muted-foreground italic text-xs" title={row.original.comment || ""}>
           {row.original.comment || "No comment"}
         </div>
       ),
     },
     {
       accessorKey: "createdAt",
-      header: "Date",
-      size: 100,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Date" />
+      ),
       cell: ({ row }) => (
-        <div className="w-[100px] text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground">
           {new Date(row.original.createdAt).toLocaleDateString()}
         </div>
       ),
     },
     {
       id: "actions",
-      header: "Action",
-      size: 60,
-      enableHiding: false,
       cell: ({ row }) => {
         const review = row.original;
         const canManage = isSuperAdmin || review.userId === currentUserId;
 
         return (
-          <div className="flex justify-center w-10">
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    className="size-8 text-muted-foreground"
-                    size="icon"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="size-8 text-muted-foreground"
+                size="icon"
+                >
+                <MoreVertical className="size-4" />
+                </Button>
+
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={() => setViewId(review.id)}>
+                <Eye className="mr-2 size-4" />
+                View Details
+              </DropdownMenuItem>
+              {canManage && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href={`/dashboard/reviews/${review.id}/edit`}>
+                      <Pencil className="mr-2 size-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => handleDelete(review.id)}
                   >
-                    <MoreHorizontal className="size-4" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem onClick={() => setViewId(review.id)}>
-                  <Eye className="mr-2 size-4" />
-                  View Details
-                </DropdownMenuItem>
-                {canManage && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href={`/dashboard/reviews/${review.id}/edit`}>
-                        <Pencil className="mr-2 size-4" />
-                        Edit
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => handleDelete(review.id)}
-                    >
-                      <Trash className="mr-2 size-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                    <Trash className="mr-2 size-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       },
     },
   ];
 
-  const table = useReactTable({
-    data: filteredData,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    getRowId: (row) => row.id,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const next = updater(pagination);
-        setPage(next.pageIndex + 1);
-        setPageSize(next.pageSize);
-      }
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
-
-  const handleClose = () => {
-    setViewId(null);
-  };
-
   if (viewId && activeReview) {
     const canManage = isSuperAdmin || activeReview.userId === currentUserId;
     return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 px-4 lg:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={handleClose}>
+            <Button variant="ghost" size="icon" onClick={() => setViewId(null)}>
               <ChevronLeft className="size-4" />
             </Button>
             <h2 className="text-2xl font-bold tracking-tight">
@@ -555,225 +396,33 @@ export function ReviewTable({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 px-4 lg:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Tabs
-            value={ratingFilter}
-            onValueChange={setRatingFilter}
-            className="w-auto"
-          >
-            <TabsList>
-              <TabsTrigger value="all">All Reviews</TabsTrigger>
-              {[5, 4, 3, 2, 1].map((star) => (
-                <TabsTrigger
-                  key={star}
-                  value={star.toString()}
-                  className="flex items-center gap-1"
-                >
-                  {star} <Star className="size-3 fill-current" />
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
-          <div className="flex items-center gap-2">
-            <DateRangePicker
-              date={dateRange}
-              setDate={setDateRange}
-              dayCounts={dayCounts}
-            />
-            <div className="relative w-full max-w-sm">
-              <Input
-                placeholder="Search reviews..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-8 w-[200px] lg:w-[300px]"
-              />
-            </div>
-            {Object.keys(rowSelection).length > 0 && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleBulkDelete}
-              >
-                <Trash className="size-4" />
-                <span>
-                  Delete Selected ({Object.keys(rowSelection).length})
-                </span>
-              </Button>
-            )}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button variant="outline" size="sm">
-                    <LayoutIcon className="size-4" />
-                    <span className="hidden lg:inline">Columns</span>
-                    <ChevronDown className="size-4" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end" className="w-48">
-                {table
-                  .getAllColumns()
-                  .filter(
-                    (col) =>
-                      typeof col.accessorFn !== "undefined" && col.getCanHide(),
-                  )
-                  .map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.id}
-                      className="capitalize"
-                      checked={col.getIsVisible()}
-                      onCheckedChange={(value) => col.toggleVisibility(!!value)}
-                    >
-                      {col.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-lg border mx-4 lg:mx-6">
-        <Table>
-          <TableHeader className="bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No reviews found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <PaginationControls table={table} />
-    </div>
-  );
-}
-
-function PaginationControls({
-  table,
-}: {
-  table: ReturnType<typeof useReactTable<Review>>;
-}) {
-  return (
-    <div className="flex items-center justify-between px-4 lg:px-6">
-      <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
-      <div className="flex w-full items-center gap-8 lg:w-fit">
-        {/* Rows per page */}
-        <div className="hidden items-center gap-2 lg:flex">
-          <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Rows per page
-          </Label>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => table.setPageSize(Number(value))}
-          >
-            <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Page indicator */}
-        <div className="flex w-fit items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </div>
-
-        {/* Nav buttons */}
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to first page</span>
-            <ChevronsLeft className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="size-8"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeft className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="size-8"
-            size="icon"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRight className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="hidden size-8 lg:flex"
-            size="icon"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight className="size-4" />
-          </Button>
-        </div>
-      </div>
+    <div className="px-4 lg:px-6">
+      <DataTable
+        columns={columns}
+        data={filteredByDate}
+        searchKey="tourPackageName"
+        searchPlaceholder="Search reviews..."
+        leftToolbar={
+          <DateRangePicker
+            date={dateRange}
+            setDate={setDateRange}
+            dayCounts={dayCounts}
+          />
+        }
+        facetedFilters={[
+          {
+            columnKey: "rating",
+            title: "Rating",
+            options: [
+              { label: "5 Stars", value: "5" },
+              { label: "4 Stars", value: "4" },
+              { label: "3 Stars", value: "3" },
+              { label: "2 Stars", value: "2" },
+              { label: "1 Star", value: "1" },
+            ],
+          },
+        ]}
+      />
     </div>
   );
 }

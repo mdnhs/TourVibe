@@ -64,7 +64,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type BlogPost = {
   id: string;
@@ -431,13 +430,19 @@ export function BlogTable({ posts }: BlogTableProps) {
     <div className="space-y-4">
       <div className="flex flex-col gap-4 px-4 lg:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-auto">
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="published">Published</TabsTrigger>
-              <TabsTrigger value="draft">Draft</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <Select
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+          >
+            <SelectTrigger className="w-[160px] h-8">
+              <SelectValue placeholder="All Posts" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+            </SelectContent>
+          </Select>
 
           <div className="flex items-center gap-2">
             <Input

@@ -2,38 +2,19 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  Row,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import {
   Ban,
-  ChevronDown,
   ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Eye,
-  LayoutIcon,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
   ShieldCheck,
   Trash,
   User as UserIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
+import { useQueryState } from "nuqs";
 
 import { deleteUser, deleteUsers, banUser, unbanUser } from "./actions";
 import { EditUserForm } from "./user-forms";
@@ -44,31 +25,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable, DataTableColumnHeader } from "@/components/ui/data-table";
 
 export type User = {
   id: string;
@@ -89,29 +52,13 @@ interface UserTableProps {
 export function UserTable({ users, currentUserId, customRoles = {} }: UserTableProps) {
   const router = useRouter();
   const [data, setData] = React.useState<User[]>(() => users);
+  const [isPending, startTransition] = React.useTransition();
 
   const allRoleLabels = { ...roleLabels, ...customRoles } as Record<string, string>;
 
   React.useEffect(() => {
     setData(users);
   }, [users]);
-
-  const [search, setSearch] = useQueryState(
-    "search",
-    parseAsString.withDefault("").withOptions({ shallow: true }),
-  );
-  const [tab, setTab] = useQueryState(
-    "tab",
-    parseAsString.withDefault("all").withOptions({ shallow: true }),
-  );
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
-  );
-  const [pageSize, setPageSize] = useQueryState(
-    "size",
-    parseAsInteger.withDefault(10).withOptions({ shallow: true }),
-  );
 
   // nuqs for View/Edit
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
@@ -121,47 +68,6 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     const id = viewId || editId;
     return data.find((u) => u.id === id);
   }, [data, viewId, editId]);
-
-  const filteredData = React.useMemo(() => {
-    let result = [...data];
-
-    // Filter by tab — any role key or "banned"
-    if (tab === "banned") {
-      result = result.filter((u) => u.banned);
-    } else if (tab !== "all") {
-      result = result.filter((u) => u.role === tab);
-    }
-
-    // Filter by search
-    if (search) {
-      const s = search.toLowerCase();
-      result = result.filter(
-        (u) =>
-          u.name.toLowerCase().includes(s) ||
-          u.email.toLowerCase().includes(s),
-      );
-    }
-
-    return result;
-  }, [data, tab, search]);
-
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-
-  const [isPending, startTransition] = React.useTransition();
-
-  const pagination = React.useMemo(
-    () => ({
-      pageIndex: page - 1,
-      pageSize: pageSize,
-    }),
-    [page, pageSize],
-  );
 
   const handleDelete = (id: string) => {
     if (id === currentUserId) {
@@ -175,28 +81,6 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
           toast.error(result.error);
         } else {
           toast.success("User deleted successfully");
-          setData((prev) => prev.filter((u) => u.id !== id));
-          router.refresh();
-        }
-      });
-    }
-  };
-
-  const handleBulkDelete = () => {
-    const selectedIds = Object.keys(rowSelection).filter(id => id !== currentUserId);
-    if (selectedIds.length === 0) return;
-
-    if (
-      confirm(`Are you sure you want to delete ${selectedIds.length} users?`)
-    ) {
-      startTransition(async () => {
-        const result = await deleteUsers(selectedIds);
-        if (result?.error) {
-          toast.error(result.error);
-        } else {
-          toast.success("Users deleted successfully");
-          setData((prev) => prev.filter((u) => !selectedIds.includes(u.id)));
-          setRowSelection({});
           router.refresh();
         }
       });
@@ -214,7 +98,6 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
         toast.error(result.error);
       } else {
         toast.success(user.banned ? "User unbanned" : "User banned");
-        setData((prev) => prev.map(u => u.id === user.id ? { ...u, banned: !user.banned } : u));
         router.refresh();
       }
     });
@@ -224,35 +107,31 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     {
       id: "select",
       header: ({ table }) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        </div>
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
       ),
       cell: ({ row }) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-            disabled={row.original.id === currentUserId}
-          />
-        </div>
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          disabled={row.original.id === currentUserId}
+        />
       ),
       enableSorting: false,
       enableHiding: false,
     },
     {
       accessorKey: "name",
-      header: "User",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="User" />
+      ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -272,7 +151,9 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     },
     {
       accessorKey: "role",
-      header: "Role",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Role" />
+      ),
       cell: ({ row }) => {
         const role = row.original.role;
         const isDefault = role in roleLabels;
@@ -286,10 +167,16 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
           </Badge>
         );
       },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
     },
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: "banned",
+      id: "status",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Status" />
+      ),
       cell: ({ row }) => (
         row.original.banned ? (
           <Badge variant="destructive" className="flex w-fit items-center gap-1">
@@ -303,10 +190,17 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
           </Badge>
         )
       ),
+      filterFn: (row, id, value) => {
+        if (value.includes("banned")) return row.getValue(id) === true;
+        if (value.includes("active")) return row.getValue(id) === false;
+        return true;
+      },
     },
     {
       accessorKey: "createdAt",
-      header: "Joined",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Joined" />
+      ),
       cell: ({ row }) => (
         <div className="text-muted-foreground text-sm">
           {new Date(row.original.createdAt).toLocaleDateString()}
@@ -315,25 +209,21 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     },
     {
       id: "actions",
-      header: "Action",
-      enableHiding: false,
       cell: ({ row }) => {
         const user = row.original;
         const isSelf = user.id === currentUserId;
         return (
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-                  size="icon"
-                >
-                  <MoreHorizontal className="size-4" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              }
-            />
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex size-8 text-muted-foreground"
+                size="icon"
+              >
+                <MoreVertical className="size-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => setViewId(user.id)}>
                 <Eye className="mr-2 size-4" />
@@ -377,48 +267,14 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     },
   ];
 
-  const table = useReactTable({
-    data: filteredData,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    getRowId: (row) => row.id,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const next = updater(pagination);
-        setPage(next.pageIndex + 1);
-        setPageSize(next.pageSize);
-      }
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    manualPagination: false,
-  });
-
   const handleClose = () => {
     setViewId(null);
     setEditId(null);
   };
 
-  // ── Render Logic ──
-
   if (editId && activeUser) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 px-4 lg:px-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={handleClose}>
             <ChevronLeft className="size-4" />
@@ -440,7 +296,7 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
 
   if (viewId && activeUser) {
     return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 px-4 lg:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={handleClose}>
@@ -517,242 +373,36 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
     );
   }
 
+  const roleOptions = [
+    { label: "Admins", value: "super_admin" },
+    { label: "Drivers", value: "driver" },
+    { label: "Tourists", value: "tourist" },
+    ...Object.entries(customRoles).map(([key, label]) => ({ label, value: key })),
+  ];
+
   return (
-    <>
-      <Tabs
-        value={tab}
-        onValueChange={setTab}
-        className="w-full flex-col justify-start gap-6"
-      >
-        {/* ── Toolbar ── */}
-        <div className="flex items-center justify-between px-4 lg:px-6">
-          <div className="flex items-center gap-4 flex-1">
-            <TabsList className="h-auto flex-wrap gap-0.5">
-              <TabsTrigger value="all">
-                All
-                <Badge variant="secondary" className="ml-1 text-[10px]">{data.length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="super_admin">
-                Admins
-                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.role === "super_admin").length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="driver">
-                Drivers
-                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.role === "driver").length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="tourist">
-                Tourists
-                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.role === "tourist").length}</Badge>
-              </TabsTrigger>
-              {/* Custom role tabs */}
-              {Object.keys(customRoles).map((roleKey) => {
-                const count = data.filter((u) => u.role === roleKey).length;
-                if (count === 0) return null;
-                return (
-                  <TabsTrigger key={roleKey} value={roleKey} className="text-violet-700">
-                    {customRoles[roleKey]}
-                    <Badge variant="outline" className="ml-1 text-[10px] border-violet-200 bg-violet-50 text-violet-700">{count}</Badge>
-                  </TabsTrigger>
-                );
-              })}
-              <TabsTrigger value="banned">
-                Banned
-                <Badge variant="secondary" className="ml-1 text-[10px]">{data.filter((u) => u.banned).length}</Badge>
-              </TabsTrigger>
-            </TabsList>
-
-            <div className="relative max-w-sm flex-1">
-              <Input
-                placeholder="Search by name or email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-8"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {Object.keys(rowSelection).length > 0 && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleBulkDelete}
-                disabled={isPending}
-              >
-                <Trash className="size-4" />
-                <span>Delete Selected ({Object.keys(rowSelection).length})</span>
-              </Button>
-            )}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button variant="outline" size="sm">
-                    <LayoutIcon className="size-4" />
-                    <span className="hidden lg:inline">Customize Columns</span>
-                    <ChevronDown className="size-4" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end" className="w-48">
-                {table
-                  .getAllColumns()
-                  .filter(
-                    (col) =>
-                      col.getCanHide(),
-                  )
-                  .map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.id}
-                      className="capitalize"
-                      checked={col.getIsVisible()}
-                      onCheckedChange={(value) => col.toggleVisibility(!!value)}
-                    >
-                      {col.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* ── Table Content ── */}
-        <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader className="sticky top-0 z-10 bg-muted">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          <PaginationControls table={table} />
-        </div>
-      </Tabs>
-    </>
-  );
-}
-
-function PaginationControls({
-  table,
-}: {
-  table: any;
-}) {
-  return (
-    <div className="flex items-center justify-between px-4 py-4">
-      <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
-      <div className="flex w-full items-center gap-8 lg:w-fit">
-        <div className="hidden items-center gap-2 lg:flex">
-          <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Rows per page
-          </Label>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => table.setPageSize(Number(value))}
-          >
-            <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex w-fit items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </div>
-
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to first page</span>
-            <ChevronsLeft className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="size-8"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeft className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="size-8"
-            size="icon"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRight className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="hidden size-8 lg:flex"
-            size="icon"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight className="size-4" />
-          </Button>
-        </div>
-      </div>
+    <div className="px-4 lg:px-6">
+      <DataTable
+        columns={columns}
+        data={users}
+        searchKey="name"
+        searchPlaceholder="Search by name or email..."
+        facetedFilters={[
+          {
+            columnKey: "role",
+            title: "Role",
+            options: roleOptions,
+          },
+          {
+            columnKey: "status",
+            title: "Status",
+            options: [
+              { label: "Active", value: "active" },
+              { label: "Banned", value: "banned" },
+            ],
+          },
+        ]}
+      />
     </div>
   );
 }

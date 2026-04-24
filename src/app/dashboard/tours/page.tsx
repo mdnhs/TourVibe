@@ -36,32 +36,34 @@ export default async function ToursPage() {
   }));
 
   return (
-    <>
+    <div className="flex flex-1 flex-col overflow-hidden">
       <SiteHeader title="Tour Management" subtitle="Admin only route" />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-2xl font-bold tracking-tight">Tour Packages</h2>
-            <p className="text-muted-foreground">
-              Manage your tour destinations, pricing, and vehicle assignments.
-            </p>
-          </div>
-          <Button asChild>
-            <Link href="/dashboard/tours/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Tour Package
-            </Link>
-          </Button>
-        </div>
-
-        <Card className="shadow-xs">
-          <CardContent className="p-0">
-            <div className="p-6">
-               <TourTable tours={tours} vehicles={vehicles} />
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-2xl font-bold tracking-tight">Tour Packages</h2>
+              <p className="text-muted-foreground">
+                Manage your tour destinations, pricing, and vehicle assignments.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <Button asChild>
+              <Link href="/dashboard/tours/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Tour Package
+              </Link>
+            </Button>
+          </div>
+
+          <Card className="shadow-xs">
+            <CardContent className="p-0">
+              <div className="p-6">
+                 <TourTable tours={tours} vehicles={vehicles} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

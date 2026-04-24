@@ -7,7 +7,21 @@ import { cn } from "@/lib/utils"
 
 const Popover = PopoverPrimitive.Root
 
-const PopoverTrigger = PopoverPrimitive.Trigger
+function PopoverTrigger({
+  asChild = false,
+  render,
+  children,
+  ...props
+}: PopoverPrimitive.Trigger.Props & { asChild?: boolean }) {
+  return (
+    <PopoverPrimitive.Trigger
+      render={asChild ? (children as React.ReactElement) : render}
+      {...props}
+    >
+      {asChild ? undefined : children}
+    </PopoverPrimitive.Trigger>
+  )
+}
 
 function PopoverContent({
   className,

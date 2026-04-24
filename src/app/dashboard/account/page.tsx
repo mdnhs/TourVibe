@@ -36,38 +36,40 @@ export default async function AccountPage() {
   })) as UserRow;
 
   return (
-    <>
+    <div className="flex flex-1 flex-col overflow-hidden">
       <SiteHeader title="Account" subtitle="Manage your profile and security" />
-      <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 max-w-3xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-            <CardDescription>
-              Update your name, phone number and profile picture.
-              {!user.phone && (
-                <span className="ml-2 inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
-                  Phone required to book tours
-                </span>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProfileForm user={user} />
-          </CardContent>
-        </Card>
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex flex-col gap-6 p-4 md:p-6 max-w-3xl">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>
+                Update your name, phone number and profile picture.
+                {!user.phone && (
+                  <span className="ml-2 inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+                    Phone required to book tours
+                  </span>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProfileForm user={user} />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-            <CardDescription>
-              Keep your account secure with a strong password.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PasswordForm />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+              <CardDescription>
+                Keep your account secure with a strong password.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PasswordForm />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
