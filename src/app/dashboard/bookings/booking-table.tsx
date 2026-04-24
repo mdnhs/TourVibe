@@ -35,11 +35,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { DataTable, DataTableColumnHeader } from "@/components/ui/data-table";
+import { formatPrice } from "@/lib/currency";
 
 export type Booking = {
   id: string;
   tourPackageId: string;
   amount: number;
+  currency: string;
   status: string;
   createdAt: string;
   tourName: string;
@@ -251,7 +253,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
       ),
       cell: ({ row }) => (
         <div className="font-semibold text-emerald-600">
-          ${row.original.amount.toLocaleString()}
+          {formatPrice(row.original.amount, row.original.currency)}
         </div>
       ),
     },

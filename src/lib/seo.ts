@@ -161,7 +161,8 @@ export function buildTourSchema(
     thumbnail: string;
     avgRating: number | null;
     reviewCount: number;
-  }
+  },
+  currency?: string,
 ) {
   if (!s.enableJsonLd) return null;
   const url = s.siteUrl ? `${s.siteUrl}/tours/${tour.id}` : undefined;
@@ -175,7 +176,7 @@ export function buildTourSchema(
     offers: {
       "@type": "Offer",
       price: tour.price,
-      priceCurrency: "USD",
+      priceCurrency: (currency || "usd").toUpperCase(),
       availability: "https://schema.org/InStock",
     },
     ...(tour.reviewCount > 0 && tour.avgRating

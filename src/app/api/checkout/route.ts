@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: (integrations.stripeCurrency || "usd").toLowerCase(),
             product_data: {
               name: tour.name,
               description: tour.description ?? undefined,
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
         tourPackageId: tourId,
         amount: tour.price,
+        currency: (integrations.stripeCurrency || "usd").toLowerCase(),
         status: "pending",
         stripeSessionId: stripeSession.id,
       },

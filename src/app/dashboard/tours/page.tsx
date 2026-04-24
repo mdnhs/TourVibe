@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { TourTable, TourPackage } from "./tour-table";
+import { getCurrencyCode } from "@/lib/currency-server";
 
 export default async function ToursPage() {
   const { isSuperAdmin } = await requireDashboardSession();
@@ -36,6 +37,8 @@ export default async function ToursPage() {
     assignedVehicles: t.vehicles.map((v) => v.vehicleId).join(","),
   }));
 
+  const currency = await getCurrencyCode();
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <SiteHeader title="Tour Management" subtitle="Admin only route" />
@@ -59,7 +62,7 @@ export default async function ToursPage() {
           <Card className="shadow-xs">
             <CardContent className="p-0">
               <div className="p-6">
-                 <TourTable tours={tours} vehicles={vehicles} />
+                 <TourTable tours={tours} vehicles={vehicles} currency={currency} />
               </div>
             </CardContent>
           </Card>

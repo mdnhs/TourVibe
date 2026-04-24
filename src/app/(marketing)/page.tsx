@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
 import { getSiteConfig } from "@/app/dashboard/site-config/actions";
+import { getCurrencyCode } from "@/lib/currency-server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSeoSettingsSync();
@@ -21,6 +22,7 @@ import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
 export default async function Home() {
   const siteConfig = await getSiteConfig();
+  const currency = await getCurrencyCode();
 
   // Fetch real-time statistics
   const [tourCount, reviewCount, avgRatingResult, vehicleCount, touristCount] = await Promise.all([
@@ -253,6 +255,7 @@ export default async function Home() {
         stats={stats}
         initialDrivers={liveDrivers}
         activeTour={activeTour}
+        currency={currency}
         heroImage={siteConfig.heroImage}
         badgeText={siteConfig.heroBadgeText}
         heroTitle={siteConfig.heroTitle}
@@ -265,7 +268,7 @@ export default async function Home() {
         ]}
       />
 
-      <PopularTours tours={popularTours} />
+      <PopularTours tours={popularTours} currency={currency} />
 
       <PopularCars cars={popularCars} />
 

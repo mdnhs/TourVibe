@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSeoSettings } from "@/app/dashboard/seo/actions";
+import { getCurrencyCode } from "@/lib/currency-server";
 
 interface TourPackage {
   id: string;
@@ -14,6 +15,7 @@ interface TourPackage {
 export async function GET() {
   const settings = await getSeoSettings();
   const siteUrl = settings.siteUrl || "https://example.com";
+  const currencyCode = (await getCurrencyCode()).toUpperCase();
   
   const tours = await db.tourPackage.findMany({
     select: {
@@ -45,7 +47,7 @@ export async function GET() {
       <g:image_link>${imageUrl}</g:image_link>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>${tour.price} USD</g:price>
+      <g:price>${tour.price} ${currencyCode}</g:price>
       <g:brand>${settings.siteTitle}</g:brand>
       <g:google_product_category>Travel > Adventure Travel</g:google_product_category>
     </item>`;

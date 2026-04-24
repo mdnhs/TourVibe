@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Clock, Star, Users, MapPin, Sparkles } from "lucide-react";
+import { formatPrice } from "@/lib/currency";
 
 interface PopularTour {
   id: string;
@@ -16,6 +17,7 @@ interface PopularTour {
 
 interface PopularToursProps {
   tours: PopularTour[];
+  currency?: string;
 }
 
 const categories = ["Coastal", "Heritage", "Mountain", "City", "Countryside", "Adventure"];
@@ -77,7 +79,7 @@ const cardColors = [
   },
 ];
 
-export function PopularTours({ tours }: PopularToursProps) {
+export function PopularTours({ tours, currency }: PopularToursProps) {
   if (tours.length === 0) return null;
 
   return (
@@ -192,7 +194,7 @@ export function PopularTours({ tours }: PopularToursProps) {
                   <div className="absolute bottom-3 left-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-white/60">From</p>
                     <p className="font-heading text-2xl font-extrabold leading-none text-white drop-shadow">
-                      ${tour.price.toLocaleString()}
+                      {formatPrice(tour.price, currency)}
                       <span className="text-xs font-normal text-white/60"> /person</span>
                     </p>
                   </div>

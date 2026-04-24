@@ -10,6 +10,8 @@ import Script from "next/script";
 
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
+import { formatPrice } from "@/lib/currency";
+import { getCurrencyCode } from "@/lib/currency-server";
 
 interface Tour {
   id: string;
@@ -104,7 +106,8 @@ export default async function TourDetailsPage({
   };
 
   const s = await getSeoSettingsSync();
-  const jsonLdSchema = buildTourSchema(s, tour as any);
+  const currency = await getCurrencyCode();
+  const jsonLdSchema = buildTourSchema(s, tour as any, currency);
 
   return (
     <div className="relative overflow-hidden pb-28">
@@ -167,7 +170,7 @@ export default async function TourDetailsPage({
               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 From
               </span>
-              <span className="text-xl font-black">${tour.price}</span>
+              <span className="text-xl font-black">{formatPrice(tour.price, currency)}</span>
             </div>
             <BookingButton tourId={tour.id} />
           </div>
@@ -348,7 +351,7 @@ export default async function TourDetailsPage({
               <div className="space-y-6">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
                   <span className="text-slate-400">Price per person</span>
-                  <span className="text-2xl font-black">${tour.price}</span>
+                  <span className="text-2xl font-black">{formatPrice(tour.price, currency)}</span>
                 </div>
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
                   <span className="text-slate-400">Total Duration</span>
@@ -389,7 +392,7 @@ export default async function TourDetailsPage({
           </aside>
         </div>
       </div>
-      <BookingBar tour={tour as any} />
+      <BookingBar tour={tour as any} currency={currency} />
     </div>
   );
 }

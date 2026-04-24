@@ -14,6 +14,14 @@ import {
   EyeOffIcon,
 } from "lucide-react";
 import { saveIntegrationsConfig } from "./actions";
+import { CURRENCY_OPTIONS } from "@/lib/currency";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface IntegrationsValues {
   cloudinaryCloudName: string;
@@ -21,6 +29,7 @@ interface IntegrationsValues {
   cloudinaryApiSecret: string;
   stripeSecretKey: string;
   stripeWebhookSecret: string;
+  stripeCurrency: string;
 }
 
 function StatusBadge({ configured }: { configured: boolean }) {
@@ -83,6 +92,7 @@ function SecretField({
 
 export function IntegrationsForm({ values }: { values: IntegrationsValues }) {
   const [pending, startTransition] = useTransition();
+  const [currency, setCurrency] = useState<string>(values.stripeCurrency || "usd");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -161,6 +171,30 @@ export function IntegrationsForm({ values }: { values: IntegrationsValues }) {
             placeholder="whsec_…"
             hint="Stripe Dashboard → Developers → Webhooks → your endpoint → Signing secret."
           />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="stripeCurrency">Currency</Label>
+              <StatusBadge configured={!!currency} />
+            </div>
+            <input type="hidden" name="stripeCurrency" value={currency} />
+            <Select value={currency} onValueChange={(v) => v && setCurrency(v)}>
+              <SelectTrigger id="stripeCurrency" className="font-mono text-sm">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    <span className="font-semibold">{c.symbol}</span>
+                    <span className="ml-2 text-muted-foreground">{c.label}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              Used for Stripe checkout and price display on all tour pages.
+            </p>
+          </div>
         </div>
       </div>
 

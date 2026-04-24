@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { db } from "@/lib/db";
 import { toursSearchParamsCache } from "./search-params";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
+import { getCurrencyCode } from "@/lib/currency-server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSeoSettingsSync();
@@ -81,6 +82,8 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     };
   }) as Tour[];
 
+  const currency = await getCurrencyCode();
+
   return (
     <div className="relative overflow-hidden">
       {/* ── Background glows ── */}
@@ -153,7 +156,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
                 </div>
               }
             >
-              <ToursList tours={tours} />
+              <ToursList tours={tours} currency={currency} />
             </Suspense>
           </main>
         </div>

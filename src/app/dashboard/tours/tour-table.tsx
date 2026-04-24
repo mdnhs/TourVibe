@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, DataTableColumnHeader } from "@/components/ui/data-table";
+import { formatPrice } from "@/lib/currency";
 
 export type TourPackage = {
   id: string;
@@ -48,9 +49,10 @@ export type TourPackage = {
 interface TourTableProps {
   tours: TourPackage[];
   vehicles: { id: string; make: string; model: string; licensePlate: string }[];
+  currency?: string;
 }
 
-export function TourTable({ tours, vehicles }: TourTableProps) {
+export function TourTable({ tours, vehicles, currency }: TourTableProps) {
   const router = useRouter();
   const [data, setData] = React.useState<TourPackage[]>(() => tours);
   const [isPending, startTransition] = React.useTransition();
@@ -124,7 +126,7 @@ export function TourTable({ tours, vehicles }: TourTableProps) {
       ),
       cell: ({ row }) => (
         <div className="font-semibold text-emerald-600">
-          ${row.original.price.toFixed(2)}
+          {formatPrice(row.original.price, currency, { decimals: 2 })}
         </div>
       ),
     },
@@ -278,7 +280,7 @@ export function TourTable({ tours, vehicles }: TourTableProps) {
                     <DollarSign className="size-4" />
                     <span className="text-sm">Price</span>
                   </div>
-                  <span className="font-bold text-emerald-600">${activeTour.price.toFixed(2)}</span>
+                  <span className="font-bold text-emerald-600">{formatPrice(activeTour.price, currency, { decimals: 2 })}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-muted-foreground">

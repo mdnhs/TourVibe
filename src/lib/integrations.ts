@@ -6,6 +6,7 @@ export interface IntegrationsConfig {
   cloudinaryApiSecret: string;
   stripeSecretKey: string;
   stripeWebhookSecret: string;
+  stripeCurrency: string;
 }
 
 const envDefaults: IntegrationsConfig = {
@@ -14,6 +15,7 @@ const envDefaults: IntegrationsConfig = {
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
   stripeSecretKey:     process.env.STRIPE_SECRET_KEY     ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  stripeCurrency:      process.env.STRIPE_CURRENCY       ?? "usd",
 };
 
 let cache: IntegrationsConfig | null = null;
@@ -33,6 +35,7 @@ export async function getIntegrations(): Promise<IntegrationsConfig> {
     cloudinaryApiSecret: stored.cloudinaryApiSecret || envDefaults.cloudinaryApiSecret,
     stripeSecretKey:     stored.stripeSecretKey     || envDefaults.stripeSecretKey,
     stripeWebhookSecret: stored.stripeWebhookSecret || envDefaults.stripeWebhookSecret,
+    stripeCurrency:      (stored.stripeCurrency || envDefaults.stripeCurrency).toLowerCase(),
   };
   cacheAt = now;
   return cache;

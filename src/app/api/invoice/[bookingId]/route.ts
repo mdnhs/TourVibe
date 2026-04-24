@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrencySymbol } from "@/lib/currency";
 
 interface BookingRow {
   id: string;
@@ -69,6 +70,7 @@ export async function GET(
   const statusColor = isPaid ? "#059669" : "#d97706";
   const statusBg = isPaid ? "#ecfdf5" : "#fffbeb";
   const statusLabel = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
+  const currencySymbol = getCurrencySymbol(booking.currency);
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -322,7 +324,7 @@ export async function GET(
             </td>
             <td>${booking.tourDuration}</td>
             <td>1</td>
-            <td>$${booking.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
+            <td>${currencySymbol}${booking.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
           </tr>
         </tbody>
       </table>
@@ -330,15 +332,15 @@ export async function GET(
       <div class="totals">
         <div class="total-row">
           <span>Subtotal</span>
-          <span>$${booking.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+          <span>${currencySymbol}${booking.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
         </div>
         <div class="total-row">
           <span>Tax (0%)</span>
-          <span>$0.00</span>
+          <span>${currencySymbol}0.00</span>
         </div>
         <div class="total-row grand">
           <span>Total</span>
-          <span>$${booking.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+          <span>${currencySymbol}${booking.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
         </div>
       </div>
 

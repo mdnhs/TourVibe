@@ -5,6 +5,7 @@ import { ArrowRight, Clock, MapPin, Star, Users, Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { formatPrice } from "@/lib/currency";
 
 interface BookingBarProps {
   tourId: string;
@@ -13,9 +14,10 @@ interface BookingBarProps {
   duration: string;
   maxPersons: number;
   rating: string | null;
+  currency?: string;
 }
 
-export function BookingBar({ tourId, name, price, duration, maxPersons, rating }: BookingBarProps) {
+export function BookingBar({ tourId, name, price, duration, maxPersons, rating, currency }: BookingBarProps) {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -78,7 +80,7 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating }
                 <p className="truncate text-sm font-bold text-slate-950 leading-none">{name}</p>
                 <p className="mt-0.5 text-[11px] text-slate-400">
                   <span className="font-heading font-extrabold text-slate-950">
-                    ${price.toLocaleString()}
+                    {formatPrice(price, currency)}
                   </span>
                   {" "}· per person · all inclusive
                 </p>

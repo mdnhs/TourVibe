@@ -93,6 +93,7 @@ export async function getIntegrationsConfig() {
     cloudinaryApiSecret: cfg.cloudinaryApiSecret,
     stripeSecretKey:     cfg.stripeSecretKey,
     stripeWebhookSecret: cfg.stripeWebhookSecret,
+    stripeCurrency:      cfg.stripeCurrency,
   };
 }
 
@@ -109,6 +110,7 @@ export async function saveIntegrationsConfig(formData: FormData) {
     cloudinaryApiSecret: g("cloudinaryApiSecret") ?? existing.cloudinaryApiSecret,
     stripeSecretKey:     g("stripeSecretKey")     ?? existing.stripeSecretKey,
     stripeWebhookSecret: g("stripeWebhookSecret") ?? existing.stripeWebhookSecret,
+    stripeCurrency:      (g("stripeCurrency") ?? existing.stripeCurrency ?? "usd").toLowerCase(),
   };
 
   await prisma.settings.upsert({
@@ -118,5 +120,6 @@ export async function saveIntegrationsConfig(formData: FormData) {
   });
 
   invalidateIntegrationsCache();
+  revalidatePath("/", "layout");
   return { success: true };
 }

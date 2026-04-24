@@ -13,7 +13,7 @@ export default async function AppearancePage() {
   return (
     <>
       <SiteHeader title="Appearance" subtitle="Customize website theme" />
-      <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-6 p-4 md:p-6">
         <AppearanceForm config={config} />
       </div>
     </>

@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { DriverTrackerMap } from "@/components/driver-tracker-map";
 import type { DriverLocation } from "@/app/api/drivers/locations/route";
+import { formatPrice } from "@/lib/currency";
 
 const locations = [
   {
@@ -85,6 +86,7 @@ const statColors = [
 // ─── Floating route card ──────────────────────────────────────────────────────
 function FloatingRouteCard({
   tour,
+  currency,
 }: {
   tour?: {
     name: string;
@@ -93,6 +95,7 @@ function FloatingRouteCard({
     reviewCount: number;
     price: number;
   };
+  currency?: string;
 }) {
   if (!tour) return null;
 
@@ -115,7 +118,7 @@ function FloatingRouteCard({
         <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
           <div className="text-center">
             <p className="text-xs font-bold text-slate-900">
-              ${tour.price.toLocaleString()}
+              {formatPrice(tour.price, currency)}
             </p>
             <p className="text-[9px] text-slate-400 uppercase tracking-wide">
               Price
@@ -170,6 +173,7 @@ export function Hero({
   stats,
   initialDrivers = [],
   activeTour,
+  currency,
   heroImage = "/cover.jpg",
   badgeText = "Your Journey Starts Here",
   heroTitle = "Discover Ireland.",
@@ -190,6 +194,7 @@ export function Hero({
     reviewCount: number;
     price: number;
   };
+  currency?: string;
   heroImage?: string;
   badgeText?: string;
   heroTitle?: string;
@@ -390,7 +395,7 @@ export function Hero({
 
             {/* Floating cards */}
             <WeatherBadge />
-            <FloatingRouteCard tour={activeTour} />
+            <FloatingRouteCard tour={activeTour} currency={currency} />
 
             {/* Map frame */}
             <div className="relative overflow-hidden rounded-[2rem] border border-white/50 bg-white/5 p-2 shadow-[0_32px_80px_rgba(15,23,42,0.40)] backdrop-blur-sm">

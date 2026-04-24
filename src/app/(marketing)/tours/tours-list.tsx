@@ -1,6 +1,7 @@
 import { Clock, Users, Star, ArrowRight, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { formatPrice } from "@/lib/currency";
 
 interface Tour {
   id: string;
@@ -16,6 +17,7 @@ interface Tour {
 
 interface ToursListProps {
   tours: Tour[];
+  currency?: string;
 }
 
 const cardColors = [
@@ -27,7 +29,7 @@ const cardColors = [
   { bar: "from-fuchsia-400 to-violet-500", glow: "bg-fuchsia-300/25", badge: "bg-fuchsia-400/15 text-fuchsia-700 border-fuchsia-200" },
 ];
 
-export function ToursList({ tours }: ToursListProps) {
+export function ToursList({ tours, currency }: ToursListProps) {
   if (tours.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-[2rem] border border-slate-200/80 bg-white py-24 text-center shadow-lg shadow-slate-200/50">
@@ -85,7 +87,7 @@ export function ToursList({ tours }: ToursListProps) {
               {/* Price badge */}
               <div className="absolute bottom-3 left-3 rounded-xl bg-white/95 px-3 py-1.5 shadow-lg backdrop-blur-sm">
                 <span className="font-heading text-base font-extrabold text-slate-950">
-                  ${tour.price.toLocaleString()}
+                  {formatPrice(tour.price, currency)}
                 </span>
                 <span className="text-[10px] font-medium text-slate-400"> / person</span>
               </div>
