@@ -391,7 +391,7 @@ export default async function SeoPage() {
             </div>
 
             {/* Hero score panel */}
-            <div className="flex min-w-fit flex-col gap-3 rounded-2xl border border-white/8 bg-white/5 px-5 py-4 shadow-lg shadow-black/40 backdrop-blur-md">
+            <div className="flex min-w-fit flex-col gap-3 rounded-2xl border border-white/8 bg-linear-to-br from-indigo-950 via-violet-950 to-purple-950 px-5 py-4 shadow-lg shadow-black/40 backdrop-blur-md">
               <div className="flex items-center gap-2">
                 <SparklesIcon className="size-3.5 text-sky-400" />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">
