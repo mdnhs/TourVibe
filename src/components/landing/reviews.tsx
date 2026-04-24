@@ -5,6 +5,7 @@ interface Review {
   name: string;
   role: string;
   quote: string;
+  image?: string | null;
 }
 
 interface ReviewsProps {
@@ -189,8 +190,12 @@ export function Reviews({ reviews }: ReviewsProps) {
                   {/* Author */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white shadow-md ${accent.avatarGrad} ${accent.avatarShadow}`}>
-                        {initials}
+                      <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white shadow-md overflow-hidden ${accent.avatarGrad} ${accent.avatarShadow}`}>
+                        {review.image ? (
+                          <img src={review.image} alt={review.name} className="size-full object-cover" />
+                        ) : (
+                          initials
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white leading-none">{review.name}</p>

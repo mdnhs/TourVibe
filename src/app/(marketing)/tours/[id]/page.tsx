@@ -1,6 +1,5 @@
-"use client";
-
 import * as React from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Clock, Users, Star, ArrowLeft, Quote, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -8,6 +7,9 @@ import Image from "next/image";
 import { BookingBar } from "./booking-bar";
 import { BookingButton } from "./booking-button";
 import Script from "next/script";
+
+import { db } from "@/lib/db";
+import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
 
 interface Tour {
   id: string;
@@ -30,13 +32,80 @@ interface Tour {
   }>;
 }
 
-export default function TourDetailsPage({
-  tour,
-  jsonLdSchema,
+export async function generateMetadata({
+  params,
 }: {
-  tour: Tour;
-  jsonLdSchema: any;
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const tour = await db.tourPackage.findUnique({
+    where: { id },
+  });
+
+  if (!tour) return {};
+
+  const s = await getSeoSettingsSync();
+  return buildMetadata(s, {
+    title: tour.name,
+    description: tour.description || "",
+    canonical: `/tours/${tour.id}`,
+    image: tour.thumbnail,
+  });
+}
+
+export default async function TourDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+  
+  const tourRaw = await db.tourPackage.findUnique({
+    where: { id },
+    include: {
+      reviews: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tourRaw) {
+    notFound();
+  }
+
+  // Calculate stats and convert Decimals
+  const reviewCount = tourRaw.reviews.length;
+  const avgRating = reviewCount > 0 
+    ? tourRaw.reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount 
+    : null;
+
+  const tour: Tour = {
+    ...tourRaw,
+    description: tourRaw.description || "",
+    price: Number(tourRaw.price),
+    reviewCount,
+    avgRating,
+    reviews: tourRaw.reviews.map(r => ({
+      id: r.id,
+      userName: r.user.name,
+      userImage: r.user.image,
+      rating: r.rating,
+      comment: r.comment,
+      createdAt: r.createdAt,
+    })),
+  };
+
+  const s = await getSeoSettingsSync();
+  const jsonLdSchema = buildTourSchema(s, tour as any);
+
   return (
     <div className="relative overflow-hidden pb-28">
       {jsonLdSchema && (
@@ -320,7 +389,7 @@ export default function TourDetailsPage({
           </aside>
         </div>
       </div>
-      <BookingBar tour={tour} />
+      <BookingBar tour={tour as any} />
     </div>
   );
 }

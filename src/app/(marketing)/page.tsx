@@ -40,7 +40,7 @@ export default async function Home() {
   const statsData = {
     tourCount,
     reviewCount,
-    avgRating: avgRatingResult._avg.rating || 0,
+    avgRating: Number(avgRatingResult._avg.rating || 0),
     vehicleCount,
     touristCount,
   };
@@ -56,17 +56,29 @@ export default async function Home() {
         select: {
           name: true,
           role: true,
+          image: true,
         },
       },
     },
   });
 
-  const dynamicReviews = dynamicReviewsRaw.map((r) => ({
-    quote: r.comment || "",
-    name: r.user.name,
-    role: r.user.role || "tourist",
-    rating: r.rating,
-  }));
+  const dynamicReviews = dynamicReviewsRaw.map((r) => {
+    const isAdmin = r.user.role === "super_admin" || r.user.role === "admin";
+    
+    return {
+      quote: r.comment || "",
+      // If admin: strictly use reviewerName or fallback to generic. Never use user.name.
+      name: isAdmin 
+        ? (r.reviewerName || "Happy Traveler") 
+        : (r.reviewerName || r.user.name),
+      // If admin: strictly use reviewerImage or null. Never use user.image.
+      image: isAdmin 
+        ? r.reviewerImage 
+        : (r.reviewerImage || r.user.image),
+      role: isAdmin ? "Tourist" : (r.user.role === "tourist" ? "Tourist" : r.user.role.replace("_", " ")),
+      rating: r.rating,
+    };
+  });
 
   // Fallback if no reviews exist
   const displayReviews =
@@ -74,7 +86,8 @@ export default async function Home() {
       ? dynamicReviews.map((r) => ({
           quote: r.quote,
           name: r.name,
-          role: r.role === "tourist" ? `Tourist` : r.role.replace("_", " "),
+          image: r.image,
+          role: r.role,
         }))
       : [
           {
@@ -125,6 +138,8 @@ export default async function Home() {
   const popularTours = popularToursRaw.map(t => ({
     ...t,
     reviewCount: Number(t.reviewCount),
+    avgRating: t.avgRating ? Number(t.avgRating) : null,
+    price: Number(t.price),
   }));
 
   // Fetch popular cars ordered by tour appearances
@@ -180,8 +195,8 @@ export default async function Home() {
     id: u.id,
     name: u.name,
     image: u.image,
-    lat: u.lat!,
-    lng: u.lng!,
+    lat: Number(u.lat!),
+    lng: Number(u.lng!),
     locationName: u.locationName,
     locationUpdatedAt: u.locationUpdatedAt?.toISOString() || null,
     vehicleMake: u.vehicles[0]?.make || null,

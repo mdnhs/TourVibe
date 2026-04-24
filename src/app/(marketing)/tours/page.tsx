@@ -75,6 +75,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     return {
       ...t,
       description: t.description || "",
+      price: Number(t.price),
       reviewCount,
       avgRating,
     };

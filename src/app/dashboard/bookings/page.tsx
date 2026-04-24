@@ -29,6 +29,7 @@ export default async function BookingsPage({
 
   const bookings: Booking[] = rawBookings.map((b) => ({
     ...b,
+    amount: Number(b.amount),
     createdAt: b.createdAt.toISOString(),
     updatedAt: b.updatedAt.toISOString(),
     tourName: b.tourPackage.name,

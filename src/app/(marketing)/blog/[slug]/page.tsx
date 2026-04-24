@@ -1,6 +1,5 @@
-"use client";
-
 import * as React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
@@ -27,15 +26,63 @@ type BlogPost = {
   createdAt: string;
 };
 
-export default function BlogPostPage({
-  post,
-  relatedPosts,
-  s,
+export async function generateMetadata({
+  params,
 }: {
-  post: BlogPost;
-  relatedPosts: BlogPost[];
-  s: any;
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await db.blogPost.findUnique({
+    where: { slug },
+  });
+
+  if (!post) return {};
+
+  const s = await getSeoSettingsSync();
+  return buildMetadata(s, {
+    title: post.metaTitle || post.title,
+    description: post.metaDescription || post.excerpt || "",
+    canonical: `/blog/${post.slug}`,
+    image: post.coverImage,
+  });
+}
+
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
+  const postRaw = await db.blogPost.findUnique({
+    where: { slug },
+  });
+
+  if (!postRaw || postRaw.status !== "published") {
+    notFound();
+  }
+
+  const post: BlogPost = {
+    ...postRaw,
+    createdAt: postRaw.createdAt.toISOString(),
+    publishedAt: postRaw.publishedAt?.toISOString() || null,
+  };
+
+  const relatedPostsRaw = await db.blogPost.findMany({
+    where: {
+      status: "published",
+      id: { not: post.id },
+    },
+    take: 3,
+    orderBy: { createdAt: "desc" },
+  });
+
+  const relatedPosts: BlogPost[] = relatedPostsRaw.map((rp) => ({
+    ...rp,
+    createdAt: rp.createdAt.toISOString(),
+    publishedAt: rp.publishedAt?.toISOString() || null,
+  }));
+
+  const s = await getSeoSettingsSync();
   const jsonLdSchema = buildBlogPostSchema(s, post);
 
   const tagList = post.tags ? post.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];

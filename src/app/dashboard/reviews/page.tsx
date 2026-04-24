@@ -33,6 +33,7 @@ export default async function ReviewPage() {
   // Flatten for the table component which expects tourPackageName etc.
   const flattenedReviews = reviews.map(r => ({
     ...r,
+    createdAt: r.createdAt.toISOString(),
     tourPackageName: r.tourPackage.name,
     userName: r.user.name,
     userEmail: r.user.email,
