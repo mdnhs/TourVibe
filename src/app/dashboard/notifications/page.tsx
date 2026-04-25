@@ -60,7 +60,7 @@ export default async function NotificationsPage() {
           title="Notifications"
           subtitle="Send and manage platform notifications"
         />
-        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin  flex-col gap-6 p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 ">
+        <div className="flex flex-col gap-6 p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 ">
           <Card className="shrink-0 overflow-hidden border-0 shadow-md relative h-fit">
             <div className="h-1 absolute top-0 w-full bg-linear-to-r from-violet-500 via-blue-500 to-cyan-400" />
             <CardHeader className="pb-4">
@@ -130,7 +130,7 @@ export default async function NotificationsPage() {
             : "You're all caught up"
         }
       />
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-6 p-4 md:p-6 max-w-3xl">
+      <div className="flex flex-col gap-6 p-4 md:p-6 max-w-3xl">
         <NotificationList notifications={inbox} />
       </div>
     </>

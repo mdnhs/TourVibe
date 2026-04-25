@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings?success=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings/${bookingId}/invoice?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tours/${tourId}?cancelled=true`,
       metadata: { bookingId, tourId, userId: session.user.id },
     });

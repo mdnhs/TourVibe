@@ -13,6 +13,41 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { Plus, X } from "lucide-react";
+
+function HighlightsEditor({ initial = [] }: { initial?: string[] }) {
+  const [items, setItems] = useState<string[]>(initial.length > 0 ? initial : [""]);
+
+  const update = (i: number, val: string) =>
+    setItems((prev) => prev.map((v, idx) => (idx === i ? val : v)));
+
+  const add = () => setItems((prev) => [...prev, ""]);
+
+  const remove = (i: number) =>
+    setItems((prev) => prev.length === 1 ? [""] : prev.filter((_, idx) => idx !== i));
+
+  return (
+    <div className="space-y-2">
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-2">
+          <Input
+            name="highlights"
+            value={item}
+            onChange={(e) => update(i, e.target.value)}
+            placeholder={`Highlight ${i + 1}`}
+          />
+          <Button type="button" variant="ghost" size="icon" onClick={() => remove(i)} className="shrink-0">
+            <X className="size-4" />
+          </Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={add} className="gap-1.5">
+        <Plus className="size-3.5" />
+        Add Highlight
+      </Button>
+    </div>
+  );
+}
 
 interface FormProps {
   vehicles: { id: string; make: string; model: string; licensePlate: string }[];
@@ -106,6 +141,11 @@ export function CreateTourForm({ vehicles }: FormProps) {
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" name="description" placeholder="Describe the tour highlights..." className="min-h-[100px]" disabled={isPending} />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Tour Highlights</Label>
+        <HighlightsEditor />
       </div>
 
       <div className="space-y-2">
@@ -304,13 +344,18 @@ export function EditTourForm({
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea 
-          id="description" 
-          name="description" 
-          defaultValue={tour.description || ""} 
-          className="min-h-[100px]" 
-          disabled={isPending} 
+        <Textarea
+          id="description"
+          name="description"
+          defaultValue={tour.description || ""}
+          className="min-h-[100px]"
+          disabled={isPending}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Tour Highlights</Label>
+        <HighlightsEditor initial={tour.highlights?.split("\n").filter(Boolean) ?? []} />
       </div>
 
       <div className="space-y-2">

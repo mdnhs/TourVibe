@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { CarFront, ArrowRight, Menu, X, Sparkles } from "lucide-react";
+import { CarFront, ArrowRight, Menu, X, Sparkles, LogOut } from "lucide-react";
 import { Session } from "better-auth";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 
 interface NavbarProps {
   session: Session | null;
@@ -30,7 +31,14 @@ export function Navbar({
   logoUrl,
 }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [activeHash, setActiveHash] = useState("");
+
+  async function handleSignOut() {
+    await authClient.signOut();
+    router.push("/");
+    router.refresh();
+  }
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -157,13 +165,22 @@ export function Navbar({
           {/* CTA + mobile toggle */}
           <div className="flex items-center gap-2">
             {session ? (
-              <Link
-                href="/dashboard"
-                className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
-              >
-                Dashboard
-                <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+              <>
+                <Link
+                  href="/dashboard"
+                  className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
+                >
+                  Dashboard
+                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex size-9 items-center justify-center rounded-full border border-red-200 bg-red-50/70 text-red-500 shadow-sm transition hover:bg-red-100 hover:text-red-600"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="size-4" />
+                </button>
+              </>
             ) : (
               <>
                 <Link
@@ -228,11 +245,20 @@ export function Navbar({
 
             <div className="mt-3 flex gap-2 border-t border-slate-100/80 pt-3">
               {session ? (
-                <Link href="/dashboard" className="flex-1">
-                  <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
-                    Dashboard
+                <>
+                  <Link href="/dashboard" className="flex-1">
+                    <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
+                      Dashboard
+                    </button>
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50/70 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-100 hover:text-red-600"
+                  >
+                    <LogOut className="size-4" />
+                    Sign out
                   </button>
-                </Link>
+                </>
               ) : (
                 <>
                   <Link href="/login" className="flex-1">

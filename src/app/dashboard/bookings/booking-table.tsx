@@ -9,6 +9,7 @@ import {
   Clock,
   CreditCard,
   Download,
+  Eye,
   ExternalLink,
   MapPin,
   MoreVertical,
@@ -317,13 +318,11 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
                 <>
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>Invoice</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        window.open(`/api/invoice/${b.id}`, "_blank")
-                      }
-                    >
-                      <Download className="mr-2 size-4" />
-                      Download Invoice
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/bookings/${b.id}/invoice`}>
+                        <Eye className="mr-2 size-4" />
+                        View Invoice
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
@@ -364,13 +363,11 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
                       View Tour
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      window.open(`/api/invoice/${b.id}`, "_blank")
-                    }
-                  >
-                    <Download className="mr-2 size-4" />
-                    Download Invoice
+                  <DropdownMenuItem asChild>
+                    <Link href={`/dashboard/bookings/${b.id}/invoice`}>
+                      <Eye className="mr-2 size-4" />
+                      View Invoice
+                    </Link>
                   </DropdownMenuItem>
                   {b.status !== "cancelled" && (
                     <>

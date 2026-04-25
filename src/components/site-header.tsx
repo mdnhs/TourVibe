@@ -1,7 +1,8 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,23 @@ export function SiteHeader({
             </div>
             
             <div className="flex items-center gap-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="size-8 rounded-full border border-border/40 bg-background/50 text-muted-foreground hover:text-foreground"
+                    asChild
+                  >
+                    <Link href="/" target="_blank">
+                      <ExternalLink className="size-4" />
+                      <span className="sr-only">Visit frontend</span>
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Visit frontend</TooltipContent>
+              </Tooltip>
+
               <ModeToggle />
               
               <Tooltip>

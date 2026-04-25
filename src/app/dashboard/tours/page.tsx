@@ -40,10 +40,9 @@ export default async function ToursPage() {
   const currency = await getCurrencyCode();
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <>
       <SiteHeader title="Tour Management" subtitle="Admin only route" />
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
-        <div className="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <div className="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <h2 className="text-2xl font-bold tracking-tight">Tour Packages</h2>
@@ -67,7 +66,6 @@ export default async function ToursPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </div>
+    </>
   );
 }

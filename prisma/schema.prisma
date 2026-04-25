@@ -119,6 +119,7 @@ model TourPackage {
   maxPersons  Int      @default(1)
   thumbnail   String   @default("")
   gallery     String?
+  highlights  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

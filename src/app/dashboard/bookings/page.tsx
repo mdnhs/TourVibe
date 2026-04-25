@@ -27,6 +27,10 @@ export default async function BookingsPage({
     },
   });
 
+  if (success === "true" && rawBookings.length > 0) {
+    redirect(`/dashboard/bookings/${rawBookings[0].id}/invoice?success=true`);
+  }
+
   const bookings: Booking[] = rawBookings.map((b) => ({
     ...b,
     amount: Number(b.amount),
@@ -51,23 +55,11 @@ export default async function BookingsPage({
             : "Manage your upcoming adventures and travel history"
         }
       />
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-6 py-6">
-        {success === "true" && (
-          <div className="mx-4 lg:mx-6 flex items-center gap-4 rounded-xl border border-emerald-100 bg-emerald-50 p-5 text-emerald-800 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
-              <CheckCircle2 className="size-5" />
-            </div>
-            <div>
-              <p className="font-semibold">Payment Successful!</p>
-              <p className="text-sm text-emerald-700/80">
-                Your tour has been successfully booked. Check your details
-                below.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <BookingTable bookings={bookings} isAdmin={isSuperAdmin} />
+      <div className="flex flex-col gap-6 py-6">
+        <BookingTable
+          bookings={bookings}
+          isAdmin={isSuperAdmin}
+        />
       </div>
     </>
   );

@@ -85,7 +85,7 @@ export default async function TrackingPage() {
   return (
     <>
       <SiteHeader title="Live Tracking" subtitle={subtitle} />
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-4 p-4 md:p-6">
+      <div className="flex flex-col gap-4 p-4 md:p-6">
         {/* Driver: location sharing panel + plain map */}
         {isDriver && driverRow && (
           <>

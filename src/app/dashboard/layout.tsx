@@ -50,7 +50,7 @@ export default async function DashboardLayout({
         unreadMessages={unreadMessages}
         allowedMenus={allowedMenus}
       />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset className="overflow-y-auto">{children}</SidebarInset>
 
       {isSuperAdmin && (missingCloudinary || missingStripe) && (
         <IntegrationsSetupDialog

@@ -42,6 +42,7 @@ export type TourPackage = {
   maxPersons: number;
   thumbnail: string;
   gallery: string | null;
+  highlights: string | null;
   assignedVehicles?: string; // Comma separated IDs
   vehicleCount?: number;
 };

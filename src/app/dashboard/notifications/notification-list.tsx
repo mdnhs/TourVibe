@@ -95,13 +95,11 @@ interface NotificationListProps {
 
 export function NotificationList({ notifications }: NotificationListProps) {
   const router = useRouter();
-  const [data, setData] = React.useState(notifications);
+  const [overrides, setOverrides] = React.useState<Record<string, Partial<NotificationItem>>>({});
   const [isPending, startTransition] = React.useTransition();
   const [filter, setFilter] = React.useState<"all" | "unread">("all");
 
-  React.useEffect(() => {
-    setData(notifications);
-  }, [notifications]);
+  const data = notifications.map((n) => ({ ...n, ...overrides[n.id] }));
 
   const unreadCount = data.filter((n) => !n.isRead).length;
   const visible = filter === "unread" ? data.filter((n) => !n.isRead) : data;
@@ -109,9 +107,7 @@ export function NotificationList({ notifications }: NotificationListProps) {
   const handleRead = (id: string) => {
     startTransition(async () => {
       await markAsRead(id);
-      setData((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-      );
+      setOverrides((prev) => ({ ...prev, [id]: { isRead: true } }));
       router.refresh();
     });
   };
@@ -119,7 +115,11 @@ export function NotificationList({ notifications }: NotificationListProps) {
   const handleMarkAll = () => {
     startTransition(async () => {
       await markAllAsRead();
-      setData((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setOverrides((prev) => {
+        const next = { ...prev };
+        notifications.forEach((n) => { next[n.id] = { ...next[n.id], isRead: true }; });
+        return next;
+      });
       toast.success("All notifications marked as read");
       router.refresh();
     });

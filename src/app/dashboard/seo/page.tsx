@@ -347,7 +347,7 @@ export default async function SeoPage() {
     <>
       <SiteHeader title="SEO Management" subtitle="TourVibe control panel" />
 
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-6 p-4 md:p-6">
+      <div className="flex flex-col gap-6 p-4 md:p-6">
         {/* ── HERO BANNER ── */}
         <div className="relative shrink-0 overflow-hidden rounded-2xl bg-linear-to-br from-indigo-950 via-violet-950 to-purple-950 p-6 text-white shadow-2xl shadow-indigo-950/40 md:p-8">
           {/* Gradient orbs */}

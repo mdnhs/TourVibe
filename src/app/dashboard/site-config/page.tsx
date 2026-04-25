@@ -32,7 +32,7 @@ export default async function SiteConfigPage() {
         title="Site Config"
         subtitle="Manage public-facing site content"
       />
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-6 p-4 md:p-6">
+      <div className="flex flex-col gap-6 p-4 md:p-6">
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           <Card className="shrink-0">
             <CardHeader>

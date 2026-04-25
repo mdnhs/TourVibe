@@ -17,6 +17,8 @@ export async function createTour(formData: FormData) {
   const duration = formData.get("duration") as string;
   const maxPersons = parseInt(formData.get("maxPersons") as string);
   const vehicleIds = formData.getAll("vehicleIds") as string[];
+  const highlightsRaw = formData.getAll("highlights") as string[];
+  const highlights = highlightsRaw.filter(Boolean).join("\n") || null;
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -47,6 +49,7 @@ export async function createTour(formData: FormData) {
         maxPersons,
         thumbnail: thumbnailUrl,
         gallery: galleryUrls.join(","),
+        highlights,
         vehicles: {
           create: vehicleIds.map((vehicleId) => ({ vehicleId })),
         },
@@ -70,6 +73,8 @@ export async function updateTour(id: string, formData: FormData) {
   const duration = formData.get("duration") as string;
   const maxPersons = parseInt(formData.get("maxPersons") as string);
   const vehicleIds = formData.getAll("vehicleIds") as string[];
+  const highlightsRaw = formData.getAll("highlights") as string[];
+  const highlights = highlightsRaw.filter(Boolean).join("\n") || null;
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -102,7 +107,7 @@ export async function updateTour(id: string, formData: FormData) {
     await prisma.$transaction([
       prisma.tourPackage.update({
         where: { id },
-        data: { name, description, price, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery },
+        data: { name, description, price, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, highlights },
       }),
       prisma.tourPackageVehicle.deleteMany({ where: { tourPackageId: id } }),
       prisma.tourPackageVehicle.createMany({

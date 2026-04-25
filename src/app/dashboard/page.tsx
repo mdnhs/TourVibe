@@ -120,11 +120,9 @@ export default async function DashboardOverviewPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <>
       <SiteHeader title="Operations Dashboard" subtitle="TourVibe control panel" />
-
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
-        <div className="flex flex-col gap-5 p-4 md:gap-6 md:p-6">
+      <div className="flex flex-col gap-5 p-4 md:gap-6 md:p-6">
           {/* ── HERO BANNER ── */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-6 text-white shadow-2xl shadow-indigo-950/40 md:p-8">
             {/* Gradient orbs */}
@@ -325,7 +323,6 @@ export default async function DashboardOverviewPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </div>
+    </>
   );
 }

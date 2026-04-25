@@ -52,7 +52,7 @@ export default async function DriversPage() {
   return (
     <>
       <SiteHeader title="Driver Management" subtitle="Admin only route" />
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <div className="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <h2 className="text-2xl font-bold tracking-tight">Driver Directory</h2>
