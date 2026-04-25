@@ -3,6 +3,8 @@ import { requireDashboardSession } from "@/lib/dashboard";
 import { notFound, redirect } from "next/navigation";
 import { InvoiceView } from "./invoice-view";
 import { CheckCircle2 } from "lucide-react";
+import Stripe from "stripe";
+import { getIntegrations } from "@/lib/integrations";
 
 export default async function InvoicePage({
   params,
@@ -19,7 +21,7 @@ export default async function InvoicePage({
     redirect(`/login?callbackUrl=/dashboard/bookings/${id}/invoice`);
   }
 
-  const booking = await prisma.booking.findUnique({
+  let booking = await prisma.booking.findUnique({
     where: { id },
     include: {
       tourPackage: { select: { name: true, duration: true } },
@@ -34,6 +36,32 @@ export default async function InvoicePage({
   // Security check: Only allow the user who made the booking or an admin to view the invoice
   if (!isSuperAdmin && booking.userId !== session.user.id) {
     redirect("/dashboard/bookings");
+  }
+
+  // If redirected from successful payment but status hasn't updated yet (webhook delay)
+  if (success === "true" && booking.status === "unpaid" && booking.stripeSessionId) {
+    try {
+      const integrations = await getIntegrations();
+      if (integrations.stripeSecretKey) {
+        const stripe = new Stripe(integrations.stripeSecretKey, {
+          apiVersion: "2023-10-16" as any,
+        });
+        const stripeSession = await stripe.checkout.sessions.retrieve(booking.stripeSessionId);
+        
+        if (stripeSession.payment_status === "paid") {
+          booking = await prisma.booking.update({
+            where: { id },
+            data: { status: "paid" },
+            include: {
+              tourPackage: { select: { name: true, duration: true } },
+              user: { select: { name: true, email: true } },
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error verifying payment on invoice page:", error);
+    }
   }
 
   const invoiceData = {

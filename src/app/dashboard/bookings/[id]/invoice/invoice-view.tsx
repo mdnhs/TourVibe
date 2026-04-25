@@ -40,6 +40,12 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
       label: "Pending",
       icon: <Calendar className="size-3.5" />
     },
+    unpaid: {
+      color: "#d97706",
+      bg: "#fffbeb",
+      label: "Awaiting Payment",
+      icon: <CreditCard className="size-3.5" />
+    },
     cancelled: {
       color: "#dc2626",
       bg: "#fef2f2",
@@ -105,7 +111,7 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
   };
 
   return (
-    <div className="flex flex-col gap-8 py-8 animate-in fade-in duration-700">
+    <div className="flex flex-col gap-8 py-8 animate-in fade-in duration-700 print-invoice-root">
       {/* Action Bar */}
       <div className="mx-4 lg:mx-auto w-full max-w-4xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <Button asChild variant="ghost" size="sm" className="w-fit hover:bg-slate-100 transition-colors rounded-lg">
@@ -130,7 +136,7 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
       <div className="mx-4 lg:mx-auto w-full max-w-4xl flex justify-center bg-slate-50 p-4 md:p-12 print:bg-white print:p-0">
         <div
           ref={invoiceRef}
-          className="w-full bg-white shadow-[0_8px_40px_rgba(0,0,0,0.04)] rounded-none overflow-hidden print:shadow-none"
+          className="w-full bg-white shadow-[0_8px_40px_rgba(0,0,0,0.04)] rounded-none overflow-hidden print:shadow-none print-invoice-card"
           style={{ 
             maxWidth: "800px",
             fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
@@ -293,8 +299,35 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
       
       <style jsx global>{`
         @media print {
-          body {
-            background-color: white !important;
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          /* Hide everything */
+          body * {
+            visibility: hidden;
+          }
+          /* Show only the invoice card */
+          .print-invoice-card, 
+          .print-invoice-card * {
+            visibility: visible;
+          }
+          /* Force the card to be at the top-left and take full width */
+          .print-invoice-card {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+          }
+          /* Ensure no backgrounds or shadows from parent containers */
+          body, html {
+            background: white !important;
           }
           .animate-in {
             animation: none !important;

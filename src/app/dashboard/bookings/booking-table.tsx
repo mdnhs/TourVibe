@@ -37,6 +37,16 @@ import {
 import { cn } from "@/lib/utils";
 import { DataTable, DataTableColumnHeader } from "@/components/ui/data-table";
 import { formatPrice } from "@/lib/currency";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export type Booking = {
   id: string;
@@ -51,6 +61,7 @@ export type Booking = {
   userName: string;
   userEmail: string;
   userImage: string | null;
+  stripeSessionId?: string | null;
 };
 
 interface BookingTableProps {
@@ -72,6 +83,13 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
     bg: "bg-amber-50",
     border: "border-amber-200",
     icon: <Clock className="size-3" />,
+  },
+  unpaid: {
+    label: "Unpaid",
+    color: "text-slate-700",
+    bg: "bg-slate-50",
+    border: "border-slate-200",
+    icon: <CreditCard className="size-3" />,
   },
   cancelled: {
     label: "Cancelled",
@@ -103,6 +121,7 @@ function StatusBadge({ status }: { status: string }) {
 export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
+  const [cancelId, setCancelId] = React.useState<string | null>(null);
 
   const handleStatusChange = (id: string, status: BookingStatus) => {
     startTransition(async () => {
@@ -116,8 +135,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
     });
   };
 
-  const handleCancelOwn = (id: string) => {
-    if (!confirm("Cancel this booking?")) return;
+  const confirmCancel = (id: string) => {
     startTransition(async () => {
       const result = await cancelOwnBooking(id);
       if (result?.error) {
@@ -126,6 +144,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
         toast.success("Booking cancelled");
         router.refresh();
       }
+      setCancelId(null);
     });
   };
 
@@ -193,8 +212,26 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
       cell: ({ row }) => {
         const status = row.original.status;
         const id = row.original.id;
+        const sessionId = row.original.stripeSessionId;
 
         if (!isAdmin) {
+          if (status === "unpaid" && sessionId) {
+            return (
+              <div className="flex flex-col gap-2">
+                <StatusBadge status={status} />
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-7 px-2 text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                  onClick={() => {
+                    window.location.href = `/api/checkout/repay?sessionId=${sessionId}`;
+                  }}
+                >
+                  Pay Now
+                </Button>
+              </div>
+            );
+          }
           return <StatusBadge status={status} />;
         }
 
@@ -289,12 +326,23 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
     {
       accessorKey: "id",
       header: "Order ID",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1.5 rounded-md border bg-muted/50 px-2 py-1 text-[10px] font-mono text-muted-foreground w-fit">
-          <CreditCard className="size-3 flex-shrink-0" />
-          <span className="truncate">{row.original.id.slice(0, 8)}…</span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const id = row.original.id;
+        return (
+          <div 
+            role="button"
+            onClick={() => {
+              navigator.clipboard.writeText(id);
+              toast.success("Order ID copied to clipboard");
+            }}
+            className="flex items-center gap-1.5 rounded-md border bg-muted/50 px-2 py-1 text-[10px] font-mono text-muted-foreground w-fit cursor-pointer hover:bg-muted transition-colors active:scale-95"
+            title="Click to copy full ID"
+          >
+            <CreditCard className="size-3 flex-shrink-0" />
+            <span className="truncate">{id.slice(0, 8)}…</span>
+          </div>
+        );
+      },
     },
     {
       id: "actions",
@@ -348,7 +396,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
                     <DropdownMenuItem
                       variant="destructive"
                       disabled={b.status === "cancelled"}
-                      onClick={() => handleStatusChange(b.id, "cancelled")}
+                      onClick={() => setCancelId(b.id)}
                     >
                       <Ban className="mr-2 size-4" />
                       Cancel Booking
@@ -375,7 +423,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
                       <DropdownMenuItem
                         variant="destructive"
                         disabled={isPending}
-                        onClick={() => handleCancelOwn(b.id)}
+                        onClick={() => setCancelId(b.id)}
                       >
                         <Ban className="mr-2 size-4" />
                         Cancel Booking
@@ -405,11 +453,37 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
             options: [
               { label: "Paid", value: "paid", icon: CheckCircle2 },
               { label: "Pending", value: "pending", icon: Clock },
+              { label: "Unpaid", value: "unpaid", icon: CreditCard },
               { label: "Cancelled", value: "cancelled", icon: Ban },
             ],
           },
         ]}
       />
+
+      <AlertDialog open={!!cancelId} onOpenChange={(open) => !open && setCancelId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently cancel your
+              tour booking and notify the tour operator.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (cancelId) confirmCancel(cancelId);
+              }}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              {isPending ? "Cancelling..." : "Yes, Cancel Booking"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

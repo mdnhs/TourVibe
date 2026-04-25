@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
         tourPackageId: tourId,
         amount: tour.price,
         currency: (integrations.stripeCurrency || "usd").toLowerCase(),
-        status: "pending",
+        status: "unpaid",
         stripeSessionId: stripeSession.id,
       },
     });

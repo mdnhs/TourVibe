@@ -3,6 +3,7 @@ import Script from "next/script";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ensureSeededSuperAdmin } from "@/lib/seed";
 import { getSeoSettingsSync, buildMetadata, buildOrganizationSchema, buildWebSiteSchema } from "@/lib/seo";
@@ -83,6 +84,7 @@ export default async function RootLayout({
           <NuqsAdapter>
             <TooltipProvider>{children}</TooltipProvider>
           </NuqsAdapter>
+          <Toaster position="top-center" richColors />
         </ThemeProvider>
 
         {/* JSON-LD Structured Data — next/script is better outside <head> */}

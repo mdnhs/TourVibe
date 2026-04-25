@@ -43,6 +43,7 @@ export default async function BookingsPage({
     userName: b.user.name,
     userEmail: b.user.email,
     userImage: b.user.image,
+    stripeSessionId: b.stripeSessionId,
   }));
 
   return (
