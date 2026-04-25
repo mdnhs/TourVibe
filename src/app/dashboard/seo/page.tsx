@@ -177,7 +177,7 @@ function SeoHealthScore({ score, total }: { score: number; total: number }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function SeoPage() {
-  const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
+  const { isSuperAdmin, allowedMenus, label } = await requireDashboardSession();
 
   if (!isSuperAdmin && !allowedMenus?.includes("SEO")) {
     redirect("/dashboard");
@@ -352,38 +352,36 @@ export default async function SeoPage() {
         <div className="relative shrink-0 overflow-hidden rounded-2xl bg-linear-to-br from-indigo-950 via-violet-950 to-purple-950 p-6 text-white shadow-2xl shadow-indigo-950/40 md:p-8">
           {/* Gradient orbs */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -right-20 -top-20 size-96 rounded-full bg-sky-500/25 blur-[90px]" />
-            <div className="absolute -bottom-20 -left-16 size-80 rounded-full bg-violet-600/25 blur-[80px]" />
-            <div className="absolute right-1/4 top-0 size-56 rounded-full bg-emerald-500/15 blur-[60px]" />
-            <div className="absolute left-1/3 bottom-0 size-48 rounded-full bg-cyan-500/15 blur-[60px]" />
+            <div className="absolute -right-20 -top-20 size-80 rounded-full bg-violet-500/25 blur-3xl" />
+            <div className="absolute -bottom-16 -left-12 size-72 rounded-full bg-indigo-600/20 blur-3xl" />
+            <div className="absolute left-1/2 top-1/2 size-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-500/10 blur-2xl" />
+            <div className="absolute right-1/4 bottom-0 size-40 rounded-full bg-pink-500/15 blur-2xl" />
           </div>
 
           {/* Dot-grid overlay */}
           <div
-            className="pointer-events-none absolute inset-0 opacity-[0.04]"
+            className="pointer-events-none absolute inset-0 opacity-[0.035]"
             style={{
               backgroundImage:
                 "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-              backgroundSize: "24px 24px",
+              backgroundSize: "28px 28px",
             }}
           />
 
-          {/* Shimmer lines */}
-          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-sky-400/80 to-transparent" />
-          <div className="absolute inset-x-0 top-0 h-4 bg-linear-to-b from-sky-500/10 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-violet-500/30 to-transparent" />
+          {/* Top shimmer line */}
+          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-violet-400/60 to-transparent" />
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-3">
-              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-xs font-bold text-sky-300 shadow-sm shadow-sky-900/50 backdrop-blur-md">
-                <span className="inline-block size-1.5 animate-pulse rounded-full bg-sky-400 shadow-sm shadow-sky-400/80" />
-                SEO Command Center
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-1 text-xs font-bold text-violet-300 backdrop-blur-sm">
+                <span className="inline-block size-1.5 animate-pulse rounded-full bg-violet-400 shadow-sm shadow-violet-400/80" />
+                {label}
               </div>
               <div>
-                <h2 className="text-2xl font-black tracking-tight drop-shadow-[0_2px_12px_rgba(56,189,248,0.35)] md:text-3xl">
+                <h2 className="text-2xl font-black tracking-tight md:text-3xl">
                   Search Engine Optimization
                 </h2>
-                <p className="mt-1 max-w-xl text-sm text-white/45">
+                <p className="mt-1 max-w-xl text-sm text-white/50">
                   Manage metadata, sitemap, structured data, and analytics for
                   all public pages.
                 </p>

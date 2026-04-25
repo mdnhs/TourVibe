@@ -16,14 +16,19 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { label: "Home",    href: "/" },
-  { label: "Tours",   href: "/tours" },
-  { label: "Blog",    href: "/blog" },
-  { label: "About",   href: "/#about" },
+  { label: "Home", href: "/" },
+  { label: "Tours", href: "/tours" },
+  { label: "Blog", href: "/blog" },
+  { label: "About", href: "/#about" },
   { label: "Contact", href: "/#contact" },
 ];
 
-export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based tour management", logoUrl }: NavbarProps) {
+export function Navbar({
+  session,
+  siteName = "TourVibe",
+  tagline = "Car-based tour management",
+  logoUrl,
+}: NavbarProps) {
   const pathname = usePathname();
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
@@ -66,10 +71,13 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
     };
   }, [pathname]);
 
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/" && (activeHash === "" || activeHash === "#");
+    if (href === "/")
+      return pathname === "/" && (activeHash === "" || activeHash === "#");
     if (href === "/tours") return pathname.startsWith("/tours");
     if (href === "/blog") return pathname.startsWith("/blog");
     if (href.includes("#")) {
@@ -81,21 +89,28 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
 
   return (
     <div className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6">
+      {/* Pill navbar */}
       <header
         className={cn(
-          "mx-auto max-w-6xl rounded-2xl border px-4 py-2.5 transition-all duration-300",
+          "mx-auto max-w-6xl rounded-full border p-2.5 transition-all duration-300",
           scrolled
-            ? "border-white/90 bg-white/97 shadow-2xl shadow-slate-900/12 backdrop-blur-xl"
-            : "border-white/70 bg-white/85 shadow-lg shadow-slate-900/8 backdrop-blur-md",
+            ? "border-white/90 bg-white/80 shadow-2xl shadow-slate-900/12 backdrop-blur-2xl"
+            : "border-white/60 bg-white/60 shadow-lg shadow-slate-900/8 backdrop-blur-xl",
         )}
       >
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="relative flex size-9 items-center justify-center rounded-xl overflow-hidden shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
+            <div className="relative flex size-9 items-center justify-center rounded-full overflow-hidden shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
               {logoUrl ? (
-                <Image src={logoUrl} alt={siteName} width={36} height={36} className="relative object-cover" />
+                <Image
+                  src={logoUrl}
+                  alt={siteName}
+                  width={36}
+                  height={36}
+                  className="relative object-cover"
+                />
               ) : (
                 <CarFront className="relative size-[17px] text-white" />
               )}
@@ -119,7 +134,7 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "group relative rounded-xl px-3.5 py-2 text-[13px] font-medium transition-all duration-200",
+                    "group relative rounded-full px-3.5 py-2 text-[13px] font-medium transition-all duration-200",
                     active
                       ? "bg-gradient-to-br from-indigo-50 to-violet-50 text-indigo-700"
                       : "text-slate-500 hover:bg-slate-100/70 hover:text-slate-900",
@@ -144,7 +159,7 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
             {session ? (
               <Link
                 href="/dashboard"
-                className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
+                className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
               >
                 Dashboard
                 <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -153,13 +168,13 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
               <>
                 <Link
                   href="/login"
-                  className="hidden rounded-xl px-4 py-2 text-[13px] font-medium text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 sm:block"
+                  className="hidden rounded-full px-4 py-2 text-[13px] font-medium text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 sm:block"
                 >
                   Login
                 </Link>
                 <Link
                   href="/signup"
-                  className="group inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:from-indigo-500 hover:to-violet-500"
+                  className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:from-indigo-500 hover:to-violet-500"
                 >
                   <Sparkles className="size-3 opacity-80" />
                   Get Started
@@ -170,17 +185,23 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
 
             <button
               onClick={() => setMobileOpen((o) => !o)}
-              className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 md:hidden"
+              className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 backdrop-blur-sm text-slate-600 shadow-sm transition hover:bg-white md:hidden"
               aria-label="Toggle menu"
             >
-              {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+              {mobileOpen ? (
+                <X className="size-4" />
+              ) : (
+                <Menu className="size-4" />
+              )}
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="mt-2.5 border-t border-slate-100 pt-3 pb-2 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
+      {/* Mobile menu — separate panel below pill */}
+      {mobileOpen && (
+        <div className="mx-auto mt-2 max-w-6xl animate-in fade-in slide-in-from-top-2 duration-200 md:hidden">
+          <div className="rounded-3xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-xl shadow-slate-900/10 px-4 py-3">
             <nav className="flex flex-col gap-0.5">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
@@ -190,10 +211,10 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      "flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
+                      "flex items-center justify-between rounded-2xl px-4 py-2.5 text-sm font-medium transition-all",
                       active
                         ? "bg-gradient-to-r from-indigo-50 to-violet-50 text-indigo-700"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+                        : "text-slate-500 hover:bg-slate-50/80 hover:text-slate-900",
                     )}
                   >
                     {link.label}
@@ -205,22 +226,22 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
               })}
             </nav>
 
-            <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+            <div className="mt-3 flex gap-2 border-t border-slate-100/80 pt-3">
               {session ? (
                 <Link href="/dashboard" className="flex-1">
-                  <button className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
+                  <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                     Dashboard
                   </button>
                 </Link>
               ) : (
                 <>
                   <Link href="/login" className="flex-1">
-                    <button className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                    <button className="w-full rounded-full border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
                       Login
                     </button>
                   </Link>
                   <Link href="/signup" className="flex-1">
-                    <button className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
+                    <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                       Get Started
                     </button>
                   </Link>
@@ -228,8 +249,8 @@ export function Navbar({ session, siteName = "TourVibe", tagline = "Car-based to
               )}
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
     </div>
   );
 }
