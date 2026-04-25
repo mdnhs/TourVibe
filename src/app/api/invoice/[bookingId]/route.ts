@@ -72,12 +72,16 @@ export async function GET(
   const statusLabel = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
   const currencySymbol = getCurrencySymbol(booking.currency);
 
+  const invoiceNumber = booking.id.length > 16 
+    ? booking.id.slice(0, 8).toUpperCase() 
+    : booking.id.toUpperCase();
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invoice #${booking.id.slice(0, 8).toUpperCase()}</title>
+  <title>Invoice #${invoiceNumber}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -281,7 +285,7 @@ export async function GET(
       </div>
       <div class="invoice-meta">
         <div class="invoice-label">Invoice</div>
-        <div class="invoice-number">#${booking.id.slice(0, 8).toUpperCase()}</div>
+        <div class="invoice-number">#${invoiceNumber}</div>
         <div class="invoice-date">${invoiceDate}</div>
       </div>
     </div>

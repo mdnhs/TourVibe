@@ -24,7 +24,9 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
   const invoiceRef = React.useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = React.useState(false);
 
-  const invoiceNumber = booking.id.slice(0, 8).toUpperCase();
+  const invoiceNumber = booking.id.length > 16 
+    ? booking.id.slice(0, 8).toUpperCase() 
+    : booking.id.toUpperCase();
   const isPaid = booking.status === "paid";
   
   const statusConfig = {

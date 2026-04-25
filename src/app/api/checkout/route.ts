@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
-import crypto from "node:crypto";
 import { getIntegrations } from "@/lib/integrations";
+import { generateOrderId } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     }
 
-    const bookingId = crypto.randomUUID();
+    const bookingId = generateOrderId();
 
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

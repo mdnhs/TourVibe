@@ -238,13 +238,11 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div 
-                role="button"
-                tabIndex={0}
+              <button 
                 className="inline-flex outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full transition-opacity hover:opacity-80 cursor-pointer"
               >
                 <StatusBadge status={status} />
-              </div>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-32">
               <DropdownMenuGroup>
@@ -339,7 +337,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
             title="Click to copy full ID"
           >
             <CreditCard className="size-3 flex-shrink-0" />
-            <span className="truncate">{id.slice(0, 8)}…</span>
+            <span className="truncate">{id.length > 16 ? `${id.slice(0, 8)}…` : id}</span>
           </div>
         );
       },
