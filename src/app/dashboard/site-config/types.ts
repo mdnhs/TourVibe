@@ -49,6 +49,40 @@ export interface SiteConfig {
   service5Title: string;
   service5Description: string;
   service5Icon: string;
+  // Footer columns
+  footerCol1Heading: string;
+  footerCol1Link1Label: string;
+  footerCol1Link1Url: string;
+  footerCol1Link2Label: string;
+  footerCol1Link2Url: string;
+  footerCol1Link3Label: string;
+  footerCol1Link3Url: string;
+  footerCol1Link4Label: string;
+  footerCol1Link4Url: string;
+  footerCol2Heading: string;
+  footerCol2Link1Label: string;
+  footerCol2Link1Url: string;
+  footerCol2Link2Label: string;
+  footerCol2Link2Url: string;
+  footerCol2Link3Label: string;
+  footerCol2Link3Url: string;
+  footerCol2Link4Label: string;
+  footerCol2Link4Url: string;
+  footerCol3Heading: string;
+  footerCol3Link1Label: string;
+  footerCol3Link1Url: string;
+  footerCol3Link2Label: string;
+  footerCol3Link2Url: string;
+  footerCol3Link3Label: string;
+  footerCol3Link3Url: string;
+  footerCol3Link4Label: string;
+  footerCol3Link4Url: string;
+  // Footer social & misc
+  footerFacebookUrl: string;
+  footerInstagramUrl: string;
+  footerTwitterUrl: string;
+  footerYoutubeUrl: string;
+  footerPoweredByText: string;
 }
 
 export const siteConfigDefaults: SiteConfig = {
@@ -110,4 +144,38 @@ export const siteConfigDefaults: SiteConfig = {
   service5Description:
     "Our team is always on call — whether you need a route change, local recommendation or emergency assistance.",
   service5Icon: "Headset",
+  // Footer columns
+  footerCol1Heading: "Services",
+  footerCol1Link1Label: "City Tours",
+  footerCol1Link1Url: "#",
+  footerCol1Link2Label: "Airport Transfers",
+  footerCol1Link2Url: "#",
+  footerCol1Link3Label: "Corporate Travel",
+  footerCol1Link3Url: "#",
+  footerCol1Link4Label: "Private Chauffeur",
+  footerCol1Link4Url: "#",
+  footerCol2Heading: "Company",
+  footerCol2Link1Label: "About Us",
+  footerCol2Link1Url: "/#about",
+  footerCol2Link2Label: "Our Fleet",
+  footerCol2Link2Url: "#",
+  footerCol2Link3Label: "Blog",
+  footerCol2Link3Url: "/blog",
+  footerCol2Link4Label: "Reviews",
+  footerCol2Link4Url: "/#reviews",
+  footerCol3Heading: "Support",
+  footerCol3Link1Label: "Help Center",
+  footerCol3Link1Url: "#",
+  footerCol3Link2Label: "Terms of Service",
+  footerCol3Link2Url: "#",
+  footerCol3Link3Label: "Privacy Policy",
+  footerCol3Link3Url: "#",
+  footerCol3Link4Label: "Safety",
+  footerCol3Link4Url: "#",
+  // Footer social & misc
+  footerFacebookUrl: "",
+  footerInstagramUrl: "",
+  footerTwitterUrl: "",
+  footerYoutubeUrl: "",
+  footerPoweredByText: "Powered by TourVibe",
 };

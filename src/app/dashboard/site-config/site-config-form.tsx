@@ -96,12 +96,13 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Tabs defaultValue="general">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 flex-wrap">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
+          <TabsTrigger value="footer">Footer</TabsTrigger>
         </TabsList>
 
         {/* ── General ── */}
@@ -243,6 +244,62 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
           <Field label="Email" name="contactEmail" defaultValue={config.contactEmail} type="email" />
           <Field label="Phone" name="contactPhone" defaultValue={config.contactPhone} />
           <Field label="Location" name="contactLocation" defaultValue={config.contactLocation} />
+        </TabsContent>
+
+        {/* ── Footer ── */}
+        <TabsContent value="footer" className="space-y-6">
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Social Links</p>
+            <p className="text-[11px] text-muted-foreground">Leave empty to hide the icon.</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Facebook URL" name="footerFacebookUrl" defaultValue={config.footerFacebookUrl} />
+              <Field label="Instagram URL" name="footerInstagramUrl" defaultValue={config.footerInstagramUrl} />
+              <Field label="Twitter / X URL" name="footerTwitterUrl" defaultValue={config.footerTwitterUrl} />
+              <Field label="YouTube URL" name="footerYoutubeUrl" defaultValue={config.footerYoutubeUrl} />
+            </div>
+          </div>
+
+          <Field
+            label="Powered By Text"
+            name="footerPoweredByText"
+            defaultValue={config.footerPoweredByText}
+            hint='Shown in the brand column, e.g. "Powered by TourVibe".'
+          />
+
+          {([1, 2, 3] as const).map((col) => {
+            const colAccentClass = col === 1
+              ? "border-amber-400/30 bg-amber-50/50"
+              : col === 2
+              ? "border-cyan-400/30 bg-cyan-50/50"
+              : "border-violet-400/30 bg-violet-50/50";
+            return (
+              <div key={col} className={`rounded-lg border p-4 space-y-3 ${colAccentClass}`}>
+                <p className="text-sm font-semibold text-slate-700">Column {col}</p>
+                <Field
+                  label="Heading"
+                  name={`footerCol${col}Heading`}
+                  defaultValue={(config as SiteConfig)[`footerCol${col}Heading` as keyof SiteConfig]}
+                />
+                <div className="space-y-2">
+                  {([1, 2, 3, 4] as const).map((n) => (
+                    <div key={n} className="grid grid-cols-2 gap-2">
+                      <Field
+                        label={`Link ${n} Label`}
+                        name={`footerCol${col}Link${n}Label`}
+                        defaultValue={(config as SiteConfig)[`footerCol${col}Link${n}Label` as keyof SiteConfig]}
+                      />
+                      <Field
+                        label={`Link ${n} URL`}
+                        name={`footerCol${col}Link${n}Url`}
+                        defaultValue={(config as SiteConfig)[`footerCol${col}Link${n}Url` as keyof SiteConfig]}
+                        hint='e.g. /blog or /#about'
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </TabsContent>
       </Tabs>
 

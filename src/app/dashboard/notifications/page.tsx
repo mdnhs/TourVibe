@@ -60,9 +60,9 @@ export default async function NotificationsPage() {
           title="Notifications"
           subtitle="Send and manage platform notifications"
         />
-        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-6 p-4 md:p-6 max-w-4xl">
-          <Card className="shrink-0 overflow-hidden border-0 shadow-md">
-            <div className="h-1 w-full bg-linear-to-r from-violet-500 via-blue-500 to-cyan-400" />
+        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin  flex-col gap-6 p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 ">
+          <Card className="shrink-0 overflow-hidden border-0 shadow-md relative h-fit">
+            <div className="h-1 absolute top-0 w-full bg-linear-to-r from-violet-500 via-blue-500 to-cyan-400" />
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
                 Send Notification
@@ -76,8 +76,8 @@ export default async function NotificationsPage() {
             </CardContent>
           </Card>
 
-          <Card className="shrink-0 overflow-hidden border-0 shadow-md">
-            <div className="h-1 w-full bg-linear-to-r from-emerald-500 via-teal-400 to-cyan-400" />
+          <Card className="shrink-0 overflow-hidden border-0 shadow-md relative h-fit">
+            <div className="h-1 absolute top-0 w-full bg-linear-to-r from-emerald-500 via-teal-400 to-cyan-400" />
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
                 Sent Notifications

@@ -1,20 +1,19 @@
-import { redirect } from "next/navigation";
 import {
+  AlertTriangleIcon,
+  CheckCircle2,
   FileText,
   Globe,
-  Search,
-  TrendingUp,
-  Map,
-  CheckCircle2,
-  XCircle,
   LayoutDashboardIcon,
-  SparklesIcon,
-  AlertTriangleIcon,
+  Map,
+  Search,
   ShieldCheckIcon,
+  SparklesIcon,
+  TrendingUp,
+  XCircle,
 } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { SiteHeader } from "@/components/site-header";
-import { SeoForm } from "./seo-form";
 import {
   Card,
   CardContent,
@@ -23,9 +22,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireDashboardSession } from "@/lib/dashboard";
-import { getSeoSettings, getSitemapCustomEntries } from "./actions";
-import { SitemapEditor } from "./sitemap-editor";
 import { db } from "@/lib/db";
+import { getSeoSettings, getSitemapCustomEntries } from "./actions";
+import { SeoForm } from "./seo-form";
+import { SitemapEditor } from "./sitemap-editor";
 
 // ── Colored stat card (server component) ─────────────────────────────────────
 
@@ -408,133 +408,134 @@ export default async function SeoPage() {
           ))}
         </div>
 
-        {/* ── FORM + CHECKLIST COLUMNS ── */}
-        <div className="grid shrink-0 gap-6 xl:grid-cols-[1fr_360px]">
-          {/* SEO Settings form */}
-          <Card className="relative overflow-hidden border-sky-200/40 shadow-sm dark:border-sky-900/30">
-            <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-sky-400 via-blue-500 to-sky-400" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* ── FORM + CHECKLIST COLUMNS ── */}
+          <div className=" space-y-6">
+            {/* Sidebar: checklist */}
+            <Card className="relative h-fit overflow-hidden border-emerald-200/40 shadow-sm dark:border-emerald-900/30">
+              <div className="absolute inset-x-0 top-0 h-1 rounded-t-[inherit] bg-linear-to-r from-emerald-400 via-teal-500 to-emerald-400" />
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2.5 text-base">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-emerald-400 to-teal-600 shadow-md shadow-emerald-400/30">
+                    <LayoutDashboardIcon className="size-4 text-white" />
+                  </div>
+                  SEO Checklist
+                </CardTitle>
+                <CardDescription className="flex items-center gap-1.5">
+                  <span className="font-bold tabular-nums text-foreground">
+                    {passCount}
+                  </span>
+                  of
+                  <span className="font-bold tabular-nums text-foreground">
+                    {checks.length}
+                  </span>
+                  items complete
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Progress bar with % pill */}
+                <div className="relative col-span-full">
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="relative h-full rounded-full bg-linear-to-r from-emerald-400 via-teal-400 to-emerald-500 transition-all duration-700"
+                      style={{ width: `${(passCount / checks.length) * 100}%` }}
+                    >
+                      <div className="absolute inset-0 rounded-full bg-linear-to-r from-transparent via-white/40 to-transparent animate-pulse" />
+                    </div>
+                  </div>
+                  <p className="mt-1.5 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    {Math.round((passCount / checks.length) * 100)}% complete
+                  </p>
+                </div>
+
+                {/* Failing items grouped first */}
+                {checks.filter((c) => !c.ok).length > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                      <AlertTriangleIcon className="size-3" />
+                      Action Needed ({checks.filter((c) => !c.ok).length})
+                    </div>
+                    {checks
+                      .filter((c) => !c.ok)
+                      .map(({ label }) => (
+                        <div
+                          key={label}
+                          className="flex items-center gap-2.5 rounded-xl border border-amber-200/60 bg-amber-50/70 px-3 py-2.5 text-sm dark:border-amber-800/40 dark:bg-amber-950/20"
+                        >
+                          <XCircle className="size-4 shrink-0 text-amber-500" />
+                          <span className="text-foreground">{label}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {/* Passing items */}
+                {checks.filter((c) => c.ok).length > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                      <ShieldCheckIcon className="size-3" />
+                      Passing ({checks.filter((c) => c.ok).length})
+                    </div>
+                    {checks
+                      .filter((c) => c.ok)
+                      .map(({ label }) => (
+                        <div
+                          key={label}
+                          className="flex items-center gap-2.5 rounded-xl border border-emerald-200/50 bg-emerald-50/40 px-3 py-2.5 text-sm dark:border-emerald-800/30 dark:bg-emerald-950/15"
+                        >
+                          <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                          <span className="text-foreground/80">{label}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            {/* SEO Settings form */}
+            <Card className="relative overflow-hidden border-sky-200/40 shadow-sm dark:border-sky-900/30">
+              <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-sky-400 via-blue-500 to-sky-400" />
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2.5 text-base">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-sky-400 to-blue-600 shadow-md shadow-sky-400/30">
+                    <Globe className="size-4 text-white" />
+                  </div>
+                  SEO Settings
+                </CardTitle>
+                <CardDescription>
+                  Changes apply to all public pages. Tour pages also generate
+                  per-page metadata automatically.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SeoForm initialData={seoSettings} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ── SITEMAP MANAGER ── */}
+          <Card className="relative shrink-0 overflow-hidden border-violet-200/40 shadow-sm dark:border-violet-900/30 h-fit">
+            <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-violet-400 via-purple-500 to-violet-400" />
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2.5 text-base">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-sky-400 to-blue-600 shadow-md shadow-sky-400/30">
-                  <Globe className="size-4 text-white" />
+                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-400/30">
+                  <Map className="size-4 text-white" />
                 </div>
-                SEO Settings
+                Sitemap Manager
               </CardTitle>
               <CardDescription>
-                Changes apply to all public pages. Tour pages also generate
-                per-page metadata automatically.
+                Auto-generated URLs come from your content. Add custom URLs for
+                extra pages you want indexed.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <SeoForm initialData={seoSettings} />
-            </CardContent>
-          </Card>
-
-          {/* Sidebar: checklist */}
-          <Card className="relative h-fit overflow-hidden border-emerald-200/40 shadow-sm dark:border-emerald-900/30">
-            <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-400 via-teal-500 to-emerald-400" />
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2.5 text-base">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-emerald-400 to-teal-600 shadow-md shadow-emerald-400/30">
-                  <LayoutDashboardIcon className="size-4 text-white" />
-                </div>
-                SEO Checklist
-              </CardTitle>
-              <CardDescription className="flex items-center gap-1.5">
-                <span className="font-bold tabular-nums text-foreground">
-                  {passCount}
-                </span>
-                of
-                <span className="font-bold tabular-nums text-foreground">
-                  {checks.length}
-                </span>
-                items complete
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {/* Progress bar with % pill */}
-              <div className="relative">
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="relative h-full rounded-full bg-linear-to-r from-emerald-400 via-teal-400 to-emerald-500 transition-all duration-700"
-                    style={{ width: `${(passCount / checks.length) * 100}%` }}
-                  >
-                    <div className="absolute inset-0 rounded-full bg-linear-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                  </div>
-                </div>
-                <p className="mt-1.5 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {Math.round((passCount / checks.length) * 100)}% complete
-                </p>
-              </div>
-
-              {/* Failing items grouped first */}
-              {checks.filter((c) => !c.ok).length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                    <AlertTriangleIcon className="size-3" />
-                    Action Needed ({checks.filter((c) => !c.ok).length})
-                  </div>
-                  {checks
-                    .filter((c) => !c.ok)
-                    .map(({ label }) => (
-                      <div
-                        key={label}
-                        className="flex items-center gap-2.5 rounded-xl border border-amber-200/60 bg-amber-50/70 px-3 py-2.5 text-sm dark:border-amber-800/40 dark:bg-amber-950/20"
-                      >
-                        <XCircle className="size-4 shrink-0 text-amber-500" />
-                        <span className="text-foreground">{label}</span>
-                      </div>
-                    ))}
-                </div>
-              )}
-
-              {/* Passing items */}
-              {checks.filter((c) => c.ok).length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                    <ShieldCheckIcon className="size-3" />
-                    Passing ({checks.filter((c) => c.ok).length})
-                  </div>
-                  {checks
-                    .filter((c) => c.ok)
-                    .map(({ label }) => (
-                      <div
-                        key={label}
-                        className="flex items-center gap-2.5 rounded-xl border border-emerald-200/50 bg-emerald-50/40 px-3 py-2.5 text-sm dark:border-emerald-800/30 dark:bg-emerald-950/15"
-                      >
-                        <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
-                        <span className="text-foreground/80">{label}</span>
-                      </div>
-                    ))}
-                </div>
-              )}
+              <SitemapEditor
+                autoEntries={autoEntries}
+                customEntries={sitemapCustomEntries}
+                siteUrl={base}
+              />
             </CardContent>
           </Card>
         </div>
-
-        {/* ── SITEMAP MANAGER ── */}
-        <Card className="relative shrink-0 overflow-hidden border-violet-200/40 shadow-sm dark:border-violet-900/30">
-          <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-violet-400 via-purple-500 to-violet-400" />
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2.5 text-base">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-400/30">
-                <Map className="size-4 text-white" />
-              </div>
-              Sitemap Manager
-            </CardTitle>
-            <CardDescription>
-              Auto-generated URLs come from your content. Add custom URLs for
-              extra pages you want indexed.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SitemapEditor
-              autoEntries={autoEntries}
-              customEntries={sitemapCustomEntries}
-              siteUrl={base}
-            />
-          </CardContent>
-        </Card>
       </div>
     </>
   );

@@ -74,6 +74,38 @@ export default async function MarketingLayout({
         tagline={siteConfig.footerTagline}
         location={siteConfig.contactLocation}
         logoUrl={siteConfig.logoUrl || undefined}
+        footerCol1Heading={siteConfig.footerCol1Heading}
+        footerCol1Link1Label={siteConfig.footerCol1Link1Label}
+        footerCol1Link1Url={siteConfig.footerCol1Link1Url}
+        footerCol1Link2Label={siteConfig.footerCol1Link2Label}
+        footerCol1Link2Url={siteConfig.footerCol1Link2Url}
+        footerCol1Link3Label={siteConfig.footerCol1Link3Label}
+        footerCol1Link3Url={siteConfig.footerCol1Link3Url}
+        footerCol1Link4Label={siteConfig.footerCol1Link4Label}
+        footerCol1Link4Url={siteConfig.footerCol1Link4Url}
+        footerCol2Heading={siteConfig.footerCol2Heading}
+        footerCol2Link1Label={siteConfig.footerCol2Link1Label}
+        footerCol2Link1Url={siteConfig.footerCol2Link1Url}
+        footerCol2Link2Label={siteConfig.footerCol2Link2Label}
+        footerCol2Link2Url={siteConfig.footerCol2Link2Url}
+        footerCol2Link3Label={siteConfig.footerCol2Link3Label}
+        footerCol2Link3Url={siteConfig.footerCol2Link3Url}
+        footerCol2Link4Label={siteConfig.footerCol2Link4Label}
+        footerCol2Link4Url={siteConfig.footerCol2Link4Url}
+        footerCol3Heading={siteConfig.footerCol3Heading}
+        footerCol3Link1Label={siteConfig.footerCol3Link1Label}
+        footerCol3Link1Url={siteConfig.footerCol3Link1Url}
+        footerCol3Link2Label={siteConfig.footerCol3Link2Label}
+        footerCol3Link2Url={siteConfig.footerCol3Link2Url}
+        footerCol3Link3Label={siteConfig.footerCol3Link3Label}
+        footerCol3Link3Url={siteConfig.footerCol3Link3Url}
+        footerCol3Link4Label={siteConfig.footerCol3Link4Label}
+        footerCol3Link4Url={siteConfig.footerCol3Link4Url}
+        footerFacebookUrl={siteConfig.footerFacebookUrl}
+        footerInstagramUrl={siteConfig.footerInstagramUrl}
+        footerTwitterUrl={siteConfig.footerTwitterUrl}
+        footerYoutubeUrl={siteConfig.footerYoutubeUrl}
+        footerPoweredByText={siteConfig.footerPoweredByText}
       />
     </div>
   );
