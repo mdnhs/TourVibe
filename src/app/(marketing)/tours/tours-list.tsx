@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/currency";
 interface Tour {
   id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
   duration: string;
@@ -57,7 +58,7 @@ export function ToursList({ tours, currency }: ToursListProps) {
         return (
           <Link
             key={tour.id}
-            href={`/tours/${tour.id}`}
+            href={`/tours/${tour.slug}`}
             style={{ animationDelay: `${i * 60}ms` }}
             className="group animate-in fade-in slide-in-from-bottom-3 duration-500
                        relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white

@@ -20,6 +20,7 @@ import { SearchParams } from "nuqs/server";
 interface Tour {
   id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
   duration: string;
@@ -79,6 +80,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
       price: Number(t.price),
       reviewCount,
       avgRating,
+      slug: t.slug,
     };
   }) as Tour[];
 

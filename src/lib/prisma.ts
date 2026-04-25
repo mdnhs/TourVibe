@@ -1,7 +1,7 @@
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
 
-// Cache bust: 2026-04-24T12:05:00Z
+// Cache bust: 2026-04-25T13:45:00Z
 const DATABASE_URL = process.env.DATABASE_URL!;
 
 function createPrismaClient() {

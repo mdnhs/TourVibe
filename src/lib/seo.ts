@@ -154,6 +154,7 @@ export function buildTourSchema(
   s: SeoSettings,
   tour: {
     id: string;
+    slug: string;
     name: string;
     description: string | null;
     price: number;
@@ -165,7 +166,7 @@ export function buildTourSchema(
   currency?: string,
 ) {
   if (!s.enableJsonLd) return null;
-  const url = s.siteUrl ? `${s.siteUrl}/tours/${tour.id}` : undefined;
+  const url = s.siteUrl ? `${s.siteUrl}/tours/${tour.slug}` : undefined;
   return {
     "@context": "https://schema.org",
     "@type": "TouristAttraction",

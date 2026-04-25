@@ -116,6 +116,7 @@ export default async function Home() {
   interface PopularTourRaw {
     id: string;
     name: string;
+    slug: string;
     description: string | null;
     price: number;
     duration: string;
@@ -127,7 +128,7 @@ export default async function Home() {
 
   const popularToursRaw = (await db.$queryRaw`
     SELECT
-      tp.id, tp.name, tp.description, tp.price, tp.duration, "tp"."maxPersons", tp.thumbnail,
+      tp.id, tp.name, tp.slug, tp.description, tp.price, tp.duration, "tp"."maxPersons", tp.thumbnail,
       AVG(r.rating) as "avgRating",
       COUNT(r.id) as "reviewCount"
     FROM tour_package tp

@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/currency";
 interface PopularTour {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   price: number;
   duration: string;
@@ -239,7 +240,7 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
 
                   {/* CTA */}
                   <Link
-                    href={`/tours/${tour.id}`}
+                    href={`/tours/${tour.slug}`}
                     className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 ${accent.btnFrom} ${accent.btnShadow}`}
                   >
                     Book this tour

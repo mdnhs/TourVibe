@@ -20,6 +20,7 @@ export async function GET() {
   const tours = await db.tourPackage.findMany({
     select: {
       id: true,
+      slug: true,
       name: true,
       description: true,
       price: true,
@@ -32,7 +33,7 @@ export async function GET() {
   });
 
   const items = tours.map((tour) => {
-    const tourUrl = `${siteUrl}/tours/${tour.id}`;
+    const tourUrl = `${siteUrl}/tours/${tour.slug}`;
     const imageUrl = tour.thumbnail.startsWith("http") 
       ? tour.thumbnail 
       : `${siteUrl}${tour.thumbnail}`;

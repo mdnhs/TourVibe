@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = s.siteUrl || "https://tourvibe.com";
 
   const tours = await db.tourPackage.findMany({
-    select: { id: true, updatedAt: true },
+    select: { slug: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' }
   });
 
@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const tourRoutes: MetadataRoute.Sitemap = tours.map((t) => ({
-    url: `${base}/tours/${t.id}`,
+    url: `${base}/tours/${t.slug}`,
     lastModified: new Date(t.updatedAt),
     changeFrequency: "weekly" as const,
     priority: 0.8,

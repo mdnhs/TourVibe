@@ -1,11 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import crypto from "node:crypto";
-
 import { prisma } from "@/lib/prisma";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { generateOrderId, slugify } from "@/lib/utils";
 
 export async function createTour(formData: FormData) {
   const { isSuperAdmin } = await requireDashboardSession();
@@ -27,7 +26,8 @@ export async function createTour(formData: FormData) {
     return { error: "Missing required fields (Name, Price, Duration, Persons, Thumbnail)" };
   }
 
-  const id = crypto.randomUUID();
+  const id = generateOrderId();
+  const slug = slugify(name);
 
   try {
     const thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours");
@@ -43,6 +43,7 @@ export async function createTour(formData: FormData) {
       data: {
         id,
         name,
+        slug,
         description,
         price,
         duration,
@@ -68,6 +69,7 @@ export async function updateTour(id: string, formData: FormData) {
   if (!isSuperAdmin) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
+  const slug = slugify(name);
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
   const duration = formData.get("duration") as string;
@@ -107,7 +109,7 @@ export async function updateTour(id: string, formData: FormData) {
     await prisma.$transaction([
       prisma.tourPackage.update({
         where: { id },
-        data: { name, description, price, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, highlights },
+        data: { name, slug, description, price, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, highlights },
       }),
       prisma.tourPackageVehicle.deleteMany({ where: { tourPackageId: id } }),
       prisma.tourPackageVehicle.createMany({

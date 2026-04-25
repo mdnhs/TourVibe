@@ -51,6 +51,7 @@ import {
 export type Booking = {
   id: string;
   tourPackageId: string;
+  tourSlug?: string | null;
   amount: number;
   currency: string;
   status: string;
@@ -67,6 +68,7 @@ export type Booking = {
 interface BookingTableProps {
   bookings: Booking[];
   isAdmin: boolean;
+  isDriver?: boolean;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
@@ -118,7 +120,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
+export function BookingTable({ bookings, isAdmin, isDriver = false }: BookingTableProps) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [cancelId, setCancelId] = React.useState<string | null>(null);
@@ -215,7 +217,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
         const sessionId = row.original.stripeSessionId;
 
         if (!isAdmin) {
-          if (status === "unpaid" && sessionId) {
+          if (!isDriver && status === "unpaid" && sessionId) {
             return (
               <div className="flex flex-col gap-2">
                 <StatusBadge status={status} />
@@ -404,7 +406,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
               ) : (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href={`/tours/${b.tourPackageId}`}>
+                    <Link href={`/tours/${b.tourSlug || b.tourPackageId}`}>
                       <ExternalLink className="mr-2 size-4" />
                       View Tour
                     </Link>
@@ -415,7 +417,7 @@ export function BookingTable({ bookings, isAdmin }: BookingTableProps) {
                       View Invoice
                     </Link>
                   </DropdownMenuItem>
-                  {b.status !== "cancelled" && (
+                  {!isDriver && b.status !== "cancelled" && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem

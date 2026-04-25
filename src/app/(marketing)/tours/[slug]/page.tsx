@@ -42,16 +42,21 @@ interface Tour {
     createdAt: Date;
   }>;
 }
-
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const tour = await db.tourPackage.findUnique({
-    where: { id },
+  const { slug } = await params;
+  let tour = await db.tourPackage.findFirst({
+    where: { slug },
   });
+
+  if (!tour) {
+    tour = await db.tourPackage.findUnique({
+      where: { id: slug },
+    });
+  }
 
   if (!tour) return {};
 
@@ -59,7 +64,7 @@ export async function generateMetadata({
   return buildMetadata(s, {
     title: tour.name,
     description: tour.description || "",
-    canonical: `/tours/${tour.id}`,
+    canonical: `/tours/${tour.slug || tour.id}`,
     image: tour.thumbnail,
   });
 }
@@ -67,12 +72,13 @@ export async function generateMetadata({
 export default async function TourDetailsPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
+  const { slug } = await params;
 
-  const tourRaw = await db.tourPackage.findUnique({
-    where: { id },
+  // Try fetching by slug first, then fallback to id
+  let tourRaw = await db.tourPackage.findFirst({
+    where: { slug },
     include: {
       reviews: {
         orderBy: { createdAt: "desc" },
@@ -87,6 +93,26 @@ export default async function TourDetailsPage({
       },
     },
   });
+
+  if (!tourRaw) {
+    // Fallback for old ID links
+    tourRaw = await db.tourPackage.findUnique({
+      where: { id: slug },
+      include: {
+        reviews: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
   if (!tourRaw) {
     notFound();

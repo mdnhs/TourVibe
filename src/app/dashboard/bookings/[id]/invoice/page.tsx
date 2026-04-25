@@ -13,7 +13,7 @@ export default async function InvoicePage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ success?: string }>;
 }) {
-  const { session, isSuperAdmin } = await requireDashboardSession();
+  const { session, role, isSuperAdmin } = await requireDashboardSession();
   const { id } = await params;
   const { success } = await searchParams;
 
@@ -24,7 +24,13 @@ export default async function InvoicePage({
   let booking = await prisma.booking.findUnique({
     where: { id },
     include: {
-      tourPackage: { select: { name: true, duration: true } },
+      tourPackage: {
+        select: {
+          name: true,
+          duration: true,
+          vehicles: { select: { vehicle: { select: { driverId: true } } } },
+        },
+      },
       user: { select: { name: true, email: true } },
     },
   });
@@ -33,8 +39,19 @@ export default async function InvoicePage({
     notFound();
   }
 
-  // Security check: Only allow the user who made the booking or an admin to view the invoice
-  if (!isSuperAdmin && booking.userId !== session.user.id) {
+  const isDriver = role === "driver";
+  const isAssignedDriver =
+    isDriver &&
+    booking.tourPackage.vehicles.some(
+      (tv) => tv.vehicle.driverId === session.user.id,
+    );
+
+  // Security check: admin, owning user, or driver assigned to the tour's fleet
+  if (
+    !isSuperAdmin &&
+    booking.userId !== session.user.id &&
+    !isAssignedDriver
+  ) {
     redirect("/dashboard/bookings");
   }
 
@@ -53,7 +70,13 @@ export default async function InvoicePage({
             where: { id },
             data: { status: "paid" },
             include: {
-              tourPackage: { select: { name: true, duration: true } },
+              tourPackage: {
+                select: {
+                  name: true,
+                  duration: true,
+                  vehicles: { select: { vehicle: { select: { driverId: true } } } },
+                },
+              },
               user: { select: { name: true, email: true } },
             },
           });
