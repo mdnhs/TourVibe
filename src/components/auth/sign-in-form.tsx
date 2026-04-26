@@ -65,7 +65,7 @@ export function SignInForm({ onSuccess, compact }: SignInFormProps = {}) {
           type="email"
           placeholder="you@example.com"
           required
-          className="placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          className="text-slate-900 placeholder:text-slate-500 dark:text-white dark:placeholder:text-slate-300"
         />
       </div>
       <div className="space-y-2">
@@ -76,7 +76,7 @@ export function SignInForm({ onSuccess, compact }: SignInFormProps = {}) {
           type="password"
           placeholder="••••••••"
           required
-          className="placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          className="text-slate-900 placeholder:text-slate-500 dark:text-white dark:placeholder:text-slate-300"
         />
       </div>
       {error ? (

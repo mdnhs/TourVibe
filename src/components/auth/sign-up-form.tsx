@@ -61,7 +61,13 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label htmlFor="signup-name">Full name</Label>
-        <Input id="signup-name" name="name" placeholder="Ariana Walker" required />
+        <Input
+          id="signup-name"
+          name="name"
+          placeholder="Ariana Walker"
+          required
+          className="text-slate-900 placeholder:text-slate-500 dark:text-white dark:placeholder:text-slate-300"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="signup-email">Email</Label>
@@ -71,6 +77,7 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
           type="email"
           placeholder="you@example.com"
           required
+          className="text-slate-900 placeholder:text-slate-500 dark:text-white dark:placeholder:text-slate-300"
         />
       </div>
       <div className="space-y-2">
@@ -82,6 +89,7 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
           minLength={8}
           placeholder="At least 8 characters"
           required
+          className="text-slate-900 placeholder:text-slate-500 dark:text-white dark:placeholder:text-slate-300"
         />
       </div>
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
