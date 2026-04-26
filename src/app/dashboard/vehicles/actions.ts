@@ -49,12 +49,12 @@ export async function createVehicle(formData: FormData) {
         gallery: galleryUrls.join(","),
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in createVehicle:", err);
     if (err instanceof Error && err.message.includes("Unique constraint")) {
       return { error: "License plate already exists" };
     }
-    return { error: err?.message || "Unknown error occurred" };
+    return { error: err instanceof Error ? err.message : "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");
@@ -104,12 +104,12 @@ export async function updateVehicle(id: string, formData: FormData) {
       where: { id },
       data: { make, model, year, licensePlate, driverId: driverId || null, thumbnail: thumbnailUrl, gallery: finalGallery },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in updateVehicle:", err);
     if (err instanceof Error && err.message.includes("Unique constraint")) {
       return { error: "License plate already exists" };
     }
-    return { error: err?.message || "Unknown error occurred" };
+    return { error: err instanceof Error ? err.message : "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");
@@ -122,9 +122,9 @@ export async function deleteVehicle(id: string) {
 
   try {
     await prisma.vehicle.delete({ where: { id } });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in deleteVehicle:", err);
-    return { error: err?.message || "Unknown error occurred" };
+    return { error: err instanceof Error ? err.message : "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");
@@ -139,9 +139,9 @@ export async function deleteVehicles(ids: string[]) {
 
   try {
     await prisma.vehicle.deleteMany({ where: { id: { in: ids } } });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in deleteVehicles:", err);
-    return { error: err?.message || "Unknown error occurred" };
+    return { error: err instanceof Error ? err.message : "Unknown error occurred" };
   }
 
   revalidatePath("/dashboard/vehicles");

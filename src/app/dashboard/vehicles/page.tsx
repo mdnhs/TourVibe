@@ -34,8 +34,9 @@ export default async function VehiclesPage() {
     ...v,
     createdAt: v.createdAt.toISOString(),
     updatedAt: v.updatedAt.toISOString(),
-    driverName: v.driver?.name ?? null,
-    driverEmail: v.driver?.email ?? null,
+    gallery: v.gallery ?? undefined,
+    driverName: v.driver?.name ?? undefined,
+    driverEmail: v.driver?.email ?? undefined,
   }));
 
   return (

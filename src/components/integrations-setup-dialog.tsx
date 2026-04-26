@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -69,15 +69,18 @@ export function IntegrationsSetupDialog({
   missingCloudinary,
   missingStripe,
 }: IntegrationsSetupDialogProps) {
-  const [open, setOpen] = useState(false);
+  const dismissed = useSyncExternalStore(
+    () => () => {},
+    () => sessionStorage.getItem(DISMISS_KEY),
+    () => null,
+  );
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    if (!missingCloudinary && !missingStripe) return;
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (!dismissed) setOpen(true);
-  }, [missingCloudinary, missingStripe]);
+  const shouldAutoOpen = (missingCloudinary || missingStripe) && !dismissed;
+  const open = manualOpen ?? shouldAutoOpen;
+  const setOpen = (value: boolean) => setManualOpen(value);
 
   if (!missingCloudinary && !missingStripe) return null;
 

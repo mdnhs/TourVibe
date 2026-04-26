@@ -41,9 +41,9 @@ export async function updateDriver(id: string, formData: FormData) {
   if (!name || !email) return { error: "Name and email are required." };
 
   try {
-    await auth.api.updateUser({
-      headers: await headers(),
-      body: { userId: id, data: { name, email } },
+    await prisma.user.update({
+      where: { id },
+      data: { name, email },
     });
 
     if (newPassword && newPassword.length >= 8) {

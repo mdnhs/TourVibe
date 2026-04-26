@@ -144,7 +144,7 @@ export function CreateVehicleForm({ drivers }: FormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="driverId">Assign Driver (Optional)</Label>
-        <Select value={driverId} onValueChange={setDriverId} disabled={isPending}>
+        <Select value={driverId} onValueChange={(value) => setDriverId(value ?? "")} disabled={isPending}>
           <SelectTrigger>
             <SelectValue>
               {driverId === "none" 
@@ -333,7 +333,7 @@ export function EditVehicleForm({
 
       <div className="space-y-2">
         <Label htmlFor="driverId">Assign Driver (Optional)</Label>
-        <Select value={driverId} onValueChange={setDriverId} disabled={isPending}>
+        <Select value={driverId} onValueChange={(value) => setDriverId(value ?? "")} disabled={isPending}>
           <SelectTrigger>
             <SelectValue>
               {driverId === "none" 

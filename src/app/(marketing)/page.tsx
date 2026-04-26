@@ -77,7 +77,7 @@ export default async function Home() {
       image: isAdmin 
         ? r.reviewerImage 
         : (r.reviewerImage || r.user.image),
-      role: isAdmin ? "Tourist" : (r.user.role === "tourist" ? "Tourist" : r.user.role.replace("_", " ")),
+      role: isAdmin ? "Tourist" : (r.user.role === "tourist" ? "Tourist" : (r.user.role?.replace("_", " ") ?? "Tourist")),
       rating: r.rating,
     };
   });
@@ -248,7 +248,11 @@ export default async function Home() {
       { createdAt: "desc" },
     ],
     take: 3,
-  });
+  }).then((rows) => rows.map((post) => ({
+    ...post,
+    publishedAt: post.publishedAt?.toISOString() ?? null,
+    createdAt: post.createdAt.toISOString(),
+  })));
 
   return (
     <div className="min-h-screen text-slate-900">

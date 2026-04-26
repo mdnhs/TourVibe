@@ -46,12 +46,8 @@ interface DriverTableProps {
 
 export function DriverTable({ drivers }: DriverTableProps) {
   const router = useRouter();
-  const [data, setData] = React.useState<Driver[]>(() => drivers);
+  const data = drivers;
   const [isPending, startTransition] = React.useTransition();
-
-  React.useEffect(() => {
-    setData(drivers);
-  }, [drivers]);
 
   // nuqs for View/Edit
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
@@ -83,7 +79,7 @@ export function DriverTable({ drivers }: DriverTableProps) {
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            table.getIsSomePageRowsSelected()
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"

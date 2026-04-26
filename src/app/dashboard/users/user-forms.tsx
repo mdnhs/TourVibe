@@ -67,7 +67,7 @@ export function CreateUserForm({
 
       <div className="space-y-2">
         <Label htmlFor="role">Role</Label>
-        <Select value={role} onValueChange={setRole} disabled={isPending}>
+        <Select value={role} onValueChange={(value) => setRole(value ?? "")} disabled={isPending}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -104,7 +104,7 @@ export function EditUserForm({
   user,
   onSuccess,
   customRoles = {}
-}: { user: any; onSuccess?: () => void; customRoles?: Record<string, string> }) {
+}: { user: { id: string; name: string; email: string; role: string }; onSuccess?: () => void; customRoles?: Record<string, string> }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [role, setRole] = useState<string>(user.role);
@@ -146,7 +146,7 @@ export function EditUserForm({
 
       <div className="space-y-2">
         <Label htmlFor="role">Role</Label>
-        <Select value={role} onValueChange={setRole} disabled={isPending}>
+        <Select value={role} onValueChange={(value) => setRole(value ?? "")} disabled={isPending}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>

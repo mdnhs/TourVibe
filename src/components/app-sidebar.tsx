@@ -84,7 +84,20 @@ export function AppSidebar({
     }));
   };
 
-  const menuGroups = [
+  type NavItem = {
+    label: string;
+    href?: string;
+    icon: React.ComponentType<{ className?: string }>;
+    adminOnly?: boolean;
+    items?: NavItem[];
+  };
+  type MenuGroup = {
+    label: string;
+    adminOnly?: boolean;
+    items: NavItem[];
+  };
+
+  const menuGroups: MenuGroup[] = [
     {
       label: "Platform",
       items: [
@@ -135,13 +148,13 @@ export function AppSidebar({
     },
   ];
 
-  const renderMenuItem = (item: any) => {
+  const renderMenuItem = (item: NavItem) => {
     const Icon = item.icon;
-    const hasSubItems = item.items && item.items.length > 0;
+    const hasSubItems = !!item.items && item.items.length > 0;
     const isExpanded = openMenus[item.label];
-    
+
     if (allowedMenus) {
-      const isAllowed = allowedMenus.includes(item.label) || (item.items && item.items.some((si: any) => allowedMenus.includes(si.label)));
+      const isAllowed = allowedMenus.includes(item.label) || (item.items?.some((si) => allowedMenus.includes(si.label)) ?? false);
       if (!isAllowed) return null;
     } else if (item.adminOnly && user.role !== "Super Admin") {
       return null;
@@ -151,7 +164,7 @@ export function AppSidebar({
       ? item.href === "/dashboard"
         ? pathname === "/dashboard"
         : pathname.startsWith(item.href)
-      : hasSubItems && item.items?.some((sub: any) => pathname.startsWith(sub.href));
+      : hasSubItems && (item.items?.some((sub) => sub.href ? pathname.startsWith(sub.href) : false) ?? false);
 
     const isNotif = item.href === "/dashboard/notifications";
     const isMessages = item.href === "/dashboard/messages";
@@ -180,7 +193,8 @@ export function AppSidebar({
             </SidebarMenuButton>
             {isExpanded && (
               <SidebarMenuSub className="border-white/10 ml-4 pl-2 space-y-1 mt-1 group-data-[collapsible=icon]:hidden">
-                {item.items?.map((subItem: any) => {
+                {item.items?.map((subItem) => {
+                  if (!subItem.href) return null;
                   if (allowedMenus && !allowedMenus.includes(subItem.label)) return null;
                   return (
                     <SidebarMenuSubItem key={subItem.href}>
@@ -289,7 +303,7 @@ export function AppSidebar({
             
             const visibleItems = group.items.filter(item => {
               if (allowedMenus) {
-                 return allowedMenus.includes(item.label) || (item.items && item.items.some((si: any) => allowedMenus.includes(si.label)));
+                 return allowedMenus.includes(item.label) || (item.items?.some((si) => allowedMenus.includes(si.label)) ?? false);
               }
               if (item.adminOnly && user.role !== "Super Admin") return false;
               return true;

@@ -50,11 +50,12 @@ interface VehicleTableProps {
 export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
   const router = useRouter();
   const [data, setData] = React.useState<Vehicle[]>(() => vehicles);
-  const [isPending, startTransition] = React.useTransition();
-
-  React.useEffect(() => {
+  const prevVehiclesRef = React.useRef(vehicles);
+  if (prevVehiclesRef.current !== vehicles) {
+    prevVehiclesRef.current = vehicles;
     setData(vehicles);
-  }, [vehicles]);
+  }
+  const [isPending, startTransition] = React.useTransition();
 
   // nuqs for View/Edit
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
@@ -86,7 +87,7 @@ export function VehicleTable({ vehicles, drivers }: VehicleTableProps) {
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            table.getIsSomePageRowsSelected()
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"

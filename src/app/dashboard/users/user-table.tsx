@@ -51,14 +51,10 @@ interface UserTableProps {
 
 export function UserTable({ users, currentUserId, customRoles = {} }: UserTableProps) {
   const router = useRouter();
-  const [data, setData] = React.useState<User[]>(() => users);
+  const data = users;
   const [isPending, startTransition] = React.useTransition();
 
   const allRoleLabels = { ...roleLabels, ...customRoles } as Record<string, string>;
-
-  React.useEffect(() => {
-    setData(users);
-  }, [users]);
 
   // nuqs for View/Edit
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
@@ -110,7 +106,7 @@ export function UserTable({ users, currentUserId, customRoles = {} }: UserTableP
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            table.getIsSomePageRowsSelected()
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"

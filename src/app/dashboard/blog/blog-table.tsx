@@ -207,7 +207,7 @@ export function BlogTable({ posts }: BlogTableProps) {
           <Checkbox
             checked={
               table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
+              table.getIsSomePageRowsSelected()
             }
             onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
             aria-label="Select all"
@@ -432,7 +432,7 @@ export function BlogTable({ posts }: BlogTableProps) {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Select
             value={statusFilter}
-            onValueChange={setStatusFilter}
+            onValueChange={(value) => setStatusFilter(value)}
           >
             <SelectTrigger className="w-[160px] h-8">
               <SelectValue placeholder="All Posts" />

@@ -42,7 +42,7 @@ function ActionBadge({ action }: { action: string }) {
 }
 
 interface RoleFormProps {
-  initialData?: { id: string; name: string; description: string; permissions: string };
+  initialData?: { id: string; name: string; description: string | null; permissions: string };
   onSuccess?: () => void;
 }
 

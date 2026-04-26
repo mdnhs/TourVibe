@@ -79,13 +79,9 @@ export function ReviewTable({
   isSuperAdmin,
 }: ReviewTableProps) {
   const router = useRouter();
-  const [data, setData] = React.useState<Review[]>(() => reviews);
+  const data = reviews;
   const [isPending, startTransition] = React.useTransition();
   const [viewId, setViewId] = useQueryState("view", { shallow: true });
-
-  React.useEffect(() => {
-    setData(reviews);
-  }, [reviews]);
 
   const [from, setFrom] = useQueryState(
     "from",
@@ -155,7 +151,7 @@ export function ReviewTable({
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            table.getIsSomePageRowsSelected()
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
@@ -218,8 +214,8 @@ export function ReviewTable({
         <DataTableColumnHeader column={column} title="Rating" />
       ),
       cell: ({ row }) => <StarRating rating={row.original.rating} />,
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id).toString());
+      filterFn: (row, id, value: string[]) => {
+        return value.includes(String(row.getValue(id)));
       },
     },
     {

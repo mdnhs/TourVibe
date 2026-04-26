@@ -21,14 +21,10 @@ export async function createUser(formData: FormData) {
   }
 
   try {
-    const response = await auth.api.createUser({
+    await auth.api.createUser({
       headers: await headers(),
       body: { name, email, password, role },
     });
-
-    if (response.error) {
-      return { error: response.error.message || "Unable to create the user account." };
-    }
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -50,7 +46,7 @@ export async function updateUser(id: string, formData: FormData) {
 
   try {
     const requestHeaders = await headers();
-    await auth.api.updateUser({ headers: requestHeaders, body: { userId: id, data: { name, email } } });
+    await prisma.user.update({ where: { id }, data: { name, email } });
     await auth.api.setRole({ headers: requestHeaders, body: { userId: id, role } });
 
     if (newPassword && newPassword.length >= 8) {

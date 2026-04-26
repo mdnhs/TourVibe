@@ -45,8 +45,8 @@ export default async function DriversPage() {
     email: u.email,
     createdAt: u.createdAt.toISOString(),
     vehicleId: u.vehicles[0]?.id ?? null,
-    vehicleName: u.vehicles[0] ? `${u.vehicles[0].make} ${u.vehicles[0].model}` : null,
-    vehiclePlate: u.vehicles[0]?.licensePlate ?? null,
+    vehicleName: u.vehicles[0] ? `${u.vehicles[0].make} ${u.vehicles[0].model}` : undefined,
+    vehiclePlate: u.vehicles[0]?.licensePlate ?? undefined,
   }));
 
   return (

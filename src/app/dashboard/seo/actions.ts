@@ -98,6 +98,7 @@ export async function updateSeoSettings(formData: FormData) {
     orgName: (formData.get("orgName") as string) || "",
     orgLogo: (formData.get("orgLogo") as string) || "",
     enableJsonLd: formData.get("enableJsonLd") === "true",
+    facebookCatalogUrl: (formData.get("facebookCatalogUrl") as string) || "/api/feeds/facebook",
   };
 
   await prisma.settings.upsert({

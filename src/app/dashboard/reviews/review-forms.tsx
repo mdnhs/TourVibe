@@ -101,7 +101,7 @@ export function CreateReviewForm({ tourPackages, onSuccess, isSuperAdmin }: Crea
         <Select 
           name="tourPackageId" 
           value={tourPackageId} 
-          onValueChange={setTourPackageId} 
+          onValueChange={(value) => setTourPackageId(value ?? "")} 
           required
         >
           <SelectTrigger>
@@ -199,7 +199,7 @@ export function EditReviewForm({ review, tourPackages, onSuccess, isSuperAdmin }
         <Select 
           name="tourPackageId" 
           value={tourPackageId} 
-          onValueChange={setTourPackageId} 
+          onValueChange={(value) => setTourPackageId(value ?? "")} 
           required
         >
           <SelectTrigger>
