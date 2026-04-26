@@ -76,11 +76,13 @@ export default async function BlogPostPage({
     orderBy: { createdAt: "desc" },
   });
 
-  const relatedPosts: BlogPost[] = relatedPostsRaw.map((rp) => ({
-    ...rp,
-    createdAt: rp.createdAt.toISOString(),
-    publishedAt: rp.publishedAt?.toISOString() || null,
-  }));
+  const relatedPosts: BlogPost[] = relatedPostsRaw.map(
+    (rp: (typeof relatedPostsRaw)[number]) => ({
+      ...rp,
+      createdAt: rp.createdAt.toISOString(),
+      publishedAt: rp.publishedAt?.toISOString() || null,
+    })
+  );
 
   const s = await getSeoSettingsSync();
   const jsonLdSchema = buildBlogPostSchema(s, post);
