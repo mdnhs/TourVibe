@@ -13,11 +13,11 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6">
+    <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6 dark:text-slate-100">
       {/* ── Background glows ── */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 left-1/4 size-96 rounded-full bg-amber-400/6 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 size-80 rounded-full bg-cyan-400/6 blur-3xl" />
+        <div className="absolute -top-32 left-1/4 size-96 rounded-full bg-amber-400/6 blur-3xl dark:bg-amber-400/10" />
+        <div className="absolute bottom-0 right-1/4 size-80 rounded-full bg-cyan-400/6 blur-3xl dark:bg-cyan-400/10" />
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row">
@@ -90,11 +90,11 @@ export default async function LoginPage() {
           style={{ animationDelay: "100ms" }}
         >
           <SignInForm />
-          <p className="mt-5 text-center text-sm text-slate-500">
+          <p className="mt-5 text-center text-sm text-slate-500 dark:text-slate-400">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="group inline-flex items-center gap-1 font-semibold text-slate-950 hover:text-amber-600 transition-colors"
+              className="group inline-flex items-center gap-1 font-semibold text-slate-950 hover:text-amber-600 transition-colors dark:text-white dark:hover:text-amber-400"
             >
               Sign up free
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />

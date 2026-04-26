@@ -78,12 +78,12 @@ export function SignInForm({ onSuccess, compact }: SignInFormProps = {}) {
         />
       </div>
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </p>
       ) : null}
       <Button
-        className="h-11 w-full rounded-full bg-slate-950 text-white hover:bg-slate-800"
+        className="h-11 w-full rounded-full bg-slate-950 text-white hover:bg-slate-800 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400"
         type="submit"
         disabled={isPending}
       >
@@ -95,9 +95,9 @@ export function SignInForm({ onSuccess, compact }: SignInFormProps = {}) {
         Sign In
       </Button>
       {!compact && (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           New here?{" "}
-          <Link className="font-semibold text-amber-700" href="/signup">
+          <Link className="font-semibold text-amber-700 dark:text-amber-400" href="/signup">
             Create an account
           </Link>
         </p>
@@ -108,10 +108,10 @@ export function SignInForm({ onSuccess, compact }: SignInFormProps = {}) {
   if (compact) return formContent;
 
   return (
-    <Card className="border-white/60 bg-white/90 shadow-2xl shadow-amber-950/10 backdrop-blur">
+    <Card className="border-white/60 bg-white/90 shadow-2xl shadow-amber-950/10 backdrop-blur dark:border-white/10 dark:bg-slate-900/80 dark:shadow-black/40">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl text-slate-950">Welcome back</CardTitle>
-        <CardDescription className="text-sm text-slate-600">
+        <CardTitle className="text-2xl text-slate-950 dark:text-white">Welcome back</CardTitle>
+        <CardDescription className="text-sm text-slate-600 dark:text-slate-400">
           Sign in to manage tours, bookings, routes and customer requests.
         </CardDescription>
       </CardHeader>

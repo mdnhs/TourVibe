@@ -35,10 +35,10 @@ export function AuthDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 overflow-hidden">
         <div className="px-6 pt-6 pb-2">
-          <DialogTitle className="text-xl font-bold text-slate-950">
+          <DialogTitle className="text-xl font-bold text-slate-950 dark:text-white">
             Sign in to continue
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1">
+          <DialogDescription className="text-sm text-slate-500 mt-1 dark:text-slate-400">
             Login or create an account to book this tour.
           </DialogDescription>
         </div>

@@ -84,16 +84,16 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
           required
         />
       </div>
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
         Tourist is the default public account role.
       </div>
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </p>
       ) : null}
       <Button
-        className="h-11 w-full rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400"
+        className="h-11 w-full rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400 dark:bg-amber-400 dark:hover:bg-amber-300"
         type="submit"
         disabled={isPending}
       >
@@ -105,9 +105,9 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
         Create Account
       </Button>
       {!compact && (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           Already have an account?{" "}
-          <Link className="font-semibold text-cyan-700" href="/login">
+          <Link className="font-semibold text-cyan-700 dark:text-cyan-400" href="/login">
             Sign in
           </Link>
         </p>
@@ -118,12 +118,12 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
   if (compact) return formContent;
 
   return (
-    <Card className="border-white/60 bg-white/90 shadow-2xl shadow-cyan-950/10 backdrop-blur">
+    <Card className="border-white/60 bg-white/90 shadow-2xl shadow-cyan-950/10 backdrop-blur dark:border-white/10 dark:bg-slate-900/80 dark:shadow-black/40">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl text-slate-950">
+        <CardTitle className="text-2xl text-slate-950 dark:text-white">
           Create your TourVibe account
         </CardTitle>
-        <CardDescription className="text-sm text-slate-600">
+        <CardDescription className="text-sm text-slate-600 dark:text-slate-400">
           Public signup creates tourist accounts only. Driver access is provisioned by
           a super admin.
         </CardDescription>

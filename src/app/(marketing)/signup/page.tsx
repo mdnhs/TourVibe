@@ -34,23 +34,24 @@ export default async function SignupPage() {
   }
 
   return (
-    <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6">
+    <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6 dark:text-slate-100">
       {/* ── Background glows ── */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 left-1/4 size-96 rounded-full bg-amber-300/10 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 size-80 rounded-full bg-cyan-300/10 blur-3xl" />
+        <div className="absolute -top-32 left-1/4 size-96 rounded-full bg-amber-300/10 blur-3xl dark:bg-amber-400/10" />
+        <div className="absolute bottom-0 right-1/4 size-80 rounded-full bg-cyan-300/10 blur-3xl dark:bg-cyan-400/10" />
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row">
 
         {/* ── LEFT: info panel ── */}
         <div className="flex-1 space-y-7 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/80 px-8 py-10 shadow-[0_40px_120px_rgba(148,163,184,0.18)] backdrop-blur-sm
-                        animate-in fade-in slide-in-from-left-4 duration-500">
-          <div className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-amber-300/15 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 size-56 rounded-full bg-cyan-300/15 blur-3xl" />
+                        animate-in fade-in slide-in-from-left-4 duration-500
+                        dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/40">
+          <div className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-amber-300/15 blur-3xl dark:bg-amber-400/10" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 size-56 rounded-full bg-cyan-300/15 blur-3xl dark:bg-cyan-400/10" />
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-700">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-700 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-300">
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
               <span className="relative inline-flex size-1.5 rounded-full bg-amber-600" />
@@ -67,7 +68,7 @@ export default async function SignupPage() {
               </span>{" "}
               starts here.
             </h1>
-            <p className="max-w-xl text-sm leading-7 text-slate-500">
+            <p className="max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
               Create a free account to explore our tour packages, save your favourites and book your perfect road trip across Ireland.
             </p>
           </div>
@@ -82,15 +83,16 @@ export default async function SignupPage() {
                   style={{ animationDelay: `${120 + i * 70}ms` }}
                   className="group animate-in fade-in slide-in-from-bottom-3 duration-500
                              relative overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-5
-                             transition-all hover:-translate-y-0.5 hover:border-slate-200 hover:bg-white hover:shadow-md"
+                             transition-all hover:-translate-y-0.5 hover:border-slate-200 hover:bg-white hover:shadow-md
+                             dark:border-white/5 dark:bg-white/5 dark:hover:border-white/10 dark:hover:bg-white/10"
                 >
                   <div className={`pointer-events-none absolute -top-6 -right-6 size-24 rounded-full blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${perk.accent.glow}`} />
                   <div className={`absolute inset-x-0 top-0 h-0.75 rounded-t-2xl bg-linear-to-r ${perk.accent.bar}`} />
                   <div className={`mt-1 flex size-9 items-center justify-center rounded-xl text-white shadow-sm transition-transform duration-300 group-hover:scale-110 ${perk.accent.iconBg}`}>
                     <Icon className="size-4" />
                   </div>
-                  <h2 className="mt-4 text-sm font-bold text-slate-950">{perk.title}</h2>
-                  <p className="mt-1.5 text-xs leading-6 text-slate-500">{perk.description}</p>
+                  <h2 className="mt-4 text-sm font-bold text-slate-950 dark:text-white">{perk.title}</h2>
+                  <p className="mt-1.5 text-xs leading-6 text-slate-500 dark:text-slate-400">{perk.description}</p>
                 </div>
               );
             })}
@@ -109,11 +111,11 @@ export default async function SignupPage() {
           style={{ animationDelay: "100ms" }}
         >
           <SignUpForm />
-          <p className="mt-5 text-center text-sm text-slate-500">
+          <p className="mt-5 text-center text-sm text-slate-500 dark:text-slate-400">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="group inline-flex items-center gap-1 font-semibold text-slate-950 hover:text-amber-600 transition-colors"
+              className="group inline-flex items-center gap-1 font-semibold text-slate-950 hover:text-amber-600 transition-colors dark:text-white dark:hover:text-amber-400"
             >
               Sign in
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
