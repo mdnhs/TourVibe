@@ -14,6 +14,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookingBar } from "./booking-bar";
 import { BookingButton } from "./booking-button";
+import { GalleryLightbox } from "./gallery-lightbox";
 import Script from "next/script";
 
 import { db } from "@/lib/db";
@@ -247,32 +248,12 @@ export default async function TourDetailsPage({
       <div className="lg:pr-[22rem]">
         {/* ── Gallery strip ── */}
         {tour.gallery &&
-          tour.gallery
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean).length > 0 && (
-            <div>
-              <div className="flex gap-2 overflow-x-auto py-4 scrollbar-none">
-                {tour.gallery
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-                  .map((img, idx) => (
-                    <div
-                      key={idx}
-                      className="relative h-20 w-32 shrink-0 overflow-hidden rounded-xl ring-2 ring-transparent transition hover:ring-indigo-400"
-                    >
-                      <Image
-                        src={img}
-                        alt={`${tour.name} ${idx + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
+          (() => {
+            const imgs = tour.gallery!.split(",").map((s) => s.trim()).filter(Boolean);
+            return imgs.length > 0 ? (
+              <GalleryLightbox images={imgs} tourName={tour.name} />
+            ) : null;
+          })()}
 
         <div className="pt-8">
           {/* ── Main content ── */}

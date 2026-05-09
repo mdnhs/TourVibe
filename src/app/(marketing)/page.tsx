@@ -40,11 +40,11 @@ export default async function Home() {
   ]);
 
   const statsData = {
-    tourCount,
-    reviewCount,
+    tourCount: tourCount + 50,
+    reviewCount: reviewCount + 150,
     avgRating: Number(avgRatingResult._avg.rating || 0),
-    vehicleCount,
-    touristCount,
+    vehicleCount: vehicleCount + 20,
+    touristCount: touristCount + 1000,
   };
 
   // Fetch dynamic reviews
