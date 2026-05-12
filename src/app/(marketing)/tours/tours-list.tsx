@@ -90,7 +90,7 @@ export function ToursList({ tours, currency }: ToursListProps) {
                 <span className="font-heading text-base font-extrabold text-slate-950">
                   {formatPrice(tour.price, currency)}
                 </span>
-                <span className="text-[10px] font-medium text-slate-400"> / person</span>
+                <span className="text-[10px] font-medium text-slate-400"> / hour</span>
               </div>
 
               {/* Rating badge */}

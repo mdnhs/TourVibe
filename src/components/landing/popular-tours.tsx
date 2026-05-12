@@ -196,7 +196,7 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-white/60">From</p>
                     <p className="font-heading text-2xl font-extrabold leading-none text-white drop-shadow">
                       {formatPrice(tour.price, currency)}
-                      <span className="text-xs font-normal text-white/60"> /person</span>
+                      <span className="text-xs font-normal text-white/60"> /hour</span>
                     </p>
                   </div>
 

@@ -90,7 +90,7 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
                     <span className="font-heading font-extrabold text-slate-950">
                       {formatPrice(price, currency)}
                     </span>
-                    {" "}· per person · all inclusive
+                    {" "}· per hour · all inclusive
                   </p>
                 </div>
               </div>

@@ -9,6 +9,9 @@ interface GalleryLightboxProps {
   tourName: string;
 }
 
+const NOISE_BG =
+  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
 export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -27,8 +30,14 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
     [current]
   );
 
-  const prev = useCallback(() => go((current - 1 + images.length) % images.length), [go, current, images.length]);
-  const next = useCallback(() => go((current + 1) % images.length), [go, current, images.length]);
+  const prev = useCallback(
+    () => go((current - 1 + images.length) % images.length),
+    [go, current, images.length]
+  );
+  const next = useCallback(
+    () => go((current + 1) % images.length),
+    [go, current, images.length]
+  );
   const close = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
@@ -46,7 +55,6 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
     };
   }, [open, prev, next, close]);
 
-  // Scroll active thumb into view
   useEffect(() => {
     if (!open || !thumbsRef.current) return;
     const active = thumbsRef.current.children[current] as HTMLElement;
@@ -58,12 +66,12 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
 
   return (
     <>
-      {/* ── Thumbnail strip ── */}
+      {/* Thumbnail strip */}
       <div className="mt-5 mb-1">
         <div className="flex items-center gap-2 mb-3">
           <Images className="size-4 text-slate-400" />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Gallery · {images.length} photos
+            Gallery &middot; {images.length} photos
           </span>
         </div>
         <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
@@ -80,20 +88,16 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              {/* Hover overlay */}
               <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/30 transition-colors duration-300 rounded-2xl" />
-              {/* Number badge */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <span className="font-mono text-sm font-bold text-white drop-shadow-lg">
                   {String(idx + 1).padStart(2, "0")}
                 </span>
               </div>
-              {/* Active ring */}
               <div className="absolute inset-0 rounded-2xl ring-2 ring-inset ring-indigo-400/0 group-hover:ring-indigo-400/80 transition-all duration-300" />
             </button>
           ))}
 
-          {/* "View all" ghost card */}
           <button
             onClick={() => { setCurrent(0); setOpen(true); }}
             className="group relative shrink-0 overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50 transition-colors duration-300 flex flex-col items-center justify-center gap-1 focus:outline-none"
@@ -107,28 +111,23 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
         </div>
       </div>
 
-      {/* ── Lightbox ── */}
+      {/* Lightbox */}
       {open && (
         <div
           className="fixed inset-0 z-50 flex flex-col"
           style={{ background: "rgba(4,4,12,0.97)" }}
           onClick={close}
         >
-          {/* Subtle noise grain */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-              backgroundSize: "128px 128px",
-            }}
+            style={{ backgroundImage: NOISE_BG, backgroundSize: "128px 128px" }}
           />
 
-          {/* ── Top bar ── */}
+          {/* Top bar */}
           <div
             className="relative z-10 flex items-center justify-between px-6 py-4 shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Tour name */}
             <div className="flex flex-col">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
                 Gallery
@@ -138,15 +137,11 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
               </span>
             </div>
 
-            {/* Film-style counter */}
             <div className="flex items-baseline gap-1 rounded-full border border-white/10 bg-white/5 px-5 py-2 backdrop-blur-md">
-              <span className="font-mono text-xl font-bold leading-none text-white">
-                {padded}
-              </span>
+              <span className="font-mono text-xl font-bold leading-none text-white">{padded}</span>
               <span className="font-mono text-xs text-white/30">/ {total}</span>
             </div>
 
-            {/* Close */}
             <button
               onClick={close}
               className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 backdrop-blur-md transition hover:bg-white/15 hover:text-white"
@@ -155,9 +150,8 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
             </button>
           </div>
 
-          {/* ── Main image area ── */}
+          {/* Main image */}
           <div className="relative flex flex-1 items-center justify-center min-h-0 px-16">
-            {/* Prev */}
             {images.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); prev(); }}
@@ -167,7 +161,6 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
               </button>
             )}
 
-            {/* Image */}
             <div
               className="relative w-full h-full transition-opacity duration-200"
               style={{ opacity: fading ? 0 : 1 }}
@@ -182,7 +175,6 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
               />
             </div>
 
-            {/* Next */}
             {images.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); next(); }}
@@ -193,12 +185,11 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
             )}
           </div>
 
-          {/* ── Bottom thumbnail rail ── */}
+          {/* Bottom thumbnail rail */}
           <div
             className="relative z-10 shrink-0 px-6 py-4"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top separator */}
             <div className="mb-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             <div
@@ -209,11 +200,12 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
                 <button
                   key={idx}
                   onClick={() => go(idx)}
-                  className={`relative shrink-0 overflow-hidden rounded-xl transition-all duration-300 focus:outline-none ${
+                  className={[
+                    "relative shrink-0 overflow-hidden rounded-xl transition-all duration-300 focus:outline-none",
                     idx === current
                       ? "ring-2 ring-indigo-400 ring-offset-2 ring-offset-[#04040c] opacity-100 scale-105"
-                      : "opacity-40 hover:opacity-75 hover:scale-105 ring-0"
-                  }`}
+                      : "opacity-40 hover:opacity-75 hover:scale-105",
+                  ].join(" ")}
                   style={{ width: 56, height: 40 }}
                 >
                   <Image src={img} alt={`${tourName} ${idx + 1}`} fill className="object-cover" />
@@ -221,10 +213,9 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
               ))}
             </div>
 
-            {/* Keyboard hint */}
-            <div className="mt-3 flex items-center justify-center gap-4">
+            <div className="mt-3 flex items-center justify-center">
               <span className="text-[10px] font-medium uppercase tracking-widest text-white/20">
-                ← → navigate · esc close
+                &larr; &rarr; navigate &middot; esc close
               </span>
             </div>
           </div>
