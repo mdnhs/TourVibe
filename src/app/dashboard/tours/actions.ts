@@ -21,6 +21,7 @@ export async function createTour(formData: FormData) {
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
+  const promoVideoFile = formData.get("promoVideo") as File | null;
 
   if (!name || isNaN(hourlyRate) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons) || !thumbnailFile || thumbnailFile.size === 0) {
     return { error: "Missing required fields (Name, Hourly Rate, Duration Hours, Persons, Thumbnail)" };
@@ -32,13 +33,18 @@ export async function createTour(formData: FormData) {
   const slug = slugify(name);
 
   try {
-    const thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours");
+    const thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours", "image");
 
     const galleryUrls: string[] = [];
     for (const file of galleryFiles) {
       if (file.size > 0) {
-        galleryUrls.push(await uploadToCloudinary(file, "tourvibe/tours"));
+        galleryUrls.push(await uploadToCloudinary(file, "tourvibe/tours", "image"));
       }
+    }
+
+    let promoVideoUrl: string | null = null;
+    if (promoVideoFile && promoVideoFile.size > 0) {
+      promoVideoUrl = await uploadToCloudinary(promoVideoFile, "tourvibe/tours/videos", "video");
     }
 
     await prisma.tourPackage.create({
@@ -54,6 +60,7 @@ export async function createTour(formData: FormData) {
         maxPersons,
         thumbnail: thumbnailUrl,
         gallery: galleryUrls.join(","),
+        promoVideoUrl,
         highlights,
         vehicles: {
           create: vehicleIds.map((vehicleId) => ({ vehicleId })),
@@ -84,9 +91,11 @@ export async function updateTour(id: string, formData: FormData) {
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
+  const promoVideoFile = formData.get("promoVideo") as File | null;
 
   const existingThumbnail = formData.get("existingThumbnail") as string;
   const existingGallery = formData.get("existingGallery") as string;
+  const existingPromoVideoUrl = formData.get("existingPromoVideoUrl") as string;
 
   if (!name || isNaN(hourlyRate) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons)) {
     return { error: "Missing required fields" };
@@ -98,13 +107,13 @@ export async function updateTour(id: string, formData: FormData) {
   try {
     let thumbnailUrl = existingThumbnail;
     if (thumbnailFile && thumbnailFile.size > 0) {
-      thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours");
+      thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours", "image");
     }
 
     const newGalleryUrls: string[] = [];
     for (const file of galleryFiles) {
       if (file.size > 0) {
-        newGalleryUrls.push(await uploadToCloudinary(file, "tourvibe/tours"));
+        newGalleryUrls.push(await uploadToCloudinary(file, "tourvibe/tours", "image"));
       }
     }
 
@@ -113,10 +122,15 @@ export async function updateTour(id: string, formData: FormData) {
       ...newGalleryUrls,
     ].join(",");
 
+    let promoVideoUrl: string | null = existingPromoVideoUrl || null;
+    if (promoVideoFile && promoVideoFile.size > 0) {
+      promoVideoUrl = await uploadToCloudinary(promoVideoFile, "tourvibe/tours/videos", "video");
+    }
+
     await prisma.$transaction([
       prisma.tourPackage.update({
         where: { id },
-        data: { name, slug, description, price, hourlyRate, durationHours, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, highlights },
+        data: { name, slug, description, price, hourlyRate, durationHours, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, promoVideoUrl, highlights },
       }),
       prisma.tourPackageVehicle.deleteMany({ where: { tourPackageId: id } }),
       prisma.tourPackageVehicle.createMany({

@@ -187,7 +187,7 @@ export function CreateTourForm({ vehicles }: FormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="gallery">Gallery (Optional, multiple)</Label>
+        <Label htmlFor="gallery">Photos (Recommended: 8–10 images)</Label>
         {galleryPreviews.length > 0 && (
           <div className="grid grid-cols-4 gap-2 mb-2">
             {galleryPreviews.map((url, i) => (
@@ -197,15 +197,34 @@ export function CreateTourForm({ vehicles }: FormProps) {
             ))}
           </div>
         )}
-        <Input 
-          id="gallery" 
-          name="gallery" 
-          type="file" 
-          accept="image/*,video/*" 
-          multiple 
-          disabled={isPending} 
+        <Input
+          id="gallery"
+          name="gallery"
+          type="file"
+          accept="image/*"
+          multiple
+          disabled={isPending}
           onChange={handleGalleryChange}
         />
+        {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
+          <p className="text-xs text-amber-600">
+            Add at least 8 photos for a complete listing ({galleryPreviews.length} selected).
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="promoVideo">Promotional Video (Optional, single)</Label>
+        <Input
+          id="promoVideo"
+          name="promoVideo"
+          type="file"
+          accept="video/*"
+          disabled={isPending}
+        />
+        <p className="text-xs text-muted-foreground">
+          Short clip (under ~90s) describing location, attractions, and visitor experience.
+        </p>
       </div>
 
       <div className="flex gap-4 pt-4">
@@ -403,7 +422,7 @@ export function EditTourForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="gallery">Add to Gallery (Optional)</Label>
+        <Label htmlFor="gallery">Add Photos (Recommended: 8–10 total)</Label>
         {galleryPreviews.length > 0 && (
           <div className="grid grid-cols-4 gap-2 mb-2">
             {galleryPreviews.map((url, i) => (
@@ -413,16 +432,52 @@ export function EditTourForm({
             ))}
           </div>
         )}
-        <Input 
-          id="gallery" 
-          name="gallery" 
-          type="file" 
-          accept="image/*,video/*" 
-          multiple 
-          disabled={isPending} 
+        <Input
+          id="gallery"
+          name="gallery"
+          type="file"
+          accept="image/*"
+          multiple
+          disabled={isPending}
           onChange={handleGalleryChange}
         />
+        {(() => {
+          const existingCount = (tour.gallery || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean).length;
+          const total = existingCount + galleryPreviews.length;
+          return total < 8 ? (
+            <p className="text-xs text-amber-600">
+              {total} photo{total === 1 ? "" : "s"} currently. Add at least {8 - total} more to reach 8.
+            </p>
+          ) : (
+            <p className="text-xs text-emerald-600">{total} photos total — meets minimum.</p>
+          );
+        })()}
         <input type="hidden" name="existingGallery" value={tour.gallery || ""} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="promoVideo">Promotional Video (Optional)</Label>
+        {tour.promoVideoUrl ? (
+          <div className="rounded-lg border overflow-hidden bg-muted w-full max-w-sm mb-2">
+            <video src={tour.promoVideoUrl} controls preload="metadata" className="w-full" />
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">No promotional video uploaded yet.</p>
+        )}
+        <Input
+          id="promoVideo"
+          name="promoVideo"
+          type="file"
+          accept="video/*"
+          disabled={isPending}
+        />
+        <p className="text-xs text-muted-foreground">
+          Uploading a new file replaces the current promotional video.
+        </p>
+        <input type="hidden" name="existingPromoVideoUrl" value={tour.promoVideoUrl || ""} />
       </div>
 
       <div className="flex gap-4 pt-4">

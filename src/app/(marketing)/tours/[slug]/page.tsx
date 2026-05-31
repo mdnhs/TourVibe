@@ -15,6 +15,7 @@ import Image from "next/image";
 import { BookingBar } from "./booking-bar";
 import { BookingButton } from "./booking-button";
 import { GalleryLightbox } from "./gallery-lightbox";
+import { cloudinaryImage } from "@/lib/cloudinary";
 import Script from "next/script";
 
 import { db } from "@/lib/db";
@@ -40,6 +41,7 @@ interface Tour {
   maxPersons: number;
   thumbnail: string;
   gallery: string | null;
+  promoVideoUrl: string | null;
   highlights: string | null;
   reviewCount: number;
   avgRating: number | null;
@@ -186,7 +188,7 @@ export default async function TourDetailsPage({
         <div className="relative h-[70vh] min-h-130 overflow-hidden rounded-[2.5rem] shadow-2xl">
           {/* Background image */}
           <Image
-            src={tour.thumbnail}
+            src={cloudinaryImage(tour.thumbnail, 1600)}
             alt={tour.name}
             fill
             className="object-cover"
@@ -269,10 +271,36 @@ export default async function TourDetailsPage({
 
       {/* ── Gallery + content — right padding reserves space for sidebar ── */}
       <div className="lg:pr-[22rem]">
+        {/* ── Promo video ── */}
+        {tour.promoVideoUrl && (
+          <section className="mt-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-8 w-1.5 rounded-full bg-primary" />
+              <h2 className="font-heading text-2xl font-bold text-slate-950">
+                Tour preview
+              </h2>
+            </div>
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 shadow-xl">
+              <video
+                src={tour.promoVideoUrl}
+                poster={tour.thumbnail || undefined}
+                controls
+                preload="metadata"
+                playsInline
+                className="w-full h-auto max-h-[70vh] object-contain bg-black"
+              />
+            </div>
+          </section>
+        )}
+
         {/* ── Gallery strip ── */}
         {tour.gallery &&
           (() => {
-            const imgs = tour.gallery!.split(",").map((s) => s.trim()).filter(Boolean);
+            const imgs = tour.gallery!
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+              .map((u) => cloudinaryImage(u, 1600));
             return imgs.length > 0 ? (
               <GalleryLightbox images={imgs} tourName={tour.name} />
             ) : null;
