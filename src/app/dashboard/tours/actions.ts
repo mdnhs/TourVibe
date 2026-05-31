@@ -12,8 +12,8 @@ export async function createTour(formData: FormData) {
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const duration = formData.get("duration") as string;
+  const hourlyRate = parseFloat(formData.get("hourlyRate") as string);
+  const durationHours = parseInt(formData.get("durationHours") as string);
   const maxPersons = parseInt(formData.get("maxPersons") as string);
   const vehicleIds = formData.getAll("vehicleIds") as string[];
   const highlightsRaw = formData.getAll("highlights") as string[];
@@ -22,10 +22,12 @@ export async function createTour(formData: FormData) {
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
 
-  if (!name || isNaN(price) || !duration || isNaN(maxPersons) || !thumbnailFile || thumbnailFile.size === 0) {
-    return { error: "Missing required fields (Name, Price, Duration, Persons, Thumbnail)" };
+  if (!name || isNaN(hourlyRate) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons) || !thumbnailFile || thumbnailFile.size === 0) {
+    return { error: "Missing required fields (Name, Hourly Rate, Duration Hours, Persons, Thumbnail)" };
   }
 
+  const price = Math.round(hourlyRate * durationHours * 100) / 100;
+  const duration = `${durationHours} ${durationHours === 1 ? "Hour" : "Hours"}`;
   const id = generateOrderId();
   const slug = slugify(name);
 
@@ -46,6 +48,8 @@ export async function createTour(formData: FormData) {
         slug,
         description,
         price,
+        hourlyRate,
+        durationHours,
         duration,
         maxPersons,
         thumbnail: thumbnailUrl,
@@ -71,8 +75,8 @@ export async function updateTour(id: string, formData: FormData) {
   const name = formData.get("name") as string;
   const slug = slugify(name);
   const description = formData.get("description") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const duration = formData.get("duration") as string;
+  const hourlyRate = parseFloat(formData.get("hourlyRate") as string);
+  const durationHours = parseInt(formData.get("durationHours") as string);
   const maxPersons = parseInt(formData.get("maxPersons") as string);
   const vehicleIds = formData.getAll("vehicleIds") as string[];
   const highlightsRaw = formData.getAll("highlights") as string[];
@@ -84,9 +88,12 @@ export async function updateTour(id: string, formData: FormData) {
   const existingThumbnail = formData.get("existingThumbnail") as string;
   const existingGallery = formData.get("existingGallery") as string;
 
-  if (!name || isNaN(price) || !duration || isNaN(maxPersons)) {
+  if (!name || isNaN(hourlyRate) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons)) {
     return { error: "Missing required fields" };
   }
+
+  const price = Math.round(hourlyRate * durationHours * 100) / 100;
+  const duration = `${durationHours} ${durationHours === 1 ? "Hour" : "Hours"}`;
 
   try {
     let thumbnailUrl = existingThumbnail;
@@ -109,7 +116,7 @@ export async function updateTour(id: string, formData: FormData) {
     await prisma.$transaction([
       prisma.tourPackage.update({
         where: { id },
-        data: { name, slug, description, price, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, highlights },
+        data: { name, slug, description, price, hourlyRate, durationHours, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, highlights },
       }),
       prisma.tourPackageVehicle.deleteMany({ where: { tourPackageId: id } }),
       prisma.tourPackageVehicle.createMany({

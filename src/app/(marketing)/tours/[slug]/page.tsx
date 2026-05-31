@@ -237,7 +237,7 @@ export default async function TourDetailsPage({
                   </span>
                   <span className="text-[10px] text-white/50">per hour</span>
                 </div>
-                <BookingButton tourId={tour.id} className="shrink-0" />
+                <BookingButton tourId={tour.id} total={tour.price} currency={currency} className="shrink-0" />
               </div> */}
             </div>
           </div>
@@ -440,6 +440,8 @@ export default async function TourDetailsPage({
               <div className="space-y-4 pt-4">
                 <BookingButton
                   tourId={tour.id}
+                  total={tour.price}
+                  currency={currency}
                   className="w-full h-14 text-lg"
                 />
                 <p className="text-center text-xs font-medium text-white/30">

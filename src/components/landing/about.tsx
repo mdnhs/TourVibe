@@ -71,7 +71,7 @@ export function About({
             {/* Stats row */}
             <div className="mt-8 grid grid-cols-3 gap-3">
               {stats.map((s, i) => (
-                <div key={s.label} className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-center">
+                <div key={`${s.label || "stat"}-${i}`} className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-center">
                   <div className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${statColors[i % statColors.length]}`} />
                   <p className={`font-heading text-xl font-extrabold leading-none bg-gradient-to-r ${statColors[i % statColors.length]} bg-clip-text text-transparent`}>{s.value}</p>
                   <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-white/35">{s.label}</p>

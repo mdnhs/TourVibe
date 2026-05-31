@@ -6,25 +6,29 @@ import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { AuthDialog } from "@/components/auth/auth-dialog";
 import { PhoneDialog } from "@/components/booking/phone-dialog";
+import { PaymentTypeDialog } from "@/components/booking/payment-type-dialog";
 
 interface BookingButtonProps {
   tourId: string;
+  total: number;
+  currency?: string;
   className?: string;
 }
 
-export function BookingButton({ tourId, className }: BookingButtonProps) {
+export function BookingButton({ tourId, total, currency, className }: BookingButtonProps) {
   const [loading, setLoading] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
 
-  const initiateBooking = async () => {
+  const submitCheckout = async (paymentType: "ADVANCE" | "FULL") => {
     try {
       setLoading(true);
 
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tourId }),
+        body: JSON.stringify({ tourId, paymentType }),
       });
 
       const data = await response.json();
@@ -32,6 +36,7 @@ export function BookingButton({ tourId, className }: BookingButtonProps) {
       if (data.url) {
         window.location.href = data.url;
       } else if (data.error === "PHONE_REQUIRED") {
+        setPayOpen(false);
         setPhoneOpen(true);
       } else {
         toast.error(data.error || "Failed to initiate booking");
@@ -44,15 +49,13 @@ export function BookingButton({ tourId, className }: BookingButtonProps) {
     }
   };
 
-  const handleBookNow = async () => {
+  const openPaymentDialog = async () => {
     const { data: session } = await authClient.getSession();
-
     if (!session) {
       setAuthOpen(true);
       return;
     }
-
-    await initiateBooking();
+    setPayOpen(true);
   };
 
   return (
@@ -60,16 +63,24 @@ export function BookingButton({ tourId, className }: BookingButtonProps) {
       <AuthDialog
         open={authOpen}
         onOpenChange={setAuthOpen}
-        onSuccess={initiateBooking}
+        onSuccess={() => setPayOpen(true)}
       />
       <PhoneDialog
         open={phoneOpen}
         onOpenChange={setPhoneOpen}
-        onSuccess={initiateBooking}
+        onSuccess={() => setPayOpen(true)}
+      />
+      <PaymentTypeDialog
+        open={payOpen}
+        onOpenChange={setPayOpen}
+        total={total}
+        currency={currency}
+        loading={loading}
+        onConfirm={submitCheckout}
       />
       <button
         disabled={loading}
-        onClick={handleBookNow}
+        onClick={openPaymentDialog}
         className={`group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-slate-100 disabled:opacity-70 disabled:cursor-not-allowed${className ? ` ${className}` : " mt-5 w-full"}`}
       >
         {loading ? (

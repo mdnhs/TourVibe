@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, Printer, CreditCard, Calendar, User, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Download, Printer, CreditCard, Calendar, User, Mail, ShieldCheck, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -11,6 +12,11 @@ import { cn } from "@/lib/utils";
 export interface InvoiceData {
   id: string;
   amount: number;
+  totalAmount: number;
+  paidAmount: number;
+  dueAmount: number;
+  paymentType: string;
+  paymentStage: string;
   currency: string;
   status: string;
   createdAt: string;
@@ -24,48 +30,80 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
   const invoiceRef = React.useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = React.useState(false);
 
-  const invoiceNumber = booking.id.length > 16 
-    ? booking.id.slice(0, 8).toUpperCase() 
+  const invoiceNumber = booking.id.length > 16
+    ? booking.id.slice(0, 8).toUpperCase()
     : booking.id.toUpperCase();
-  const isPaid = booking.status === "paid";
-  
-  const statusConfig = {
-    paid: {
-      color: "#059669",
-      bg: "#ecfdf5",
-      label: "Paid",
-      icon: <ShieldCheck className="size-3.5" />
-    },
-    pending: {
-      color: "#d97706",
-      bg: "#fffbeb",
-      label: "Pending",
-      icon: <Calendar className="size-3.5" />
-    },
-    unpaid: {
-      color: "#d97706",
-      bg: "#fffbeb",
-      label: "Awaiting Payment",
-      icon: <CreditCard className="size-3.5" />
-    },
-    cancelled: {
-      color: "#dc2626",
-      bg: "#fef2f2",
-      label: "Cancelled",
-      icon: <CreditCard className="size-3.5" />
+  const isPaid = booking.paymentStage === "FULLY_PAID";
+  const isAdvancePaid = booking.paymentStage === "ADVANCE_PAID";
+  const [balanceLoading, setBalanceLoading] = React.useState(false);
+
+  const handlePayBalance = async () => {
+    try {
+      setBalanceLoading(true);
+      const res = await fetch("/api/checkout/balance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: booking.id }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Failed to start balance payment");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setBalanceLoading(false);
     }
-  }[booking.status] || {
-    color: "#64748b",
-    bg: "#f1f5f9",
-    label: booking.status,
-    icon: null
   };
 
+  const statusConfig = (isAdvancePaid
+    ? {
+        color: "#d97706",
+        bg: "#fffbeb",
+        label: "Advance Paid · Balance Due",
+        icon: <CreditCard className="size-3.5" />,
+      }
+    : {
+        paid: {
+          color: "#059669",
+          bg: "#ecfdf5",
+          label: "Paid",
+          icon: <ShieldCheck className="size-3.5" />,
+        },
+        pending: {
+          color: "#d97706",
+          bg: "#fffbeb",
+          label: "Pending",
+          icon: <Calendar className="size-3.5" />,
+        },
+        unpaid: {
+          color: "#d97706",
+          bg: "#fffbeb",
+          label: "Awaiting Payment",
+          icon: <CreditCard className="size-3.5" />,
+        },
+        cancelled: {
+          color: "#dc2626",
+          bg: "#fef2f2",
+          label: "Cancelled",
+          icon: <CreditCard className="size-3.5" />,
+        },
+      }[booking.status] || {
+        color: "#64748b",
+        bg: "#f1f5f9",
+        label: booking.status,
+        icon: null,
+      });
+
   const currencySymbol = getCurrencySymbol(booking.currency);
-  const formattedAmount = booking.amount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const fmt = (n: number) =>
+    n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formattedAmount = fmt(booking.totalAmount || booking.amount);
+  const formattedPaid = fmt(booking.paidAmount);
+  const formattedDue = fmt(booking.dueAmount);
   
   const invoiceDate = new Date(booking.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
@@ -253,7 +291,7 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
 
             {/* Summary */}
             <div className="flex justify-end mb-14">
-              <div className="w-full max-w-[300px] space-y-3">
+              <div className="w-full max-w-[320px] space-y-3">
                 <div className="flex justify-between text-sm text-slate-500 font-medium px-2">
                   <span>Subtotal</span>
                   <span className="text-slate-900 font-semibold">{currencySymbol}{formattedAmount}</span>
@@ -262,10 +300,39 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
                   <span>Tax (0.00%)</span>
                   <span className="text-slate-900 font-semibold">{currencySymbol}0.00</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-900 text-white rounded-xl p-4 mt-4 shadow-lg shadow-slate-900/10 transition-transform hover:scale-[1.02] duration-300">
-                  <span className="font-bold tracking-wide uppercase text-[10px] opacity-70">Total Amount Due</span>
-                  <span className="text-xl font-black">{currencySymbol}{formattedAmount}</span>
+                <div className="flex justify-between text-sm text-emerald-700 font-medium px-2">
+                  <span>Paid ({booking.paymentType === "ADVANCE" ? "20% advance" : "full"})</span>
+                  <span className="font-semibold">{currencySymbol}{formattedPaid}</span>
                 </div>
+                <div className={cn(
+                  "flex justify-between items-center rounded-xl p-4 mt-4 shadow-lg transition-transform hover:scale-[1.02] duration-300",
+                  isPaid ? "bg-emerald-600 text-white shadow-emerald-600/10" : "bg-slate-900 text-white shadow-slate-900/10",
+                )}>
+                  <span className="font-bold tracking-wide uppercase text-[10px] opacity-70">
+                    {isPaid ? "Paid in full" : "Balance Due"}
+                  </span>
+                  <span className="text-xl font-black">{currencySymbol}{isPaid ? formattedAmount : formattedDue}</span>
+                </div>
+
+                {isAdvancePaid && (
+                  <Button
+                    onClick={handlePayBalance}
+                    disabled={balanceLoading}
+                    className="w-full h-11 mt-2 print:hidden"
+                  >
+                    {balanceLoading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin mr-2" />
+                        Starting payment...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="size-4 mr-2" />
+                        Pay balance now
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
 

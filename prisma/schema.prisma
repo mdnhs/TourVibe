@@ -111,18 +111,20 @@ model Vehicle {
 }
 
 model TourPackage {
-  id          String   @id
-  name        String
-  slug        String   @unique
-  description String?
-  price       Float
-  duration    String
-  maxPersons  Int      @default(1)
-  thumbnail   String   @default("")
-  gallery     String?
-  highlights  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id
+  name          String
+  slug          String   @unique
+  description   String?
+  price         Float
+  hourlyRate    Float    @default(0)
+  durationHours Int      @default(1)
+  duration      String
+  maxPersons    Int      @default(1)
+  thumbnail     String   @default("")
+  gallery       String?
+  highlights    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   vehicles TourPackageVehicle[]
   reviews  Review[]
@@ -160,15 +162,21 @@ model Review {
 }
 
 model Booking {
-  id              String   @id
-  userId          String
-  tourPackageId   String
-  amount          Float
-  currency        String   @default("usd")
-  status          String   @default("pending")
-  stripeSessionId String?  @unique
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                     String   @id
+  userId                 String
+  tourPackageId          String
+  amount                 Float
+  totalAmount            Float    @default(0)
+  paidAmount             Float    @default(0)
+  dueAmount              Float    @default(0)
+  paymentType            String   @default("FULL")
+  paymentStage           String   @default("UNPAID")
+  currency               String   @default("usd")
+  status                 String   @default("pending")
+  stripeSessionId        String?  @unique
+  balanceStripeSessionId String?  @unique
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   user        User        @relation("UserBookings", fields: [userId], references: [id], onDelete: Cascade)
   tourPackage TourPackage @relation(fields: [tourPackageId], references: [id], onDelete: Cascade)

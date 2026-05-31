@@ -313,9 +313,10 @@ export function Hero({
                   </>
                 );
                 const isExternal = tag.url?.startsWith("http");
+                const tagKey = `${tag.label}-${i}`;
                 return isExternal ? (
                   <a
-                    key={tag.label}
+                    key={tagKey}
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -326,7 +327,7 @@ export function Hero({
                   </a>
                 ) : (
                   <button
-                    key={tag.label}
+                    key={tagKey}
                     onClick={() => router.push(href)}
                     style={{ animationDelay: `${320 + i * 60}ms` }}
                     className={tagClass}
@@ -343,7 +344,7 @@ export function Hero({
                 const colors = statColors[i] ?? statColors[0];
                 return (
                   <div
-                    key={stat.label}
+                    key={`${stat.label}-${i}`}
                     style={{ animationDelay: `${400 + i * 70}ms` }}
                     className="group animate-in fade-in slide-in-from-bottom-3 duration-500
           relative overflow-hidden rounded-2xl border border-white/15

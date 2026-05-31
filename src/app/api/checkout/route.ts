@@ -20,10 +20,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tourId } = await req.json();
+    const { tourId, paymentType: rawPaymentType } = await req.json();
     if (!tourId) {
       return NextResponse.json({ error: "Tour ID is required" }, { status: 400 });
     }
+
+    const paymentType: "ADVANCE" | "FULL" = rawPaymentType === "ADVANCE" ? "ADVANCE" : "FULL";
 
     const userRow = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -41,7 +43,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     }
 
+    const totalAmount = Math.round(tour.price * 100) / 100;
+    const chargeAmount = paymentType === "ADVANCE"
+      ? Math.round(totalAmount * 0.2 * 100) / 100
+      : totalAmount;
+
     const bookingId = generateOrderId();
+    const productLabel = paymentType === "ADVANCE"
+      ? `${tour.name} — 20% Advance`
+      : tour.name;
 
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -50,13 +60,13 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: (integrations.stripeCurrency || "usd").toLowerCase(),
             product_data: {
-              name: tour.name,
+              name: productLabel,
               description: tour.description ?? undefined,
               images: tour.thumbnail
                 ? [tour.thumbnail.startsWith("http") ? tour.thumbnail : `${process.env.NEXT_PUBLIC_APP_URL}${tour.thumbnail}`]
                 : [],
             },
-            unit_amount: Math.round(tour.price * 100),
+            unit_amount: Math.round(chargeAmount * 100),
           },
           quantity: 1,
         },
@@ -64,7 +74,7 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings/${bookingId}/invoice?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tours/${tour.slug}?cancelled=true`,
-      metadata: { bookingId, tourId, userId: session.user.id },
+      metadata: { bookingId, tourId, userId: session.user.id, kind: paymentType },
     });
 
     await prisma.booking.create({
@@ -72,7 +82,12 @@ export async function POST(req: NextRequest) {
         id: bookingId,
         userId: session.user.id,
         tourPackageId: tourId,
-        amount: tour.price,
+        amount: chargeAmount,
+        totalAmount,
+        paidAmount: 0,
+        dueAmount: totalAmount,
+        paymentType,
+        paymentStage: "UNPAID",
         currency: (integrations.stripeCurrency || "usd").toLowerCase(),
         status: "unpaid",
         stripeSessionId: stripeSession.id,

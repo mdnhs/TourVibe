@@ -93,6 +93,13 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
     border: "border-slate-200",
     icon: <CreditCard className="size-3" />,
   },
+  advance_paid: {
+    label: "Advance Paid",
+    color: "text-amber-700",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    icon: <CreditCard className="size-3" />,
+  },
   cancelled: {
     label: "Cancelled",
     color: "text-red-700",

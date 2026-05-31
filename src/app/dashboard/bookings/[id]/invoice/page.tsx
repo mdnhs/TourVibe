@@ -55,20 +55,42 @@ export default async function InvoicePage({
     redirect("/dashboard/bookings");
   }
 
-  // If redirected from successful payment but status hasn't updated yet (webhook delay)
-  if (success === "true" && booking.status === "unpaid" && booking.stripeSessionId) {
+  // If redirected from successful payment but webhook hasn't synced yet
+  if (
+    success === "true" &&
+    booking.paymentStage !== "FULLY_PAID" &&
+    (booking.stripeSessionId || booking.balanceStripeSessionId)
+  ) {
     try {
       const integrations = await getIntegrations();
       if (integrations.stripeSecretKey) {
         const stripe = new Stripe(integrations.stripeSecretKey, {
           apiVersion: "2023-10-16" as any,
         });
-        const stripeSession = await stripe.checkout.sessions.retrieve(booking.stripeSessionId);
-        
+        const sessionIdToCheck = booking.balanceStripeSessionId ?? booking.stripeSessionId!;
+        const stripeSession = await stripe.checkout.sessions.retrieve(sessionIdToCheck);
+
         if (stripeSession.payment_status === "paid") {
+          const kind = stripeSession.metadata?.kind ?? booking.paymentType;
+          const paidNow = (stripeSession.amount_total ?? 0) / 100;
+          const newPaidAmount =
+            Math.round((booking.paidAmount + paidNow) * 100) / 100;
+          const newDueAmount = Math.max(
+            0,
+            Math.round((booking.totalAmount - newPaidAmount) * 100) / 100,
+          );
+          const paymentStage =
+            kind === "ADVANCE" && newDueAmount > 0 ? "ADVANCE_PAID" : "FULLY_PAID";
+          const status = paymentStage === "FULLY_PAID" ? "paid" : "advance_paid";
+
           booking = await prisma.booking.update({
             where: { id },
-            data: { status: "paid" },
+            data: {
+              paidAmount: newPaidAmount,
+              dueAmount: newDueAmount,
+              paymentStage,
+              status,
+            },
             include: {
               tourPackage: {
                 select: {
@@ -90,6 +112,11 @@ export default async function InvoicePage({
   const invoiceData = {
     id: booking.id,
     amount: Number(booking.amount),
+    totalAmount: Number(booking.totalAmount),
+    paidAmount: Number(booking.paidAmount),
+    dueAmount: Number(booking.dueAmount),
+    paymentType: booking.paymentType,
+    paymentStage: booking.paymentStage,
     currency: booking.currency,
     status: booking.status,
     createdAt: booking.createdAt.toISOString(),
@@ -107,10 +134,15 @@ export default async function InvoicePage({
             <CheckCircle2 className="size-5" />
           </div>
           <div>
-            <p className="font-semibold">Payment Successful!</p>
+            <p className="font-semibold">
+              {invoiceData.paymentStage === "FULLY_PAID"
+                ? "Payment Successful!"
+                : "Advance Payment Received"}
+            </p>
             <p className="text-sm text-emerald-700/80">
-              Your tour has been successfully booked. Your invoice is ready
-              below.
+              {invoiceData.paymentStage === "FULLY_PAID"
+                ? "Your tour has been successfully booked. Your invoice is ready below."
+                : `20% advance recorded. Balance due before your tour date.`}
             </p>
           </div>
         </div>

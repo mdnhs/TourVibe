@@ -38,6 +38,8 @@ export type TourPackage = {
   name: string;
   description: string | null;
   price: number;
+  hourlyRate: number;
+  durationHours: number;
   duration: string;
   maxPersons: number;
   thumbnail: string;

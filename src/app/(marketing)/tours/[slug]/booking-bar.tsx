@@ -6,6 +6,8 @@ import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/currency";
 import { AuthDialog } from "@/components/auth/auth-dialog";
+import { PhoneDialog } from "@/components/booking/phone-dialog";
+import { PaymentTypeDialog } from "@/components/booking/payment-type-dialog";
 
 interface BookingBarProps {
   tourId: string;
@@ -21,6 +23,8 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 320);
@@ -28,20 +32,23 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const initiateBooking = async () => {
+  const submitCheckout = async (paymentType: "ADVANCE" | "FULL") => {
     try {
       setLoading(true);
 
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tourId }),
+        body: JSON.stringify({ tourId, paymentType }),
       });
 
       const data = await response.json();
 
       if (data.url) {
         window.location.href = data.url;
+      } else if (data.error === "PHONE_REQUIRED") {
+        setPayOpen(false);
+        setPhoneOpen(true);
       } else {
         toast.error(data.error || "Failed to initiate booking");
       }
@@ -53,15 +60,13 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
     }
   };
 
-  const handleBookNow = async () => {
+  const openPaymentDialog = async () => {
     const { data: session } = await authClient.getSession();
-
     if (!session) {
       setAuthOpen(true);
       return;
     }
-
-    await initiateBooking();
+    setPayOpen(true);
   };
 
   return (
@@ -69,7 +74,20 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
       <AuthDialog
         open={authOpen}
         onOpenChange={setAuthOpen}
-        onSuccess={initiateBooking}
+        onSuccess={() => setPayOpen(true)}
+      />
+      <PhoneDialog
+        open={phoneOpen}
+        onOpenChange={setPhoneOpen}
+        onSuccess={() => setPayOpen(true)}
+      />
+      <PaymentTypeDialog
+        open={payOpen}
+        onOpenChange={setPayOpen}
+        total={price}
+        currency={currency}
+        loading={loading}
+        onConfirm={submitCheckout}
       />
       <div
         className={`fixed bottom-0 inset-x-0 z-50 px-4 pb-4 sm:px-6 transition-all duration-300
@@ -90,7 +108,7 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
                     <span className="font-heading font-extrabold text-slate-950">
                       {formatPrice(price, currency)}
                     </span>
-                    {" "}· per hour · all inclusive
+                    {" "}· total · all inclusive
                   </p>
                 </div>
               </div>
@@ -113,7 +131,7 @@ export function BookingBar({ tourId, name, price, duration, maxPersons, rating, 
               {/* CTA */}
               <button
                 disabled={loading}
-                onClick={handleBookNow}
+                onClick={openPaymentDialog}
                 className="group shrink-0 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? (

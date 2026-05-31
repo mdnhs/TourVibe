@@ -124,12 +124,12 @@ export function CreateTourForm({ vehicles }: FormProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="price">Price (USD)</Label>
-          <Input id="price" name="price" type="number" step="0.01" placeholder="99.99" required disabled={isPending} />
+          <Label htmlFor="hourlyRate">Hourly Rate (€)</Label>
+          <Input id="hourlyRate" name="hourlyRate" type="number" step="0.01" placeholder="70" required disabled={isPending} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="duration">Duration</Label>
-          <Input id="duration" name="duration" placeholder="e.g. 3 Days / 2 Nights" required disabled={isPending} />
+          <Label htmlFor="durationHours">Duration (hours)</Label>
+          <Input id="durationHours" name="durationHours" type="number" min="1" step="1" placeholder="4" required disabled={isPending} />
         </div>
       </div>
 
@@ -306,25 +306,28 @@ export function EditTourForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="price">Price (USD)</Label>
-          <Input 
-            id="price" 
-            name="price" 
-            type="number" 
-            step="0.01" 
-            defaultValue={tour.price} 
-            required 
-            disabled={isPending} 
+          <Label htmlFor="hourlyRate">Hourly Rate (€)</Label>
+          <Input
+            id="hourlyRate"
+            name="hourlyRate"
+            type="number"
+            step="0.01"
+            defaultValue={tour.hourlyRate ?? 0}
+            required
+            disabled={isPending}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="duration">Duration</Label>
-          <Input 
-            id="duration" 
-            name="duration" 
-            defaultValue={tour.duration} 
-            required 
-            disabled={isPending} 
+          <Label htmlFor="durationHours">Duration (hours)</Label>
+          <Input
+            id="durationHours"
+            name="durationHours"
+            type="number"
+            min="1"
+            step="1"
+            defaultValue={tour.durationHours ?? 1}
+            required
+            disabled={isPending}
           />
         </div>
       </div>
