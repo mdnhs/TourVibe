@@ -22,18 +22,28 @@ import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
 import { formatPrice } from "@/lib/currency";
 import { getCurrencyCode } from "@/lib/currency-server";
 
+interface TourVehicle {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  licensePlate: string;
+  thumbnail: string;
+}
 interface Tour {
   id: string;
   name: string;
   description: string;
   price: number;
   duration: string;
+  durationHours: number;
   maxPersons: number;
   thumbnail: string;
   gallery: string | null;
   highlights: string | null;
   reviewCount: number;
   avgRating: number | null;
+  vehicles: TourVehicle[];
   reviews: Array<{
     id: string;
     userName: string;
@@ -77,41 +87,45 @@ export default async function TourDetailsPage({
 }) {
   const { slug } = await params;
 
-  // Try fetching by slug first, then fallback to id
-  let tourRaw = await db.tourPackage.findFirst({
-    where: { slug },
-    include: {
-      reviews: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              name: true,
-              image: true,
-            },
+  const tourInclude = {
+    reviews: {
+      orderBy: { createdAt: "desc" as const },
+      include: {
+        user: {
+          select: {
+            name: true,
+            image: true,
           },
         },
       },
     },
+    vehicles: {
+      include: {
+        vehicle: {
+          select: {
+            id: true,
+            make: true,
+            model: true,
+            year: true,
+            licensePlate: true,
+            thumbnail: true,
+          },
+        },
+      },
+    },
+  };
+
+  // Try fetching by slug first, then fallback to id
+  let tourRaw = await db.tourPackage.findFirst({
+    where: { slug },
+    include: tourInclude,
   });
 
   if (!tourRaw) {
     // Fallback for old ID links
     tourRaw = await db.tourPackage.findUnique({
       where: { id: slug },
-      include: {
-        reviews: {
-          orderBy: { createdAt: "desc" },
-          include: {
-            user: {
-              select: {
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
+      include: tourInclude,
     });
   }
 
@@ -131,8 +145,17 @@ export default async function TourDetailsPage({
     description: tourRaw.description || "",
     highlights: tourRaw.highlights ?? null,
     price: Number(tourRaw.price),
+    durationHours: tourRaw.durationHours,
     reviewCount,
     avgRating,
+    vehicles: tourRaw.vehicles.map((tv) => ({
+      id: tv.vehicle.id,
+      make: tv.vehicle.make,
+      model: tv.vehicle.model,
+      year: tv.vehicle.year,
+      licensePlate: tv.vehicle.licensePlate,
+      thumbnail: tv.vehicle.thumbnail,
+    })),
     reviews: tourRaw.reviews.map((r) => ({
       id: r.id,
       userName: r.user.name,
@@ -237,7 +260,7 @@ export default async function TourDetailsPage({
                   </span>
                   <span className="text-[10px] text-white/50">per hour</span>
                 </div>
-                <BookingButton tourId={tour.id} total={tour.price} currency={currency} className="shrink-0" />
+                <BookingButton tourId={tour.id} total={tour.price} currency={currency} durationHours={tour.durationHours} vehicles={tour.vehicles} className="shrink-0" />
               </div> */}
             </div>
           </div>
@@ -442,6 +465,8 @@ export default async function TourDetailsPage({
                   tourId={tour.id}
                   total={tour.price}
                   currency={currency}
+                  durationHours={tour.durationHours}
+                  vehicles={tour.vehicles}
                   className="w-full h-14 text-lg"
                 />
                 <p className="text-center text-xs font-medium text-white/30">
@@ -477,6 +502,8 @@ export default async function TourDetailsPage({
         name={tour.name}
         price={tour.price}
         duration={tour.duration}
+        durationHours={tour.durationHours}
+        vehicles={tour.vehicles}
         maxPersons={tour.maxPersons}
         rating={tour.avgRating ? tour.avgRating.toFixed(1) : null}
         currency={currency}

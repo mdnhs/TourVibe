@@ -125,7 +125,7 @@ export async function DriverOverview({
     id: b.id,
     tourName: b.tourPackage.name,
     duration: b.tourPackage.duration,
-    customerName: b.user.name,
+    customerName: b.user?.name ?? b.guestName ?? "Guest",
     status: b.status,
     amount: Number(b.amount),
     currency: b.currency,

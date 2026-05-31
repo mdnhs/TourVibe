@@ -62,6 +62,8 @@ export type Booking = {
   userName: string;
   userEmail: string;
   userImage: string | null;
+  whatsapp?: string;
+  isGuest?: boolean;
   stripeSessionId?: string | null;
 };
 

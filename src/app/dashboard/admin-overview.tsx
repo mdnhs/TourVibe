@@ -232,8 +232,8 @@ export async function AdminOverview({
 
   const recentBookings = recentBookingsRaw.map((b) => ({
     id: b.id,
-    customer: b.user.name,
-    email: b.user.email,
+    customer: b.user?.name ?? b.guestName ?? "Guest",
+    email: b.user?.email ?? b.guestEmail ?? "",
     tour: b.tourPackage.name,
     amount: Number(b.amount),
     currency: b.currency,

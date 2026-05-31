@@ -78,16 +78,18 @@ export async function POST(req: NextRequest) {
           ? `Payment received for ${tourName}. Booking ${bookingId} is confirmed.`
           : `20% advance received for ${tourName}. Balance ${newDueAmount.toFixed(2)} ${booking.currency.toUpperCase()} due before tour date.`;
 
-      await prisma.notification.create({
-        data: {
-          id: generateOrderId(),
-          title: notifTitle,
-          body: notifBody,
-          type: "booking",
-          targetUserId: booking.userId,
-          createdBy: "system",
-        },
-      });
+      if (booking.userId) {
+        await prisma.notification.create({
+          data: {
+            id: generateOrderId(),
+            title: notifTitle,
+            body: notifBody,
+            type: "booking",
+            targetUserId: booking.userId,
+            createdBy: "system",
+          },
+        });
+      }
       break;
     }
     case "checkout.session.expired": {

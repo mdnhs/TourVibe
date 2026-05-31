@@ -1,36 +1,24 @@
 import { prisma } from "@/lib/prisma";
-import { requireDashboardSession } from "@/lib/dashboard";
-import { notFound, redirect } from "next/navigation";
-import { InvoiceView } from "./invoice-view";
+import { notFound } from "next/navigation";
+import { InvoiceView } from "@/app/dashboard/bookings/[id]/invoice/invoice-view";
 import { CheckCircle2 } from "lucide-react";
 import Stripe from "stripe";
 import { getIntegrations } from "@/lib/integrations";
 
-export default async function InvoicePage({
+export default async function PublicBookingConfirmationPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ success?: string }>;
 }) {
-  const { session, role, isSuperAdmin } = await requireDashboardSession();
   const { id } = await params;
   const { success } = await searchParams;
-
-  if (!session) {
-    redirect(`/login?callbackUrl=/dashboard/bookings/${id}/invoice`);
-  }
 
   let booking = await prisma.booking.findUnique({
     where: { id },
     include: {
-      tourPackage: {
-        select: {
-          name: true,
-          duration: true,
-          vehicles: { select: { vehicle: { select: { driverId: true } } } },
-        },
-      },
+      tourPackage: { select: { name: true, duration: true } },
       user: { select: { name: true, email: true } },
     },
   });
@@ -39,20 +27,6 @@ export default async function InvoicePage({
     notFound();
   }
 
-  const isDriver = role === "driver";
-  const isAssignedDriver =
-    isDriver &&
-    booking.tourPackage.vehicles.some(
-      (tv) => tv.vehicle.driverId === session.user.id,
-    );
-
-  // Security check: admin, owning user, or driver assigned to the tour's fleet
-  const isOwner = booking.userId != null && booking.userId === session.user.id;
-  if (!isSuperAdmin && !isOwner && !isAssignedDriver) {
-    redirect("/dashboard/bookings");
-  }
-
-  // If redirected from successful payment but webhook hasn't synced yet
   if (
     success === "true" &&
     booking.paymentStage !== "FULLY_PAID" &&
@@ -64,7 +38,8 @@ export default async function InvoicePage({
         const stripe = new Stripe(integrations.stripeSecretKey, {
           apiVersion: "2023-10-16" as any,
         });
-        const sessionIdToCheck = booking.balanceStripeSessionId ?? booking.stripeSessionId!;
+        const sessionIdToCheck =
+          booking.balanceStripeSessionId ?? booking.stripeSessionId!;
         const stripeSession = await stripe.checkout.sessions.retrieve(sessionIdToCheck);
 
         if (stripeSession.payment_status === "paid") {
@@ -82,27 +57,16 @@ export default async function InvoicePage({
 
           booking = await prisma.booking.update({
             where: { id },
-            data: {
-              paidAmount: newPaidAmount,
-              dueAmount: newDueAmount,
-              paymentStage,
-              status,
-            },
+            data: { paidAmount: newPaidAmount, dueAmount: newDueAmount, paymentStage, status },
             include: {
-              tourPackage: {
-                select: {
-                  name: true,
-                  duration: true,
-                  vehicles: { select: { vehicle: { select: { driverId: true } } } },
-                },
-              },
+              tourPackage: { select: { name: true, duration: true } },
               user: { select: { name: true, email: true } },
             },
           });
         }
       }
     } catch (error) {
-      console.error("Error verifying payment on invoice page:", error);
+      console.error("Error verifying payment on booking page:", error);
     }
   }
 
@@ -126,23 +90,25 @@ export default async function InvoicePage({
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="min-h-screen bg-slate-50">
       {success === "true" && (
-        <div className="mx-4 lg:mx-6 mt-6 flex items-center gap-4 rounded-xl border border-emerald-100 bg-emerald-50 p-5 text-emerald-800 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
-            <CheckCircle2 className="size-5" />
-          </div>
-          <div>
-            <p className="font-semibold">
-              {invoiceData.paymentStage === "FULLY_PAID"
-                ? "Payment Successful!"
-                : "Advance Payment Received"}
-            </p>
-            <p className="text-sm text-emerald-700/80">
-              {invoiceData.paymentStage === "FULLY_PAID"
-                ? "Your tour has been successfully booked. Your invoice is ready below."
-                : `20% advance recorded. Balance due before your tour date.`}
-            </p>
+        <div className="mx-auto max-w-4xl px-4 pt-6">
+          <div className="flex items-center gap-4 rounded-xl border border-emerald-100 bg-emerald-50 p-5 text-emerald-800 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
+              <CheckCircle2 className="size-5" />
+            </div>
+            <div>
+              <p className="font-semibold">
+                {invoiceData.paymentStage === "FULLY_PAID"
+                  ? "Payment Successful!"
+                  : "Advance Payment Received"}
+              </p>
+              <p className="text-sm text-emerald-700/80">
+                {invoiceData.paymentStage === "FULLY_PAID"
+                  ? "Your tour has been successfully booked."
+                  : "20% advance recorded. Balance due before your tour date."}
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -16,7 +16,7 @@ interface UserRow {
   name: string;
   email: string;
   image: string | null;
-  phone: string | null;
+  whatsapp: string | null;
   role: string;
 }
 
@@ -30,7 +30,7 @@ export default async function AccountPage() {
       name: true,
       email: true,
       image: true,
-      phone: true,
+      whatsapp: true,
       role: true,
     },
   })) as UserRow;
@@ -43,10 +43,10 @@ export default async function AccountPage() {
             <CardHeader>
               <CardTitle>Profile</CardTitle>
               <CardDescription>
-                Update your name, phone number and profile picture.
-                {!user.phone && (
+                Update your name, WhatsApp number and profile picture.
+                {!user.whatsapp && (
                   <span className="ml-2 inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
-                    Phone required to book tours
+                    WhatsApp required to book tours
                   </span>
                 )}
               </CardDescription>

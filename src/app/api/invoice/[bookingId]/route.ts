@@ -14,7 +14,7 @@ interface BookingRow {
   tourThumbnail: string | null;
   userName: string;
   userEmail: string;
-  userId: string;
+  userId: string | null;
 }
 
 export async function GET(
@@ -46,9 +46,9 @@ export async function GET(
         tourName: raw.tourPackage.name,
         tourDuration: raw.tourPackage.duration,
         tourThumbnail: raw.tourPackage.thumbnail,
-        userName: raw.user.name,
-        userEmail: raw.user.email,
-        userId: raw.user.id,
+        userName: raw.user?.name ?? raw.guestName ?? "Guest",
+        userEmail: raw.user?.email ?? raw.guestEmail ?? "",
+        userId: raw.user?.id ?? null,
       }
     : undefined;
 
@@ -56,7 +56,8 @@ export async function GET(
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  if (booking.userId !== session.user.id && session.user.role !== "admin") {
+  const isOwner = booking.userId != null && booking.userId === session.user.id;
+  if (!isOwner && session.user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

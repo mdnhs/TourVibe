@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import { getIntegrations } from "@/lib/integrations";
+import { normalizeWhatsapp } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,11 +16,7 @@ export async function POST(req: NextRequest) {
     });
 
     const session = await auth.api.getSession({ headers: req.headers });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { bookingId } = await req.json();
+    const { bookingId, whatsapp: guestWhatsapp } = await req.json();
     if (!bookingId) {
       return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
     }
@@ -32,19 +29,38 @@ export async function POST(req: NextRequest) {
     if (!booking) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
-    if (booking.userId !== session.user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    if (booking.userId) {
+      if (!session?.user || booking.userId !== session.user.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else {
+      const normalized =
+        typeof guestWhatsapp === "string" ? normalizeWhatsapp(guestWhatsapp) : "";
+      if (!normalized || normalized !== booking.whatsapp) {
+        return NextResponse.json(
+          { error: "WHATSAPP_REQUIRED", message: "Verify your WhatsApp number to continue." },
+          { status: 403 },
+        );
+      }
     }
+
     if (booking.paymentStage !== "ADVANCE_PAID") {
-      return NextResponse.json({ error: "Booking is not eligible for balance payment" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Booking is not eligible for balance payment" },
+        { status: 400 },
+      );
     }
     if (booking.dueAmount <= 0) {
       return NextResponse.json({ error: "No outstanding balance" }, { status: 400 });
     }
 
     const tour = booking.tourPackage;
+    const stripeCustomerEmail = session?.user?.email ?? booking.guestEmail ?? undefined;
+
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      ...(stripeCustomerEmail ? { customer_email: stripeCustomerEmail } : {}),
       line_items: [
         {
           price_data: {
@@ -53,7 +69,11 @@ export async function POST(req: NextRequest) {
               name: `${tour.name} — Balance Payment`,
               description: tour.description ?? undefined,
               images: tour.thumbnail
-                ? [tour.thumbnail.startsWith("http") ? tour.thumbnail : `${process.env.NEXT_PUBLIC_APP_URL}${tour.thumbnail}`]
+                ? [
+                    tour.thumbnail.startsWith("http")
+                      ? tour.thumbnail
+                      : `${process.env.NEXT_PUBLIC_APP_URL}${tour.thumbnail}`,
+                  ]
                 : [],
             },
             unit_amount: Math.round(booking.dueAmount * 100),
@@ -62,9 +82,14 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings/${bookingId}/invoice?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings/${bookingId}/invoice?cancelled=true`,
-      metadata: { bookingId, tourId: tour.id, userId: session.user.id, kind: "BALANCE" },
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking/${bookingId}?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking/${bookingId}?cancelled=true`,
+      metadata: {
+        bookingId,
+        tourId: tour.id,
+        userId: booking.userId ?? "",
+        kind: "BALANCE",
+      },
     });
 
     await prisma.booking.update({

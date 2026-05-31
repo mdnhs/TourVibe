@@ -4,42 +4,58 @@ import { useState } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { AuthDialog } from "@/components/auth/auth-dialog";
-import { PhoneDialog } from "@/components/booking/phone-dialog";
-import { PaymentTypeDialog } from "@/components/booking/payment-type-dialog";
+import { WhatsappDialog } from "@/components/booking/whatsapp-dialog";
+import { BookingDialog } from "@/components/booking/booking-dialog";
+import { GuestBookingDialog } from "@/components/booking/guest-booking-dialog";
+import type { PickerVehicle } from "@/components/booking/schedule-vehicle-picker";
 
 interface BookingButtonProps {
   tourId: string;
   total: number;
   currency?: string;
+  durationHours: number;
+  vehicles: PickerVehicle[];
   className?: string;
 }
 
-export function BookingButton({ tourId, total, currency, className }: BookingButtonProps) {
+export function BookingButton({
+  tourId,
+  total,
+  currency,
+  durationHours,
+  vehicles,
+  className,
+}: BookingButtonProps) {
   const [loading, setLoading] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [phoneOpen, setPhoneOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [guestOpen, setGuestOpen] = useState(false);
 
-  const submitCheckout = async (paymentType: "ADVANCE" | "FULL") => {
+  const submitCheckout = async (payload: {
+    paymentType: "ADVANCE" | "FULL";
+    vehicleId: string;
+    startTime: string;
+  }) => {
     try {
       setLoading(true);
 
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tourId, paymentType }),
+        body: JSON.stringify({ tourId, ...payload }),
       });
 
       const data = await response.json();
 
       if (data.url) {
         window.location.href = data.url;
-      } else if (data.error === "PHONE_REQUIRED") {
-        setPayOpen(false);
-        setPhoneOpen(true);
+      } else if (data.error === "WHATSAPP_REQUIRED") {
+        setBookingOpen(false);
+        setWhatsappOpen(true);
+      } else if (data.error === "VEHICLE_UNAVAILABLE") {
+        toast.error(data.message);
       } else {
-        toast.error(data.error || "Failed to initiate booking");
+        toast.error(data.error || data.message || "Failed to initiate booking");
       }
     } catch (error) {
       console.error(error);
@@ -49,38 +65,44 @@ export function BookingButton({ tourId, total, currency, className }: BookingBut
     }
   };
 
-  const openPaymentDialog = async () => {
+  const handleBookNow = async () => {
     const { data: session } = await authClient.getSession();
     if (!session) {
-      setAuthOpen(true);
+      setGuestOpen(true);
       return;
     }
-    setPayOpen(true);
+    setBookingOpen(true);
   };
 
   return (
     <>
-      <AuthDialog
-        open={authOpen}
-        onOpenChange={setAuthOpen}
-        onSuccess={() => setPayOpen(true)}
+      <WhatsappDialog
+        open={whatsappOpen}
+        onOpenChange={setWhatsappOpen}
+        onSuccess={() => setBookingOpen(true)}
       />
-      <PhoneDialog
-        open={phoneOpen}
-        onOpenChange={setPhoneOpen}
-        onSuccess={() => setPayOpen(true)}
-      />
-      <PaymentTypeDialog
-        open={payOpen}
-        onOpenChange={setPayOpen}
+      <BookingDialog
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
         total={total}
         currency={currency}
+        durationHours={durationHours}
+        vehicles={vehicles}
         loading={loading}
         onConfirm={submitCheckout}
       />
+      <GuestBookingDialog
+        open={guestOpen}
+        onOpenChange={setGuestOpen}
+        tourId={tourId}
+        total={total}
+        currency={currency}
+        durationHours={durationHours}
+        vehicles={vehicles}
+      />
       <button
         disabled={loading}
-        onClick={openPaymentDialog}
+        onClick={handleBookNow}
         className={`group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-slate-950 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-slate-100 disabled:opacity-70 disabled:cursor-not-allowed${className ? ` ${className}` : " mt-5 w-full"}`}
       >
         {loading ? (

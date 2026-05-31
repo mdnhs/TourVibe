@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Camera, Loader2, Phone, User } from "lucide-react";
+import { Camera, Loader2, MessageCircle, User } from "lucide-react";
 import Image from "next/image";
 
 import { updateProfile } from "./actions";
@@ -18,7 +18,7 @@ interface ProfileFormProps {
     name: string;
     email: string;
     image: string | null;
-    phone: string | null;
+    whatsapp: string | null;
   };
 }
 
@@ -128,29 +128,29 @@ export function ProfileForm({ user }: ProfileFormProps) {
           />
         </div>
 
-        {/* Phone */}
+        {/* WhatsApp */}
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="phone">
-            Phone Number{" "}
+          <Label htmlFor="whatsapp">
+            WhatsApp Number{" "}
             <span className="text-destructive">*</span>
             <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-              (required to book tours)
+              (required to book tours · international format, e.g. +14155551234)
             </span>
           </Label>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <MessageCircle className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              id="phone"
-              name="phone"
+              id="whatsapp"
+              name="whatsapp"
               type="tel"
-              defaultValue={user.phone ?? ""}
+              defaultValue={user.whatsapp ?? ""}
               className="pl-9"
-              placeholder="+1 (555) 000-0000"
+              placeholder="+14155551234"
             />
           </div>
-          {!user.phone && (
+          {!user.whatsapp && (
             <p className="text-xs text-amber-600">
-              You must add a phone number before you can book a tour.
+              Add an active WhatsApp number before booking a tour.
             </p>
           )}
         </div>

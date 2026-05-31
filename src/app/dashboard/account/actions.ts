@@ -7,15 +7,20 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { isValidE164, normalizeWhatsapp } from "@/lib/whatsapp";
 
 export async function updateProfile(formData: FormData) {
   const { session } = await requireDashboardSession();
 
   const name = (formData.get("name") as string)?.trim();
-  const phone = (formData.get("phone") as string)?.trim();
+  const whatsappRaw = (formData.get("whatsapp") as string)?.trim();
+  const whatsapp = whatsappRaw ? normalizeWhatsapp(whatsappRaw) : "";
   const avatarFile = formData.get("avatar") as File | null;
 
   if (!name) return { error: "Name is required." };
+  if (whatsapp && !isValidE164(whatsapp)) {
+    return { error: "WhatsApp number must be in international format, e.g. +14155551234." };
+  }
 
   let imageUrl: string | undefined;
   if (avatarFile && avatarFile.size > 0) {
@@ -35,7 +40,7 @@ export async function updateProfile(formData: FormData) {
 
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { phone: phone || null },
+      data: { whatsapp: whatsapp || null },
     });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Unknown error" };

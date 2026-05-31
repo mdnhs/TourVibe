@@ -12,38 +12,39 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { isValidE164, normalizeWhatsapp } from "@/lib/whatsapp";
 
-interface PhoneDialogProps {
+interface WhatsappDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
 
-export function PhoneDialog({ open, onOpenChange, onSuccess }: PhoneDialogProps) {
-  const [phone, setPhone] = useState("");
+export function WhatsappDialog({ open, onOpenChange, onSuccess }: WhatsappDialogProps) {
+  const [whatsapp, setWhatsapp] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const trimmed = phone.trim();
-    if (!trimmed) {
-      toast.error("Phone number is required");
+    const normalized = normalizeWhatsapp(whatsapp);
+    if (!isValidE164(normalized)) {
+      toast.error("Enter a valid WhatsApp number in international format (e.g. +14155551234)");
       return;
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/profile/phone", {
+      const res = await fetch("/api/profile/whatsapp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: trimmed }),
+        body: JSON.stringify({ whatsapp: normalized }),
       });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || "Failed to save phone number");
+        toast.error(data.error || "Failed to save WhatsApp number");
         return;
       }
       onOpenChange(false);
-      setPhone("");
+      setWhatsapp("");
       onSuccess();
     } catch {
       toast.error("An error occurred. Please try again.");
@@ -56,25 +57,28 @@ export function PhoneDialog({ open, onOpenChange, onSuccess }: PhoneDialogProps)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogTitle className="text-xl font-bold">
-          Add your phone number
+          Add your WhatsApp number
         </DialogTitle>
         <DialogDescription>
-          We need a phone number to confirm your booking.
+          We use WhatsApp to confirm your booking and share trip details.
         </DialogDescription>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="booking-phone">Phone number</Label>
+            <Label htmlFor="booking-whatsapp">WhatsApp number</Label>
             <Input
-              id="booking-phone"
+              id="booking-whatsapp"
               type="tel"
               autoFocus
               required
-              placeholder="+1 555 000 1234"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+14155551234"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
               disabled={saving}
             />
+            <p className="text-xs text-muted-foreground">
+              Include country code with leading +.
+            </p>
           </div>
           <Button type="submit" disabled={saving} className="w-full">
             {saving ? (

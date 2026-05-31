@@ -24,7 +24,7 @@ model User {
   banExpires DateTime?
 
   // app-specific fields
-  phone             String?
+  whatsapp          String?
   lat               Float?
   lng               Float?
   locationName      String?
@@ -106,6 +106,7 @@ model Vehicle {
 
   driver       User?                @relation("DriverVehicles", fields: [driverId], references: [id], onDelete: SetNull)
   tourPackages TourPackageVehicle[]
+  bookings     Booking[]            @relation("VehicleBookings")
 
   @@map("vehicle")
 }
@@ -163,7 +164,7 @@ model Review {
 
 model Booking {
   id                     String   @id
-  userId                 String
+  userId                 String?
   tourPackageId          String
   amount                 Float
   totalAmount            Float    @default(0)
@@ -173,14 +174,22 @@ model Booking {
   paymentStage           String   @default("UNPAID")
   currency               String   @default("usd")
   status                 String   @default("pending")
+  whatsapp               String?
+  guestName              String?
+  guestEmail             String?
+  vehicleId              String?
+  startTime              DateTime?
+  endTime                DateTime?
   stripeSessionId        String?  @unique
   balanceStripeSessionId String?  @unique
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  user        User        @relation("UserBookings", fields: [userId], references: [id], onDelete: Cascade)
+  user        User?       @relation("UserBookings", fields: [userId], references: [id], onDelete: SetNull)
   tourPackage TourPackage @relation(fields: [tourPackageId], references: [id], onDelete: Cascade)
+  vehicle     Vehicle?    @relation("VehicleBookings", fields: [vehicleId], references: [id], onDelete: SetNull)
 
+  @@index([vehicleId, startTime, endTime])
   @@map("booking")
 }
 

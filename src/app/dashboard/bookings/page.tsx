@@ -53,9 +53,11 @@ export default async function BookingsPage({
     tourThumbnail: b.tourPackage.thumbnail,
     tourDuration: b.tourPackage.duration,
     tourSlug: b.tourPackage.slug,
-    userName: b.user.name,
-    userEmail: b.user.email,
-    userImage: b.user.image,
+    userName: b.user?.name ?? b.guestName ?? "Guest",
+    userEmail: b.user?.email ?? b.guestEmail ?? "",
+    userImage: b.user?.image ?? null,
+    whatsapp: b.whatsapp ?? "",
+    isGuest: !b.userId,
     stripeSessionId: b.stripeSessionId,
   }));
 

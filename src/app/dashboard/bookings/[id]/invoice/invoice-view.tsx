@@ -24,6 +24,8 @@ export interface InvoiceData {
   tourDuration: string;
   userName: string;
   userEmail: string;
+  whatsapp?: string;
+  isGuest?: boolean;
 }
 
 export function InvoiceView({ booking }: { booking: InvoiceData }) {
@@ -40,10 +42,22 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
   const handlePayBalance = async () => {
     try {
       setBalanceLoading(true);
+      const payload: { bookingId: string; whatsapp?: string } = { bookingId: booking.id };
+      if (booking.isGuest) {
+        const entered = window.prompt(
+          "Enter the WhatsApp number used for this booking (international format, e.g. +14155551234):",
+          "",
+        );
+        if (!entered) {
+          setBalanceLoading(false);
+          return;
+        }
+        payload.whatsapp = entered;
+      }
       const res = await fetch("/api/checkout/balance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: booking.id }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.url) {
@@ -155,9 +169,9 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
       {/* Action Bar */}
       <div className="mx-4 lg:mx-auto w-full max-w-4xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <Button asChild variant="ghost" size="sm" className="w-fit hover:bg-slate-100 transition-colors rounded-lg">
-          <Link href="/dashboard/bookings">
+          <Link href={booking.isGuest ? "/" : "/dashboard/bookings"}>
             <ArrowLeft className="mr-2 size-4" />
-            Back to Bookings
+            {booking.isGuest ? "Back to home" : "Back to Bookings"}
           </Link>
         </Button>
         <div className="flex items-center gap-3">
