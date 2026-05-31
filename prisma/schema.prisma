@@ -152,6 +152,7 @@ model Review {
   userId        String
   rating        Int
   comment       String?
+  photos        String?
   reviewerName  String?
   reviewerImage String?
   createdAt     DateTime @default(now())
@@ -160,6 +161,7 @@ model Review {
   tourPackage TourPackage @relation(fields: [tourPackageId], references: [id], onDelete: Cascade)
   user        User        @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, tourPackageId])
   @@map("review")
 }
 

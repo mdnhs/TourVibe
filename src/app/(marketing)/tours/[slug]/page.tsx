@@ -17,11 +17,14 @@ import { BookingButton } from "./booking-button";
 import { GalleryLightbox } from "./gallery-lightbox";
 import { cloudinaryImage } from "@/lib/cloudinary";
 import Script from "next/script";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
 import { formatPrice } from "@/lib/currency";
 import { getCurrencyCode } from "@/lib/currency-server";
+import { ReviewForm } from "@/components/reviews/review-form";
 
 interface TourVehicle {
   id: string;
@@ -48,10 +51,12 @@ interface Tour {
   vehicles: TourVehicle[];
   reviews: Array<{
     id: string;
+    userId: string;
     userName: string;
     userImage: string | null;
     rating: number;
     comment: string | null;
+    photos: string[];
     createdAt: Date;
   }>;
 }
@@ -160,10 +165,15 @@ export default async function TourDetailsPage({
     })),
     reviews: tourRaw.reviews.map((r) => ({
       id: r.id,
+      userId: r.userId,
       userName: r.user.name,
       userImage: r.user.image,
       rating: r.rating,
       comment: r.comment,
+      photos: (r.photos ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
       createdAt: r.createdAt,
     })),
   };
@@ -171,6 +181,32 @@ export default async function TourDetailsPage({
   const s = await getSeoSettingsSync();
   const currency = await getCurrencyCode();
   const jsonLdSchema = buildTourSchema(s, tour as any, currency);
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  let canReview = false;
+  let myReview: { id: string; rating: number; comment: string | null; photos: string[] } | null = null;
+  if (session?.user) {
+    const eligibleBooking = await db.booking.findFirst({
+      where: {
+        userId: session.user.id,
+        tourPackageId: tour.id,
+        paymentStage: { in: ["ADVANCE_PAID", "FULLY_PAID"] },
+      },
+      select: { id: true },
+    });
+    canReview = !!eligibleBooking;
+    if (canReview) {
+      const own = tour.reviews.find((r) => r.userId === session.user.id);
+      if (own) {
+        myReview = {
+          id: own.id,
+          rating: own.rating,
+          comment: own.comment,
+          photos: own.photos,
+        };
+      }
+    }
+  }
 
   return (
     <div className="relative  pb-28 mx-auto max-w-6xl pt-4">
@@ -367,17 +403,23 @@ export default async function TourDetailsPage({
                 </div>
               </div>
 
+              {canReview && (
+                <div className="mb-6">
+                  <ReviewForm tourPackageId={tour.id} existing={myReview} />
+                </div>
+              )}
+
               {tour.reviews.length > 0 ? (
-                <div className="grid gap-6">
+                <div className="grid gap-5 sm:gap-6">
                   {tour.reviews.map((rev) => (
                     <div
                       key={rev.id}
-                      className="group relative rounded-[2rem] bg-white p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 ring-1 ring-slate-100"
+                      className="group relative rounded-2xl sm:rounded-[2rem] bg-white p-5 sm:p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 ring-1 ring-slate-100"
                     >
-                      <Quote className="absolute right-8 top-8 size-12 text-slate-50 transition-colors group-hover:text-indigo-50" />
-                      <div className="relative flex flex-col gap-6">
-                        <div className="flex items-center gap-4">
-                          <div className="relative size-14 overflow-hidden rounded-2xl ring-2 ring-white shadow-md">
+                      <Quote className="hidden sm:block absolute right-8 top-8 size-12 text-slate-50 transition-colors group-hover:text-indigo-50" />
+                      <div className="relative flex flex-col gap-4 sm:gap-6">
+                        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                          <div className="relative size-12 sm:size-14 overflow-hidden rounded-2xl ring-2 ring-white shadow-md shrink-0">
                             {rev.userImage ? (
                               <Image
                                 src={rev.userImage}
@@ -391,8 +433,8 @@ export default async function TourDetailsPage({
                               </div>
                             )}
                           </div>
-                          <div>
-                            <p className="font-bold text-slate-950">
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-950 truncate">
                               {rev.userName}
                             </p>
                             <div className="mt-0.5 flex gap-0.5">
@@ -409,29 +451,52 @@ export default async function TourDetailsPage({
                               ))}
                             </div>
                           </div>
-                          <span className="ml-auto text-xs font-semibold uppercase tracking-widest text-slate-400">
+                          <span className="ml-auto text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400">
                             {new Date(rev.createdAt).toLocaleDateString(
                               "en-US",
                               { month: "short", year: "numeric" },
                             )}
                           </span>
                         </div>
-                        <p className="text-lg leading-relaxed text-slate-600">
-                          {rev.comment}
-                        </p>
+                        {rev.comment && (
+                          <p className="text-base sm:text-lg leading-relaxed text-slate-600">
+                            {rev.comment}
+                          </p>
+                        )}
+                        {rev.photos.length > 0 && (
+                          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                            {rev.photos.map((url) => (
+                              <a
+                                key={url}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+                              >
+                                <Image
+                                  src={cloudinaryImage(url, 600)}
+                                  alt=""
+                                  fill
+                                  sizes="(max-width: 640px) 33vw, 20vw"
+                                  className="object-cover transition-transform hover:scale-105"
+                                />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 py-20 text-center">
+                <div className="rounded-2xl sm:rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 py-14 sm:py-20 text-center">
                   <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
                     <Star className="size-8 text-slate-200" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-950">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-950">
                     No reviews yet
                   </h3>
-                  <p className="text-slate-500">
+                  <p className="text-slate-500 px-4 text-sm sm:text-base">
                     Be the first traveler to share your experience!
                   </p>
                 </div>
