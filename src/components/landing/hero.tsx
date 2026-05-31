@@ -23,15 +23,15 @@ import { formatPrice } from "@/lib/currency";
 const locations = [
   {
     id: 1,
-    name: "Dublin",
-    description: "Ireland's vibrant capital city",
+    name: "Cobh",
+    description: "Historic harbour town on Ireland's south coast",
     hours: "Open year round",
     rating: 4.8,
     reviews: 12453,
     color: "bg-amber-400",
     ring: "ring-amber-400/30",
-    lng: -6.2603,
-    lat: 53.3498,
+    lng: -8.2948,
+    lat: 51.8513,
   },
   {
     id: 2,

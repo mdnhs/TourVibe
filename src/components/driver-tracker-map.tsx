@@ -211,7 +211,7 @@ export function DriverTrackerMap({
   }, [activeRoute, destination, drivers]);
 
   const defaultCenter: [number, number] =
-    drivers.length > 0 ? [drivers[0].lng, drivers[0].lat] : [-6.2603, 53.3498];
+    drivers.length > 0 ? [drivers[0].lng, drivers[0].lat] : [-8.2948, 51.8513];
 
   return (
     <div className={cn("relative", className)}>

@@ -4,7 +4,7 @@ import { ContactForm } from "./contact-form";
 export function Contact({
   email = "hello@tourvibe.ie",
   phone = "+353 1 800 0000",
-  location = "Dublin, Ireland",
+  location = "Cobh, Ireland",
 }: {
   email?: string;
   phone?: string;

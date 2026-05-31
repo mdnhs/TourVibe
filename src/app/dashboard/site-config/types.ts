@@ -106,7 +106,7 @@ export const siteConfigDefaults: SiteConfig = {
   heroTag3Url: "",
   contactEmail: "hello@tourvibe.ie",
   contactPhone: "+353 1 800 0000",
-  contactLocation: "Dublin, Ireland",
+  contactLocation: "Cobh, Ireland",
   footerTagline:
     "Premium car tour management for modern travelers. Experience the island like never before.",
   aboutTitle: "Born from a passion for unforgettable Irish roads.",

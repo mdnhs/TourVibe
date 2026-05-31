@@ -32,7 +32,7 @@ type FooterProps = {
 export function Footer({
   siteName = "TourVibe",
   tagline = "Premium car tour management for modern travelers. Experience the island like never before.",
-  location = "Ireland, EU",
+  location = "Cobh, Ireland",
   logoUrl,
   footerCol1Heading = "Services",
   footerCol1Link1Label = "City Tours", footerCol1Link1Url = "#",
