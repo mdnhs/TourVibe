@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,9 +27,9 @@ interface GuestBookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tourId: string;
-  total: number;
+  hourlyRate: number;
   currency?: string;
-  durationHours: number;
+  minHours: number;
   vehicles: PickerVehicle[];
 }
 
@@ -37,9 +37,9 @@ export function GuestBookingDialog({
   open,
   onOpenChange,
   tourId,
-  total,
+  hourlyRate,
   currency,
-  durationHours,
+  minHours,
   vehicles,
 }: GuestBookingDialogProps) {
   const [name, setName] = useState("");
@@ -50,10 +50,15 @@ export function GuestBookingDialog({
     date: "",
     time: "",
     vehicleId: "",
+    hours: minHours,
   });
   const [available, setAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const total = useMemo(
+    () => Math.round(hourlyRate * (schedule.hours || minHours) * 100) / 100,
+    [hourlyRate, schedule.hours, minHours],
+  );
   const advance = Math.round(total * 0.2 * 100) / 100;
   const balance = Math.round((total - advance) * 100) / 100;
 
@@ -97,6 +102,7 @@ export function GuestBookingDialog({
           whatsapp: normalizedWa,
           vehicleId: schedule.vehicleId,
           startTime,
+          hours: schedule.hours,
         }),
       });
       const data = await res.json();
@@ -176,11 +182,20 @@ export function GuestBookingDialog({
           <div className="pt-2">
             <ScheduleVehiclePicker
               vehicles={vehicles}
-              durationHours={durationHours}
+              minHours={minHours}
               value={schedule}
               onChange={setSchedule}
               onAvailabilityChange={setAvailable}
             />
+          </div>
+
+          <div className="rounded-lg border bg-slate-50 p-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600">
+                {schedule.hours} {schedule.hours === 1 ? "hour" : "hours"} × {formatPrice(hourlyRate, currency)}
+              </span>
+              <span className="font-bold text-slate-900">{formatPrice(total, currency)}</span>
+            </div>
           </div>
 
           <div className="space-y-2 pt-2">

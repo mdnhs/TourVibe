@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       whatsapp: bodyWhatsapp,
       vehicleId,
       startTime: startTimeRaw,
+      hours: hoursRaw,
     } = body;
 
     if (!tourId) {
@@ -136,8 +137,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const durationHours = tour.durationHours || 1;
-    const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+    const minHours = tour.durationHours || 1;
+    const MAX_HOURS = 24;
+    let bookedHours = Number(hoursRaw);
+    if (!Number.isFinite(bookedHours) || bookedHours <= 0) {
+      bookedHours = minHours;
+    }
+    bookedHours = Math.round(bookedHours);
+    if (bookedHours < minHours) {
+      return NextResponse.json(
+        { error: `Minimum duration for this tour is ${minHours} hour${minHours === 1 ? "" : "s"}.` },
+        { status: 400 },
+      );
+    }
+    if (bookedHours > MAX_HOURS) {
+      return NextResponse.json(
+        { error: `Maximum duration is ${MAX_HOURS} hours.` },
+        { status: 400 },
+      );
+    }
+    const endTime = new Date(startTime.getTime() + bookedHours * 60 * 60 * 1000);
 
     // Pre-check (fast path, avoids creating Stripe session for obvious conflicts)
     const preConflict = await findVehicleConflict(prisma, {
@@ -152,7 +171,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const totalAmount = Math.round(tour.price * 100) / 100;
+    const hourlyRate = tour.hourlyRate || (minHours > 0 ? tour.price / minHours : tour.price);
+    const totalAmount = Math.round(hourlyRate * bookedHours * 100) / 100;
     const chargeAmount =
       paymentType === "ADVANCE"
         ? Math.round(totalAmount * 0.2 * 100) / 100

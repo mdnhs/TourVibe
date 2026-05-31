@@ -11,18 +11,18 @@ import type { PickerVehicle } from "@/components/booking/schedule-vehicle-picker
 
 interface BookingButtonProps {
   tourId: string;
-  total: number;
+  hourlyRate: number;
   currency?: string;
-  durationHours: number;
+  minHours: number;
   vehicles: PickerVehicle[];
   className?: string;
 }
 
 export function BookingButton({
   tourId,
-  total,
+  hourlyRate,
   currency,
-  durationHours,
+  minHours,
   vehicles,
   className,
 }: BookingButtonProps) {
@@ -35,6 +35,7 @@ export function BookingButton({
     paymentType: "ADVANCE" | "FULL";
     vehicleId: string;
     startTime: string;
+    hours: number;
   }) => {
     try {
       setLoading(true);
@@ -84,9 +85,9 @@ export function BookingButton({
       <BookingDialog
         open={bookingOpen}
         onOpenChange={setBookingOpen}
-        total={total}
+        hourlyRate={hourlyRate}
         currency={currency}
-        durationHours={durationHours}
+        minHours={minHours}
         vehicles={vehicles}
         loading={loading}
         onConfirm={submitCheckout}
@@ -95,9 +96,9 @@ export function BookingButton({
         open={guestOpen}
         onOpenChange={setGuestOpen}
         tourId={tourId}
-        total={total}
+        hourlyRate={hourlyRate}
         currency={currency}
-        durationHours={durationHours}
+        minHours={minHours}
         vehicles={vehicles}
       />
       <button

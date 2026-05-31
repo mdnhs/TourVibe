@@ -14,6 +14,7 @@ interface BookingBarProps {
   tourId: string;
   name: string;
   price: number;
+  hourlyRate: number;
   duration: string;
   durationHours: number;
   vehicles: PickerVehicle[];
@@ -22,7 +23,7 @@ interface BookingBarProps {
   currency?: string;
 }
 
-export function BookingBar({ tourId, name, price, duration, durationHours, vehicles, maxPersons, rating, currency }: BookingBarProps) {
+export function BookingBar({ tourId, name, price, hourlyRate, duration, durationHours, vehicles, maxPersons, rating, currency }: BookingBarProps) {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [whatsappOpen, setWhatsappOpen] = useState(false);
@@ -39,6 +40,7 @@ export function BookingBar({ tourId, name, price, duration, durationHours, vehic
     paymentType: "ADVANCE" | "FULL";
     vehicleId: string;
     startTime: string;
+    hours: number;
   }) => {
     try {
       setLoading(true);
@@ -88,9 +90,9 @@ export function BookingBar({ tourId, name, price, duration, durationHours, vehic
       <BookingDialog
         open={bookingOpen}
         onOpenChange={setBookingOpen}
-        total={price}
+        hourlyRate={hourlyRate}
         currency={currency}
-        durationHours={durationHours}
+        minHours={durationHours}
         vehicles={vehicles}
         loading={loading}
         onConfirm={submitCheckout}
@@ -99,9 +101,9 @@ export function BookingBar({ tourId, name, price, duration, durationHours, vehic
         open={guestOpen}
         onOpenChange={setGuestOpen}
         tourId={tourId}
-        total={price}
+        hourlyRate={hourlyRate}
         currency={currency}
-        durationHours={durationHours}
+        minHours={durationHours}
         vehicles={vehicles}
       />
       <div

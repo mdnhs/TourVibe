@@ -39,6 +39,7 @@ interface Tour {
   name: string;
   description: string;
   price: number;
+  hourlyRate: number;
   duration: string;
   durationHours: number;
   maxPersons: number;
@@ -152,6 +153,12 @@ export default async function TourDetailsPage({
     description: tourRaw.description || "",
     highlights: tourRaw.highlights ?? null,
     price: Number(tourRaw.price),
+    hourlyRate:
+      Number(tourRaw.hourlyRate) > 0
+        ? Number(tourRaw.hourlyRate)
+        : tourRaw.durationHours > 0
+          ? Number(tourRaw.price) / tourRaw.durationHours
+          : Number(tourRaw.price),
     durationHours: tourRaw.durationHours,
     reviewCount,
     avgRating,
@@ -298,7 +305,7 @@ export default async function TourDetailsPage({
                   </span>
                   <span className="text-[10px] text-white/50">per hour</span>
                 </div>
-                <BookingButton tourId={tour.id} total={tour.price} currency={currency} durationHours={tour.durationHours} vehicles={tour.vehicles} className="shrink-0" />
+                <BookingButton tourId={tour.id} hourlyRate={tour.hourlyRate} currency={currency} minHours={tour.durationHours} vehicles={tour.vehicles} className="shrink-0" />
               </div> */}
             </div>
           </div>
@@ -556,9 +563,9 @@ export default async function TourDetailsPage({
               <div className="space-y-4 pt-4">
                 <BookingButton
                   tourId={tour.id}
-                  total={tour.price}
+                  hourlyRate={tour.hourlyRate}
                   currency={currency}
-                  durationHours={tour.durationHours}
+                  minHours={tour.durationHours}
                   vehicles={tour.vehicles}
                   className="w-full h-14 text-lg"
                 />
@@ -594,6 +601,7 @@ export default async function TourDetailsPage({
         tourId={tour.id}
         name={tour.name}
         price={tour.price}
+        hourlyRate={tour.hourlyRate}
         duration={tour.duration}
         durationHours={tour.durationHours}
         vehicles={tour.vehicles}

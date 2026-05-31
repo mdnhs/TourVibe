@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, Minus, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -19,11 +19,13 @@ export interface ScheduleVehicleValue {
   date: string;
   time: string;
   vehicleId: string;
+  hours: number;
 }
 
 interface ScheduleVehiclePickerProps {
   vehicles: PickerVehicle[];
-  durationHours: number;
+  minHours: number;
+  maxHours?: number;
   value: ScheduleVehicleValue;
   onChange: (next: ScheduleVehicleValue) => void;
   onAvailabilityChange?: (available: boolean) => void;
@@ -38,7 +40,8 @@ function toIsoStart(date: string, time: string): string | null {
 
 export function ScheduleVehiclePicker({
   vehicles,
-  durationHours,
+  minHours,
+  maxHours = 24,
   value,
   onChange,
   onAvailabilityChange,
@@ -56,9 +59,13 @@ export function ScheduleVehiclePicker({
     onChange({ ...value, ...patch });
   };
 
+  const hours = value.hours || minHours;
+  const decHours = () => set({ hours: Math.max(minHours, hours - 1) });
+  const incHours = () => set({ hours: Math.min(maxHours, hours + 1) });
+
   useEffect(() => {
     const startIso = toIsoStart(value.date, value.time);
-    if (!startIso || !value.vehicleId) {
+    if (!startIso || !value.vehicleId || !hours) {
       setStatus("idle");
       setMessage("");
       onAvailabilityChange?.(false);
@@ -71,7 +78,7 @@ export function ScheduleVehiclePicker({
       onAvailabilityChange?.(false);
       return;
     }
-    const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+    const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
     const ctrl = new AbortController();
     setChecking(true);
     fetch(
@@ -99,7 +106,7 @@ export function ScheduleVehiclePicker({
       .finally(() => setChecking(false));
 
     return () => ctrl.abort();
-  }, [value.date, value.time, value.vehicleId, durationHours, onAvailabilityChange]);
+  }, [value.date, value.time, value.vehicleId, hours, onAvailabilityChange]);
 
   return (
     <div className="space-y-4">
@@ -131,9 +138,46 @@ export function ScheduleVehiclePicker({
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Tour duration: {durationHours} {durationHours === 1 ? "hour" : "hours"}.
-      </p>
+      <div className="space-y-2">
+        <Label>
+          Duration (hours) <span className="text-destructive">*</span>
+        </Label>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={decHours}
+            disabled={hours <= minHours}
+            className="inline-flex size-9 items-center justify-center rounded-md border border-input bg-background text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Decrease hours"
+          >
+            <Minus className="size-4" />
+          </button>
+          <Input
+            type="number"
+            min={minHours}
+            max={maxHours}
+            value={hours}
+            onChange={(e) => {
+              const v = parseInt(e.target.value || "0", 10);
+              if (!Number.isFinite(v)) return;
+              set({ hours: Math.min(maxHours, Math.max(minHours, v)) });
+            }}
+            className="w-20 text-center"
+          />
+          <button
+            type="button"
+            onClick={incHours}
+            disabled={hours >= maxHours}
+            className="inline-flex size-9 items-center justify-center rounded-md border border-input bg-background text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Increase hours"
+          >
+            <Plus className="size-4" />
+          </button>
+          <span className="text-xs text-muted-foreground">
+            Minimum {minHours} {minHours === 1 ? "hour" : "hours"} for this tour.
+          </span>
+        </div>
+      </div>
 
       <div className="space-y-2">
         <Label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -23,24 +23,25 @@ import {
 interface BookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  total: number;
+  hourlyRate: number;
   currency?: string;
-  durationHours: number;
+  minHours: number;
   vehicles: PickerVehicle[];
   loading?: boolean;
   onConfirm: (payload: {
     paymentType: "ADVANCE" | "FULL";
     vehicleId: string;
     startTime: string;
+    hours: number;
   }) => void;
 }
 
 export function BookingDialog({
   open,
   onOpenChange,
-  total,
+  hourlyRate,
   currency,
-  durationHours,
+  minHours,
   vehicles,
   loading,
   onConfirm,
@@ -49,10 +50,15 @@ export function BookingDialog({
     date: "",
     time: "",
     vehicleId: "",
+    hours: minHours,
   });
   const [available, setAvailable] = useState(false);
   const [paymentType, setPaymentType] = useState<"ADVANCE" | "FULL">("FULL");
 
+  const total = useMemo(
+    () => Math.round(hourlyRate * (schedule.hours || minHours) * 100) / 100,
+    [hourlyRate, schedule.hours, minHours],
+  );
   const advance = Math.round(total * 0.2 * 100) / 100;
   const balance = Math.round((total - advance) * 100) / 100;
 
@@ -63,28 +69,41 @@ export function BookingDialog({
     e.preventDefault();
     if (!ready) return;
     const startTime = new Date(`${schedule.date}T${schedule.time}:00`).toISOString();
-    onConfirm({ paymentType, vehicleId: schedule.vehicleId, startTime });
+    onConfirm({
+      paymentType,
+      vehicleId: schedule.vehicleId,
+      startTime,
+      hours: schedule.hours,
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Book this tour</DialogTitle>
           <DialogDescription>
-            Total package amount:{" "}
-            <span className="font-semibold">{formatPrice(total, currency)}</span>
+            Rate: {formatPrice(hourlyRate, currency)} / hour. Total updates with selected hours.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <ScheduleVehiclePicker
             vehicles={vehicles}
-            durationHours={durationHours}
+            minHours={minHours}
             value={schedule}
             onChange={setSchedule}
             onAvailabilityChange={setAvailable}
           />
+
+          <div className="rounded-lg border bg-slate-50 p-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600">
+                {schedule.hours} {schedule.hours === 1 ? "hour" : "hours"} × {formatPrice(hourlyRate, currency)}
+              </span>
+              <span className="font-bold text-slate-900">{formatPrice(total, currency)}</span>
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Label>Payment option</Label>

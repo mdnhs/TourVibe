@@ -109,7 +109,7 @@ export function Navbar({
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="relative flex size-9 items-center justify-center rounded-full overflow-hidden shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
+            <div className="relative flex size-9 items-center justify-center shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
               {logoUrl ? (
                 <Image
