@@ -4,7 +4,6 @@ import { CreateReviewForm } from "../review-forms";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default async function NewReviewPage() {
   const { isSuperAdmin } = await requireDashboardSession();
@@ -27,14 +26,7 @@ export default async function NewReviewPage() {
         </h2>
       </div>
 
-      <Card className="max-w-2xl">
-        <CardContent className="p-6">
-          <CreateReviewForm 
-            tourPackages={tourPackages} 
-            isSuperAdmin={isSuperAdmin}
-          />
-        </CardContent>
-      </Card>
+      <CreateReviewForm tourPackages={tourPackages} isSuperAdmin={isSuperAdmin} />
     </div>
   );
 }

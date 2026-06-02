@@ -10,24 +10,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  Tag,
+  ArrowDownUp,
+  Car,
+} from "lucide-react";
 
-export function ToursFilter() {
+type VehicleOption = { id: string; label: string };
+
+function FieldLabel({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+      <Icon className="size-3" />
+      {children}
+    </label>
+  );
+}
+
+export function ToursFilter({ vehicles = [] }: { vehicles?: VehicleOption[] }) {
   const [params, setParams] = useQueryStates(toursSearchParams, {
     shallow: false,
   });
 
   const clearFilters = () =>
-    setParams({ q: "", minPrice: null, maxPrice: null, sort: "newest" });
+    setParams({ q: "", minPrice: null, maxPrice: null, sort: "newest", vehicle: "", page: null });
+
+  const vehicleLabel = vehicles.find((v) => v.id === params.vehicle)?.label;
 
   const hasFilters =
     params.q ||
     params.minPrice !== null ||
     params.maxPrice !== null ||
-    params.sort !== "newest";
+    params.sort !== "newest" ||
+    !!params.vehicle;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -42,7 +69,7 @@ export function ToursFilter() {
             className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500 transition hover:border-slate-300 hover:bg-white hover:text-slate-900"
           >
             <X className="size-3" />
-            Clear
+            Clear all
           </button>
         )}
       </div>
@@ -51,25 +78,44 @@ export function ToursFilter() {
 
       {/* Search */}
       <div className="space-y-2">
-        <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
-          Search
-        </label>
+        <FieldLabel icon={Search}>Search</FieldLabel>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Package name..."
             className="rounded-xl border-slate-200 pl-9 text-sm placeholder:text-slate-400 focus-visible:border-amber-400 focus-visible:ring-amber-400/20"
             value={params.q ?? ""}
-            onChange={(e) => setParams({ q: e.target.value || null })}
+            onChange={(e) => setParams({ q: e.target.value || null, page: null })}
           />
         </div>
       </div>
 
+      {/* Vehicle */}
+      <div className="space-y-2">
+        <FieldLabel icon={Car}>Vehicle</FieldLabel>
+        <Select
+          value={params.vehicle || "all"}
+          onValueChange={(val) => setParams({ vehicle: val === "all" ? "" : val, page: null })}
+        >
+          <SelectTrigger className="w-full rounded-xl border-slate-200 text-sm focus:border-amber-400 focus:ring-amber-400/20">
+            <SelectValue placeholder="Any vehicle">
+              {params.vehicle ? vehicleLabel ?? "Selected vehicle" : "Any vehicle"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            <SelectItem value="all">Any vehicle</SelectItem>
+            {vehicles.map((v) => (
+              <SelectItem key={v.id} value={v.id}>
+                {v.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Price range */}
       <div className="space-y-2">
-        <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
-          Price Range
-        </label>
+        <FieldLabel icon={Tag}>Price Range</FieldLabel>
         <div className="flex items-center gap-2">
           <Input
             type="number"
@@ -77,7 +123,7 @@ export function ToursFilter() {
             className="rounded-xl border-slate-200 text-sm placeholder:text-slate-400 focus-visible:border-amber-400 focus-visible:ring-amber-400/20"
             value={params.minPrice ?? ""}
             onChange={(e) =>
-              setParams({ minPrice: e.target.value ? parseInt(e.target.value) : null })
+              setParams({ minPrice: e.target.value ? parseInt(e.target.value) : null, page: null })
             }
           />
           <span className="shrink-0 text-xs font-medium text-slate-300">—</span>
@@ -87,7 +133,7 @@ export function ToursFilter() {
             className="rounded-xl border-slate-200 text-sm placeholder:text-slate-400 focus-visible:border-amber-400 focus-visible:ring-amber-400/20"
             value={params.maxPrice ?? ""}
             onChange={(e) =>
-              setParams({ maxPrice: e.target.value ? parseInt(e.target.value) : null })
+              setParams({ maxPrice: e.target.value ? parseInt(e.target.value) : null, page: null })
             }
           />
         </div>
@@ -95,14 +141,12 @@ export function ToursFilter() {
 
       {/* Sort */}
       <div className="space-y-2">
-        <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
-          Sort By
-        </label>
+        <FieldLabel icon={ArrowDownUp}>Sort By</FieldLabel>
         <Select
           value={params.sort ?? "newest"}
-          onValueChange={(val) => setParams({ sort: val })}
+          onValueChange={(val) => setParams({ sort: val, page: null })}
         >
-          <SelectTrigger className="rounded-xl border-slate-200 text-sm focus:border-amber-400 focus:ring-amber-400/20">
+          <SelectTrigger className="w-full rounded-xl border-slate-200 text-sm focus:border-amber-400 focus:ring-amber-400/20">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -122,6 +166,15 @@ export function ToursFilter() {
             Active filters
           </p>
           <div className="flex flex-wrap gap-1.5">
+            {params.vehicle && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
+                <Car className="size-2.5" />
+                {vehicleLabel ?? "Selected vehicle"}
+                <button onClick={() => setParams({ vehicle: "" })} className="hover:text-indigo-900">
+                  <X className="size-2.5" />
+                </button>
+              </span>
+            )}
             {params.q && (
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                 &ldquo;{params.q}&rdquo;

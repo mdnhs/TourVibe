@@ -55,35 +55,51 @@ export default async function EditReviewPage({ params }: { params: Promise<{ id:
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Update Review</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EditReviewForm 
-              review={review} 
-              tourPackages={tourPackages}
-              isSuperAdmin={isSuperAdmin} 
-            />
-          </CardContent>
-        </Card>
+      <EditReviewForm review={review} tourPackages={tourPackages} isSuperAdmin={isSuperAdmin} />
 
+      <div className="mx-auto w-full max-w-5xl">
         <Card>
           <CardHeader>
             <CardTitle>Review Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground uppercase">Date Created</p>
-              <p className="text-sm font-semibold">{new Date(review.createdAt).toLocaleString()}</p>
-            </div>
-            {review.updatedAt && review.updatedAt.getTime() !== review.createdAt.getTime() && (
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap gap-8">
               <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase">Last Updated</p>
-                <p className="text-sm font-semibold">{new Date(review.updatedAt).toLocaleString()}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase">Date Created</p>
+                <p className="text-sm font-semibold">{new Date(review.createdAt).toLocaleString()}</p>
               </div>
-            )}
+              {review.updatedAt && review.updatedAt.getTime() !== review.createdAt.getTime() && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Last Updated</p>
+                  <p className="text-sm font-semibold">{new Date(review.updatedAt).toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+            {(() => {
+              const photos = (review.photos ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+              if (photos.length === 0) return null;
+              return (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">
+                    Photos ({photos.length})
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {photos.map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="aspect-square w-20 overflow-hidden rounded-lg border bg-muted"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="Review photo" className="size-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       </div>

@@ -247,17 +247,23 @@ export function Hero({
               style={{ animationDelay: "100ms" }}
             >
               <h1 className="font-heading max-w-lg text-5xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl">
-                {heroTitleHighlight && heroTitle.includes(heroTitleHighlight) ? (
+                {heroTitleHighlight &&
+                heroTitle.includes(heroTitleHighlight) ? (
                   <>
                     {heroTitle.split(heroTitleHighlight)[0]}
                     <span className="relative inline-block">
-                      <span className="relative z-10">{heroTitleHighlight}</span>
+                      <span className="relative z-10">
+                        {heroTitleHighlight}
+                      </span>
                       <span
                         className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-amber-400/70"
                         aria-hidden="true"
                       />
                     </span>
-                    {heroTitle.split(heroTitleHighlight).slice(1).join(heroTitleHighlight)}
+                    {heroTitle
+                      .split(heroTitleHighlight)
+                      .slice(1)
+                      .join(heroTitleHighlight)}
                   </>
                 ) : (
                   heroTitle
@@ -302,40 +308,45 @@ export function Hero({
               <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35 mr-1 shrink-0">
                 Popular
               </span>
-              {popularTags.filter(t => t.label).map((tag, i) => {
-                const href = tag.url?.trim() || `/tours?q=${encodeURIComponent(tag.label)}`;
-                const tagClass = "group animate-in fade-in slide-in-from-bottom-2 duration-500 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:bg-amber-400/15 hover:text-white hover:shadow-lg hover:shadow-amber-400/10 active:scale-95";
-                const inner = (
-                  <>
-                    <span className="text-sm leading-none">{tag.emoji}</span>
-                    {tag.label}
-                    <ChevronRight className="size-3 text-white/25 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
-                  </>
-                );
-                const isExternal = tag.url?.startsWith("http");
-                const tagKey = `${tag.label}-${i}`;
-                return isExternal ? (
-                  <a
-                    key={tagKey}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ animationDelay: `${320 + i * 60}ms` }}
-                    className={tagClass}
-                  >
-                    {inner}
-                  </a>
-                ) : (
-                  <button
-                    key={tagKey}
-                    onClick={() => router.push(href)}
-                    style={{ animationDelay: `${320 + i * 60}ms` }}
-                    className={tagClass}
-                  >
-                    {inner}
-                  </button>
-                );
-              })}
+              {popularTags
+                .filter((t) => t.label)
+                .map((tag, i) => {
+                  const href =
+                    tag.url?.trim() ||
+                    `/tours?q=${encodeURIComponent(tag.label)}`;
+                  const tagClass =
+                    "group animate-in fade-in slide-in-from-bottom-2 duration-500 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:bg-amber-400/15 hover:text-white hover:shadow-lg hover:shadow-amber-400/10 active:scale-95";
+                  const inner = (
+                    <>
+                      <span className="text-sm leading-none">{tag.emoji}</span>
+                      {tag.label}
+                      <ChevronRight className="size-3 text-white/25 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
+                    </>
+                  );
+                  const isExternal = tag.url?.startsWith("http");
+                  const tagKey = `${tag.label}-${i}`;
+                  return isExternal ? (
+                    <a
+                      key={tagKey}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ animationDelay: `${320 + i * 60}ms` }}
+                      className={tagClass}
+                    >
+                      {inner}
+                    </a>
+                  ) : (
+                    <button
+                      key={tagKey}
+                      onClick={() => router.push(href)}
+                      style={{ animationDelay: `${320 + i * 60}ms` }}
+                      className={tagClass}
+                    >
+                      {inner}
+                    </button>
+                  );
+                })}
             </div>
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">

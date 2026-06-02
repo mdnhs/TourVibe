@@ -79,6 +79,7 @@ export default async function Home() {
         : (r.reviewerImage || r.user.image),
       role: isAdmin ? "Tourist" : (r.user.role === "tourist" ? "Tourist" : (r.user.role?.replace("_", " ") ?? "Tourist")),
       rating: r.rating,
+      photos: (r.photos ?? "").split(",").map((s) => s.trim()).filter(Boolean),
     };
   });
 
@@ -90,6 +91,7 @@ export default async function Home() {
           name: r.name,
           image: r.image,
           role: r.role,
+          photos: r.photos,
         }))
       : [
           {
@@ -254,6 +256,22 @@ export default async function Home() {
     createdAt: post.createdAt.toISOString(),
   })));
 
+  // Empty strings (e.g. cleared in dashboard) -> undefined so each
+  // component's built-in default content renders as a fallback.
+  const od = (v?: string) => (v && v.trim() ? v : undefined);
+
+  const heroTags = [
+    { label: siteConfig.heroTag1Label, emoji: siteConfig.heroTag1Emoji, url: siteConfig.heroTag1Url },
+    { label: siteConfig.heroTag2Label, emoji: siteConfig.heroTag2Emoji, url: siteConfig.heroTag2Url },
+    { label: siteConfig.heroTag3Label, emoji: siteConfig.heroTag3Emoji, url: siteConfig.heroTag3Url },
+  ].filter((t) => t.label.trim());
+
+  const aboutStats = [
+    { value: siteConfig.aboutStat1Value, label: siteConfig.aboutStat1Label },
+    { value: siteConfig.aboutStat2Value, label: siteConfig.aboutStat2Label },
+    { value: siteConfig.aboutStat3Value, label: siteConfig.aboutStat3Label },
+  ].filter((s) => s.value.trim() || s.label.trim());
+
   return (
     <div className="min-h-screen text-slate-900">
       <Hero
@@ -261,16 +279,12 @@ export default async function Home() {
         initialDrivers={liveDrivers}
         activeTour={activeTour}
         currency={currency}
-        heroImage={siteConfig.heroImage}
-        badgeText={siteConfig.heroBadgeText}
-        heroTitle={siteConfig.heroTitle}
-        heroTitleHighlight={siteConfig.heroTitleHighlight}
-        heroSubtitle={siteConfig.heroSubtitle}
-        popularTags={[
-          { label: siteConfig.heroTag1Label, emoji: siteConfig.heroTag1Emoji, url: siteConfig.heroTag1Url },
-          { label: siteConfig.heroTag2Label, emoji: siteConfig.heroTag2Emoji, url: siteConfig.heroTag2Url },
-          { label: siteConfig.heroTag3Label, emoji: siteConfig.heroTag3Emoji, url: siteConfig.heroTag3Url },
-        ]}
+        heroImage={od(siteConfig.heroImage)}
+        badgeText={od(siteConfig.heroBadgeText)}
+        heroTitle={od(siteConfig.heroTitle)}
+        heroTitleHighlight={od(siteConfig.heroTitleHighlight)}
+        heroSubtitle={od(siteConfig.heroSubtitle)}
+        popularTags={heroTags.length ? heroTags : undefined}
       />
 
       <PopularTours tours={popularTours} currency={currency} />
@@ -279,23 +293,19 @@ export default async function Home() {
 
       <Services
         services={services}
-        badgeText={siteConfig.servicesBadgeText}
-        sectionTitle={siteConfig.servicesSectionTitle}
-        sectionHighlight={siteConfig.servicesSectionHighlight}
-        sectionSubtitle={siteConfig.servicesSectionSubtitle}
+        badgeText={od(siteConfig.servicesBadgeText)}
+        sectionTitle={od(siteConfig.servicesSectionTitle)}
+        sectionHighlight={od(siteConfig.servicesSectionHighlight)}
+        sectionSubtitle={od(siteConfig.servicesSectionSubtitle)}
       />
 
       <LiveTrackingSection initialDrivers={liveDrivers} />
 
       <About
-        title={siteConfig.aboutTitle}
-        titleHighlight={siteConfig.aboutTitleHighlight}
-        description={siteConfig.aboutDescription}
-        stats={[
-          { value: siteConfig.aboutStat1Value, label: siteConfig.aboutStat1Label },
-          { value: siteConfig.aboutStat2Value, label: siteConfig.aboutStat2Label },
-          { value: siteConfig.aboutStat3Value, label: siteConfig.aboutStat3Label },
-        ]}
+        title={od(siteConfig.aboutTitle)}
+        titleHighlight={od(siteConfig.aboutTitleHighlight)}
+        description={od(siteConfig.aboutDescription)}
+        stats={aboutStats.length ? aboutStats : undefined}
       />
 
       <Reviews reviews={displayReviews} />
@@ -303,9 +313,9 @@ export default async function Home() {
       <BlogPreview posts={blogPosts} />
 
       <Contact
-        email={siteConfig.contactEmail}
-        phone={siteConfig.contactPhone}
-        location={siteConfig.contactLocation}
+        email={od(siteConfig.contactEmail)}
+        phone={od(siteConfig.contactPhone)}
+        location={od(siteConfig.contactLocation)}
       />
     </div>
   );

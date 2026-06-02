@@ -35,6 +35,7 @@ export function Navbar({
   const [activeHash, setActiveHash] = useState("");
 
   async function handleSignOut() {
+    setMobileOpen(false);
     await authClient.signOut();
     router.push("/");
     router.refresh();
@@ -52,10 +53,7 @@ export function Navbar({
   }, []);
 
   useEffect(() => {
-    if (pathname !== "/") {
-      setActiveHash("");
-      return;
-    }
+    if (pathname !== "/") return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -77,10 +75,6 @@ export function Navbar({
       observer.disconnect();
       window.removeEventListener("hashchange", onHash);
     };
-  }, [pathname]);
-
-  useEffect(() => {
-    setMobileOpen(false);
   }, [pathname]);
 
   const isActive = (href: string) => {
@@ -109,8 +103,10 @@ export function Navbar({
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="relative flex size-9 items-center justify-center shadow-md shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
+            <div className="relative flex size-9 items-center justify-center transition-transform duration-300 group-hover:scale-105">
+              {!logoUrl && (
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
+              )}
               {logoUrl ? (
                 <Image
                   src={logoUrl}
@@ -246,7 +242,7 @@ export function Navbar({
             <div className="mt-3 flex gap-2 border-t border-slate-100/80 pt-3">
               {session ? (
                 <>
-                  <Link href="/dashboard" className="flex-1">
+                  <Link href="/dashboard" className="flex-1" onClick={() => setMobileOpen(false)}>
                     <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                       Dashboard
                     </button>
@@ -261,12 +257,12 @@ export function Navbar({
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="flex-1">
+                  <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
                     <button className="w-full rounded-full border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
                       Login
                     </button>
                   </Link>
-                  <Link href="/signup" className="flex-1">
+                  <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
                     <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                       Get Started
                     </button>

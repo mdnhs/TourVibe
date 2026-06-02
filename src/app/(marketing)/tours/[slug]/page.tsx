@@ -9,6 +9,7 @@ import {
   Quote,
   MapPin,
   Camera,
+  Car,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -33,6 +34,7 @@ interface TourVehicle {
   year: number;
   licensePlate: string;
   thumbnail: string;
+  gallery?: string | null;
 }
 interface Tour {
   id: string;
@@ -103,6 +105,7 @@ export default async function TourDetailsPage({
           select: {
             name: true,
             image: true,
+            role: true,
           },
         },
       },
@@ -117,6 +120,7 @@ export default async function TourDetailsPage({
             year: true,
             licensePlate: true,
             thumbnail: true,
+            gallery: true,
           },
         },
       },
@@ -169,12 +173,16 @@ export default async function TourDetailsPage({
       year: tv.vehicle.year,
       licensePlate: tv.vehicle.licensePlate,
       thumbnail: tv.vehicle.thumbnail,
+      gallery: tv.vehicle.gallery,
     })),
-    reviews: tourRaw.reviews.map((r) => ({
+    reviews: tourRaw.reviews.map((r) => {
+      const isAdmin = r.user.role === "super_admin" || r.user.role === "admin";
+      return {
       id: r.id,
       userId: r.userId,
-      userName: r.user.name,
-      userImage: r.user.image,
+      // For admin-authored reviews, never expose the admin's account name/photo.
+      userName: isAdmin ? (r.reviewerName || "Happy Traveler") : (r.reviewerName || r.user.name),
+      userImage: isAdmin ? r.reviewerImage : (r.reviewerImage || r.user.image),
       rating: r.rating,
       comment: r.comment,
       photos: (r.photos ?? "")
@@ -182,7 +190,8 @@ export default async function TourDetailsPage({
         .map((s) => s.trim())
         .filter(Boolean),
       createdAt: r.createdAt,
-    })),
+      };
+    }),
   };
 
   const s = await getSeoSettingsSync();
@@ -386,6 +395,76 @@ export default async function TourDetailsPage({
                       </span>
                     </div>
                   ))}
+                </div>
+              </section>
+            )}
+
+            {/* Vehicles */}
+            {tour.vehicles.length > 0 && (
+              <section className="space-y-8">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-1.5 rounded-full bg-indigo-500" />
+                  <h2 className="font-heading text-3xl font-bold text-slate-950">
+                    Vehicles for this tour
+                  </h2>
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {tour.vehicles.map((v) => {
+                    const photos = [
+                      v.thumbnail,
+                      ...((v.gallery ?? "").split(",").map((s) => s.trim()).filter(Boolean)),
+                    ].filter(Boolean);
+                    return (
+                      <div
+                        key={v.id}
+                        className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-xl hover:shadow-slate-200/50"
+                      >
+                        <div className="relative aspect-video bg-slate-100">
+                          {photos[0] && (
+                            <Image
+                              src={cloudinaryImage(photos[0], 800)}
+                              alt={`${v.make} ${v.model}`}
+                              fill
+                              sizes="(max-width: 640px) 100vw, 50vw"
+                              className="object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="space-y-3 p-5">
+                          <div className="flex items-center gap-2">
+                            <Car className="size-5 text-indigo-500" />
+                            <p className="font-heading text-lg font-bold text-slate-950">
+                              {v.make} {v.model}
+                            </p>
+                            <span className="ml-auto text-sm font-medium text-slate-400">
+                              {v.year}
+                            </span>
+                          </div>
+                          {photos.length > 1 && (
+                            <div className="grid grid-cols-4 gap-2">
+                              {photos.slice(1, 5).map((url) => (
+                                <a
+                                  key={url}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+                                >
+                                  <Image
+                                    src={cloudinaryImage(url, 300)}
+                                    alt={`${v.make} ${v.model}`}
+                                    fill
+                                    sizes="120px"
+                                    className="object-cover transition-transform hover:scale-105"
+                                  />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </section>
             )}

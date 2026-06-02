@@ -6,6 +6,7 @@ interface Review {
   role: string;
   quote: string;
   image?: string | null;
+  photos?: string[];
 }
 
 interface ReviewsProps {
@@ -183,6 +184,26 @@ export function Reviews({ reviews }: ReviewsProps) {
                   <p className="flex-1 text-sm leading-7 text-white/70">
                     &ldquo;{review.quote}&rdquo;
                   </p>
+
+                  {/* Traveler photos */}
+                  {review.photos && review.photos.length > 0 && (
+                    <div className="flex gap-2">
+                      {review.photos.slice(0, 4).map((url, idx) => (
+                        <div
+                          key={url}
+                          className="relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt="Traveler photo" className="size-full object-cover" />
+                          {idx === 3 && review.photos!.length > 4 && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-xs font-bold text-white">
+                              +{review.photos!.length - 4}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Divider */}
                   <div className={`h-px w-full bg-gradient-to-r ${accent.bar} opacity-20`} />

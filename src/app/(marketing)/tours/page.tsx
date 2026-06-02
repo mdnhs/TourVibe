@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 import { ToursList } from "./tours-list";
 import { ToursFilter } from "./tours-filter";
+import { ToursPagination } from "./tours-pagination";
 import { SearchParams } from "nuqs/server";
 
 interface Tour {
@@ -28,6 +29,7 @@ interface Tour {
   thumbnail: string;
   reviewCount: number;
   avgRating: number | null;
+  vehicleCount: number;
 }
 
 interface ToursPageProps {
@@ -35,7 +37,8 @@ interface ToursPageProps {
 }
 
 export default async function ToursPage({ searchParams }: ToursPageProps) {
-  const { q, minPrice, maxPrice, sort } = await toursSearchParamsCache.parse(searchParams);
+  const { q, minPrice, maxPrice, sort, vehicle, page } = await toursSearchParamsCache.parse(searchParams);
+  const PAGE_SIZE = 9;
 
   const where: any = {};
   if (q) {
@@ -49,6 +52,16 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     if (minPrice !== null) where.price.gte = minPrice;
     if (maxPrice !== null) where.price.lte = maxPrice;
   }
+  if (vehicle) {
+    where.vehicles = { some: { vehicleId: vehicle } };
+  }
+
+  const vehicleOptions = (
+    await db.vehicle.findMany({
+      select: { id: true, make: true, model: true },
+      orderBy: [{ make: "asc" }, { model: "asc" }],
+    })
+  ).map((v) => ({ id: v.id, label: `${v.make} ${v.model}` }));
 
   const orderBy: any = {};
   if (sort === "price-asc") orderBy.price = "asc";
@@ -56,14 +69,23 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
   else if (sort === "name-asc") orderBy.name = "asc";
   else orderBy.createdAt = "desc";
 
+  const totalTours = await db.tourPackage.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalTours / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+
   const toursRaw = await db.tourPackage.findMany({
     where,
     orderBy,
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
     include: {
       reviews: {
         select: {
           rating: true,
         },
+      },
+      _count: {
+        select: { vehicles: true },
       },
     },
   });
@@ -80,6 +102,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
       price: Number(t.price),
       reviewCount,
       avgRating,
+      vehicleCount: t._count.vehicles,
       slug: t.slug,
     };
   }) as Tour[];
@@ -127,8 +150,8 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                <span className="font-heading text-lg font-extrabold text-slate-950">{tours.length}</span>
-                <span className="text-xs font-medium text-slate-400">experience{tours.length !== 1 ? "s" : ""} found</span>
+                <span className="font-heading text-lg font-extrabold text-slate-950">{totalTours}</span>
+                <span className="text-xs font-medium text-slate-400">experience{totalTours !== 1 ? "s" : ""} found</span>
               </div>
             </div>
           </div>
@@ -143,7 +166,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
               {/* Sidebar top bar */}
               <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-cyan-500" />
               <div className="p-6">
-                <ToursFilter />
+                <ToursFilter vehicles={vehicleOptions} />
               </div>
             </div>
           </aside>
@@ -153,13 +176,14 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
               fallback={
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-[420px] animate-pulse rounded-[1.5rem] bg-slate-100" />
+                    <div key={i} className="h-105 animate-pulse rounded-[1.5rem] bg-slate-100" />
                   ))}
                 </div>
               }
             >
               <ToursList tours={tours} currency={currency} />
             </Suspense>
+            <ToursPagination currentPage={currentPage} totalPages={totalPages} />
           </main>
         </div>
       </div>

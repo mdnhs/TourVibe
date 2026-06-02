@@ -1,4 +1,4 @@
-import { Clock, Users, Star, ArrowRight, MapPin } from "lucide-react";
+import { Clock, Users, Star, ArrowRight, MapPin, Car, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/currency";
@@ -14,6 +14,7 @@ interface Tour {
   thumbnail: string;
   reviewCount: number;
   avgRating: number | null;
+  vehicleCount: number;
 }
 
 interface ToursListProps {
@@ -69,47 +70,42 @@ export function ToursList({ tours, currency }: ToursListProps) {
             <div className={`pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
 
             {/* Thumbnail */}
-            <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+            <div className="relative h-52 w-full overflow-hidden bg-slate-100">
               {tour.thumbnail ? (
                 <Image
                   src={tour.thumbnail}
                   alt={tour.name}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-108"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-100 to-slate-200">
                   <MapPin className="size-10 text-slate-300" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950/35 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
 
-              {/* Price badge */}
-              <div className="absolute bottom-3 left-3 rounded-xl bg-white/95 px-3 py-1.5 shadow-lg backdrop-blur-sm">
-                <span className="font-heading text-base font-extrabold text-slate-950">
-                  {formatPrice(tour.price, currency)}
-                </span>
-                <span className="text-[10px] font-medium text-slate-400"> / hour</span>
-              </div>
-
-              {/* Rating badge */}
-              {rating && (
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-xl bg-white/95 px-2.5 py-1.5 shadow-lg backdrop-blur-sm">
+              {/* Rating / New badge — top right */}
+              {rating ? (
+                <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 shadow-lg backdrop-blur-sm">
                   <Star className="size-3 fill-amber-400 text-amber-400" />
                   <span className="text-xs font-bold text-slate-950">{rating}</span>
                   {tour.reviewCount > 0 && (
                     <span className="text-[10px] text-slate-400">({tour.reviewCount})</span>
                   )}
                 </div>
-              )}
-
-              {/* New badge */}
-              {!rating && (
-                <div className="absolute bottom-3 right-3 rounded-xl border border-emerald-200 bg-emerald-50/95 px-2.5 py-1.5 shadow-lg backdrop-blur-sm">
-                  <span className="text-[10px] font-bold text-emerald-700">New</span>
+              ) : (
+                <div className={`absolute right-3 top-3 flex items-center gap-1 rounded-full bg-linear-to-r px-2.5 py-1 shadow-lg ring-1 ring-white/30 ${accent.bar}`}>
+                  <Sparkles className="size-3 text-white" />
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-white">New</span>
                 </div>
               )}
+
+              {/* Title overlay */}
+              <h3 className="absolute inset-x-4 bottom-3 font-heading text-lg font-extrabold leading-tight text-white drop-shadow line-clamp-2">
+                {tour.name}
+              </h3>
             </div>
 
             {/* Top gradient bar */}
@@ -117,16 +113,11 @@ export function ToursList({ tours, currency }: ToursListProps) {
 
             {/* Content */}
             <div className="flex flex-1 flex-col gap-4 p-5">
-              <div className="space-y-1.5">
-                <h3 className="font-heading text-lg font-bold text-slate-950 leading-snug line-clamp-1 group-hover:text-slate-700 transition-colors">
-                  {tour.name}
-                </h3>
-                {tour.description && (
-                  <p className="text-xs leading-6 text-slate-500 line-clamp-2">
-                    {tour.description}
-                  </p>
-                )}
-              </div>
+              {tour.description && (
+                <p className="text-xs leading-6 text-slate-500 line-clamp-2">
+                  {tour.description}
+                </p>
+              )}
 
               {/* Meta pills */}
               <div className="flex flex-wrap gap-2">
@@ -138,17 +129,25 @@ export function ToursList({ tours, currency }: ToursListProps) {
                   <Users className="size-3" />
                   Up to {tour.maxPersons}
                 </span>
+                {tour.vehicleCount > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                    <Car className="size-3" />
+                    {tour.vehicleCount} vehicle{tour.vehicleCount !== 1 ? "s" : ""}
+                  </span>
+                )}
               </div>
 
-              {/* Bottom */}
-              <div className="mt-auto flex items-center justify-between pt-1">
-                <div className="flex items-center gap-2">
-                  <div className={`h-0.75 w-8 rounded-full bg-linear-to-r ${accent.bar}`} />
-                  <div className={`h-0.75 w-3 rounded-full bg-linear-to-r ${accent.bar} opacity-40`} />
+              {/* Bottom — price + CTA */}
+              <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
+                <div className="leading-none">
+                  <span className="font-heading text-xl font-extrabold text-slate-950">
+                    {formatPrice(tour.price, currency)}
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-400"> / hour</span>
                 </div>
-                <span className="flex items-center gap-1 text-xs font-semibold text-slate-400 transition-colors group-hover:text-slate-700">
+                <span className={`inline-flex items-center gap-1.5 rounded-xl bg-linear-to-r ${accent.bar} px-3.5 py-2 text-xs font-bold text-white shadow-md transition-transform group-hover:translate-x-0.5`}>
                   View details
-                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="size-3.5" />
                 </span>
               </div>
             </div>

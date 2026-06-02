@@ -18,6 +18,34 @@ const ICON_OPTIONS = [
   "Car", "Star", "Shield", "Clock", "MapPin", "Camera", "Heart",
 ];
 
+const EMOJI_OPTIONS: { emoji: string; label: string }[] = [
+  { emoji: "🏖️", label: "Beach" },
+  { emoji: "🏔️", label: "Mountain" },
+  { emoji: "🗺️", label: "Map" },
+  { emoji: "🧭", label: "Compass" },
+  { emoji: "✈️", label: "Plane" },
+  { emoji: "🚗", label: "Car" },
+  { emoji: "🚐", label: "Van" },
+  { emoji: "🚌", label: "Bus" },
+  { emoji: "🏝️", label: "Island" },
+  { emoji: "🌋", label: "Volcano" },
+  { emoji: "🏞️", label: "Park" },
+  { emoji: "🏕️", label: "Camping" },
+  { emoji: "🌅", label: "Sunrise" },
+  { emoji: "🌊", label: "Wave" },
+  { emoji: "🧳", label: "Luggage" },
+  { emoji: "📸", label: "Camera" },
+  { emoji: "🏰", label: "Castle" },
+  { emoji: "⛰️", label: "Peak" },
+  { emoji: "🛶", label: "Canoe" },
+  { emoji: "⛵", label: "Sailboat" },
+  { emoji: "🎡", label: "Ferris Wheel" },
+  { emoji: "🗽", label: "Landmark" },
+  { emoji: "🌍", label: "Globe" },
+  { emoji: "🔥", label: "Hot" },
+  { emoji: "⭐", label: "Star" },
+];
+
 function Field({
   label,
   name,
@@ -80,6 +108,36 @@ function IconSelect({ name, defaultValue }: { name: string; defaultValue?: strin
   );
 }
 
+function EmojiSelect({
+  label,
+  name,
+  defaultValue,
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+}) {
+  const value = defaultValue && defaultValue.length > 0 ? defaultValue : EMOJI_OPTIONS[0].emoji;
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={name}>{label}</Label>
+      <Select name={name} defaultValue={value}>
+        <SelectTrigger id={name}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {EMOJI_OPTIONS.map((o) => (
+            <SelectItem key={o.emoji} value={o.emoji}>
+              <span className="mr-2 text-base">{o.emoji}</span>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 export function SiteConfigForm({ config }: { config: SiteConfig }) {
   const [pending, startTransition] = useTransition();
 
@@ -106,7 +164,7 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
         </TabsList>
 
         {/* ── General ── */}
-        <TabsContent value="general" className="space-y-4">
+        <TabsContent value="general" keepMounted className="space-y-4">
           <Field
             label="Site Name"
             name="siteName"
@@ -135,7 +193,7 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
         </TabsContent>
 
         {/* ── Hero ── */}
-        <TabsContent value="hero" className="space-y-4">
+        <TabsContent value="hero" keepMounted className="space-y-4">
           <ImageUploadField
             name="heroImage"
             label="Hero Background Image"
@@ -174,8 +232,8 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
             {([1, 2, 3] as const).map((n) => (
               <div key={n} className="rounded-lg border border-border/60 bg-muted/10 p-3 space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground">Tag {n}</p>
-                <div className="grid grid-cols-[60px_1fr] gap-2 items-end">
-                  <Field label="Emoji" name={`heroTag${n}Emoji`} defaultValue={(config as SiteConfig)[`heroTag${n}Emoji` as keyof SiteConfig]} />
+                <div className="grid grid-cols-[140px_1fr] gap-2 items-end">
+                  <EmojiSelect label="Emoji" name={`heroTag${n}Emoji`} defaultValue={(config as SiteConfig)[`heroTag${n}Emoji` as keyof SiteConfig]} />
                   <Field label="Label" name={`heroTag${n}Label`} defaultValue={(config as SiteConfig)[`heroTag${n}Label` as keyof SiteConfig]} />
                 </div>
                 <Field
@@ -190,7 +248,7 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
         </TabsContent>
 
         {/* ── About ── */}
-        <TabsContent value="about" className="space-y-4">
+        <TabsContent value="about" keepMounted className="space-y-4">
           <Field
             label="About Title"
             name="aboutTitle"
@@ -222,7 +280,7 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
         </TabsContent>
 
         {/* ── Services ── */}
-        <TabsContent value="services" className="space-y-6">
+        <TabsContent value="services" keepMounted className="space-y-6">
           <div className="space-y-4">
             <Field label="Badge Text" name="servicesBadgeText" defaultValue={config.servicesBadgeText} hint='Pill above heading, e.g. "What We Offer".' />
             <Field label="Section Title" name="servicesSectionTitle" defaultValue={config.servicesSectionTitle} hint="Full heading text." />
@@ -240,14 +298,14 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
         </TabsContent>
 
         {/* ── Contact ── */}
-        <TabsContent value="contact" className="space-y-4">
+        <TabsContent value="contact" keepMounted className="space-y-4">
           <Field label="Email" name="contactEmail" defaultValue={config.contactEmail} type="email" />
           <Field label="Phone" name="contactPhone" defaultValue={config.contactPhone} />
           <Field label="Location" name="contactLocation" defaultValue={config.contactLocation} />
         </TabsContent>
 
         {/* ── Footer ── */}
-        <TabsContent value="footer" className="space-y-6">
+        <TabsContent value="footer" keepMounted className="space-y-6">
           <div className="space-y-2">
             <p className="text-sm font-medium">Social Links</p>
             <p className="text-[11px] text-muted-foreground">Leave empty to hide the icon.</p>

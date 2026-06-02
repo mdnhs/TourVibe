@@ -237,7 +237,7 @@ export function PopularCars({ cars }: PopularCarsProps) {
 
                   {/* CTA */}
                   <Link
-                    href="/tours"
+                    href={`/tours?vehicle=${car.id}`}
                     className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-bold backdrop-blur-sm transition-all hover:-translate-y-0.5 ${accent.btnBorder}`}
                   >
                     Book with this vehicle

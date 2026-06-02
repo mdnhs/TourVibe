@@ -32,6 +32,14 @@ export async function createReview(formData: FormData) {
   }
 
   try {
+    const photoFiles = formData.getAll("photos") as File[];
+    const photoUrls: string[] = [];
+    for (const file of photoFiles) {
+      if (file && file.size > 0) {
+        photoUrls.push(await uploadToCloudinary(file, "tourvibe/reviews"));
+      }
+    }
+
     await prisma.review.create({
       data: {
         id: crypto.randomUUID(),
@@ -39,6 +47,7 @@ export async function createReview(formData: FormData) {
         userId,
         rating,
         comment,
+        photos: photoUrls.length ? photoUrls.join(",") : null,
         reviewerName,
         reviewerImage,
       },
@@ -69,6 +78,20 @@ export async function updateReview(id: string, formData: FormData) {
 
     const data: Record<string, unknown> = { rating, comment };
     if (tourPackageId) data.tourPackageId = tourPackageId;
+
+    const existingPhotos = ((formData.get("existingPhotos") as string) || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const photoFiles = formData.getAll("photos") as File[];
+    const newPhotoUrls: string[] = [];
+    for (const file of photoFiles) {
+      if (file && file.size > 0) {
+        newPhotoUrls.push(await uploadToCloudinary(file, "tourvibe/reviews"));
+      }
+    }
+    const finalPhotos = [...existingPhotos, ...newPhotoUrls];
+    data.photos = finalPhotos.length ? finalPhotos.join(",") : null;
 
     if (isSuperAdmin) {
       const customName = formData.get("reviewerName") as string;

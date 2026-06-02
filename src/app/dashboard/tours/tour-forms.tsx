@@ -13,8 +13,56 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import { Plus, X } from "lucide-react";
+import {
+  Plus,
+  X,
+  Sparkles,
+  ImageIcon,
+  Video,
+  Car,
+  Info,
+  Tag,
+  Users,
+  Clock,
+  Euro,
+  Trash2,
+  CheckCircle2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
+type Vehicle = { id: string; make: string; model: string; licensePlate: string };
+
+// ── Section wrapper ─────────────────────────────────────────────────────────
+function Section({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border bg-card shadow-sm">
+      <div className="flex items-start gap-3 border-b px-5 py-4">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-4.5" />
+        </div>
+        <div className="space-y-0.5">
+          <h3 className="text-sm font-semibold leading-none">{title}</h3>
+          {description && (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          )}
+        </div>
+      </div>
+      <div className="space-y-4 p-5">{children}</div>
+    </section>
+  );
+}
+
+// ── Highlights editor ─────────────────────────────────────────────────────────
 function HighlightsEditor({ initial = [] }: { initial?: string[] }) {
   const [items, setItems] = useState<string[]>(initial.length > 0 ? initial : [""]);
 
@@ -24,19 +72,28 @@ function HighlightsEditor({ initial = [] }: { initial?: string[] }) {
   const add = () => setItems((prev) => [...prev, ""]);
 
   const remove = (i: number) =>
-    setItems((prev) => prev.length === 1 ? [""] : prev.filter((_, idx) => idx !== i));
+    setItems((prev) => (prev.length === 1 ? [""] : prev.filter((_, idx) => idx !== i)));
 
   return (
     <div className="space-y-2">
       {items.map((item, i) => (
-        <div key={i} className="flex gap-2">
+        <div key={i} className="flex items-center gap-2">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-muted-foreground">
+            {i + 1}
+          </span>
           <Input
             name="highlights"
             value={item}
             onChange={(e) => update(i, e.target.value)}
-            placeholder={`Highlight ${i + 1}`}
+            placeholder="e.g. Scenic coastal drive along the Wild Atlantic Way"
           />
-          <Button type="button" variant="ghost" size="icon" onClick={() => remove(i)} className="shrink-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => remove(i)}
+            className="shrink-0 text-muted-foreground hover:text-destructive"
+          >
             <X className="size-4" />
           </Button>
         </div>
@@ -49,13 +106,224 @@ function HighlightsEditor({ initial = [] }: { initial?: string[] }) {
   );
 }
 
-interface FormProps {
-  vehicles: { id: string; make: string; model: string; licensePlate: string }[];
+// ── Pricing + basics ─────────────────────────────────────────────────────────
+function BasicsFields({
+  disabled,
+  defaults,
+}: {
+  disabled?: boolean;
+  defaults?: {
+    name?: string;
+    description?: string;
+    hourlyRate?: number | string;
+    durationHours?: number | string;
+    maxPersons?: number | string;
+  };
+}) {
+  const [rate, setRate] = useState(defaults?.hourlyRate?.toString() ?? "");
+  const [hours, setHours] = useState(defaults?.durationHours?.toString() ?? "");
+
+  const rateNum = parseFloat(rate);
+  const hoursNum = parseInt(hours);
+  const total =
+    !isNaN(rateNum) && !isNaN(hoursNum) && hoursNum > 0
+      ? Math.round(rateNum * hoursNum * 100) / 100
+      : null;
+
+  return (
+    <>
+      <Section icon={Info} title="Basics" description="Name and description shown to travelers.">
+        <div className="space-y-2">
+          <Label htmlFor="name">Package Name</Label>
+          <Input
+            id="name"
+            name="name"
+            defaultValue={defaults?.name}
+            placeholder="e.g. Dreamy Sylhet Getaway"
+            required
+            disabled={disabled}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            name="description"
+            defaultValue={defaults?.description ?? ""}
+            placeholder="Describe the tour — what travelers will see, do, and experience..."
+            className="min-h-27.5"
+            disabled={disabled}
+          />
+        </div>
+      </Section>
+
+      <Section
+        icon={Tag}
+        title="Pricing & Capacity"
+        description="Total price is calculated automatically from rate × duration."
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="hourlyRate" className="flex items-center gap-1.5">
+              <Euro className="size-3.5 text-muted-foreground" />
+              Hourly Rate (€)
+            </Label>
+            <Input
+              id="hourlyRate"
+              name="hourlyRate"
+              type="number"
+              step="0.01"
+              min="0"
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+              placeholder="70"
+              required
+              disabled={disabled}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="durationHours" className="flex items-center gap-1.5">
+              <Clock className="size-3.5 text-muted-foreground" />
+              Duration (hours)
+            </Label>
+            <Input
+              id="durationHours"
+              name="durationHours"
+              type="number"
+              min="1"
+              step="1"
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              placeholder="4"
+              required
+              disabled={disabled}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxPersons" className="flex items-center gap-1.5">
+              <Users className="size-3.5 text-muted-foreground" />
+              Max Persons
+            </Label>
+            <Input
+              id="maxPersons"
+              name="maxPersons"
+              type="number"
+              min="1"
+              defaultValue={defaults?.maxPersons}
+              placeholder="6"
+              required
+              disabled={disabled}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-dashed bg-muted/40 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Euro className="size-4" />
+            Total package price
+          </div>
+          <div className="text-right">
+            {total !== null ? (
+              <p className="text-lg font-bold tabular-nums">€{total.toFixed(2)}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Enter rate & duration</p>
+            )}
+            {total !== null && (
+              <p className="text-[11px] text-muted-foreground">
+                €{rateNum.toFixed(2)} × {hoursNum}h
+              </p>
+            )}
+          </div>
+        </div>
+      </Section>
+    </>
+  );
+}
+
+// ── Vehicle picker ─────────────────────────────────────────────────────────
+function VehiclePicker({
+  vehicles,
+  selected,
+  onToggle,
+  disabled,
+  idPrefix,
+}: {
+  vehicles: Vehicle[];
+  selected: string[];
+  onToggle: (id: string) => void;
+  disabled?: boolean;
+  idPrefix: string;
+}) {
+  return (
+    <Section
+      icon={Car}
+      title="Assign Vehicles"
+      description={
+        selected.length > 0
+          ? `${selected.length} vehicle${selected.length === 1 ? "" : "s"} selected`
+          : "Select which vehicles can run this tour."
+      }
+    >
+      {vehicles.length === 0 ? (
+        <p className="text-sm italic text-muted-foreground">No vehicles available.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {vehicles.map((v) => {
+            const active = selected.includes(v.id);
+            return (
+              <label
+                key={v.id}
+                htmlFor={`${idPrefix}-${v.id}`}
+                className={cn(
+                  "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors",
+                  active ? "border-primary bg-primary/5" : "hover:bg-muted/50",
+                )}
+              >
+                <Checkbox
+                  id={`${idPrefix}-${v.id}`}
+                  checked={active}
+                  onCheckedChange={() => onToggle(v.id)}
+                  disabled={disabled}
+                />
+                <span className="flex flex-col leading-tight">
+                  <span className="font-medium">
+                    {v.make} {v.model}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{v.licensePlate}</span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </Section>
+  );
+}
+
+// ── Sticky action bar ─────────────────────────────────────────────────────────
+function ActionBar({
+  submitLabel,
+  pendingLabel,
+  isPending,
+  onCancel,
+}: {
+  submitLabel: string;
+  pendingLabel: string;
+  isPending: boolean;
+  onCancel: React.ReactNode;
+}) {
+  return (
+    <div className="sticky bottom-0 -mx-1 flex gap-3 border-t bg-background/80 px-1 py-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <Button type="submit" className="flex-1 sm:flex-none sm:min-w-48" disabled={isPending}>
+        {isPending ? pendingLabel : submitLabel}
+      </Button>
+      {onCancel}
+    </div>
+  );
 }
 
 // ── Create Tour Form ──────────────────────────────────────────────────────────
-
-export function CreateTourForm({ vehicles }: FormProps) {
+export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
@@ -65,30 +333,19 @@ export function CreateTourForm({ vehicles }: FormProps) {
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setThumbnailPreview(URL.createObjectURL(file));
-    } else {
-      setThumbnailPreview(null);
-    }
+    setThumbnailPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-      setGalleryPreviews(urls);
-    } else {
-      setGalleryPreviews([]);
-    }
+    setGalleryPreviews(files ? Array.from(files).map((f) => URL.createObjectURL(f)) : []);
   };
 
-  const toggleVehicle = (id: string) => {
-    setSelectedVehicles(prev => 
-      prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]
+  const toggleVehicle = (id: string) =>
+    setSelectedVehicles((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
     );
-  };
 
-  // Cleanup object URLs
   React.useEffect(() => {
     return () => {
       if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
@@ -99,9 +356,8 @@ export function CreateTourForm({ vehicles }: FormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
     formData.delete("vehicleIds");
-    selectedVehicles.forEach(id => formData.append("vehicleIds", id));
+    selectedVehicles.forEach((id) => formData.append("vehicleIds", id));
 
     startTransition(async () => {
       const result = await createTour(formData);
@@ -116,170 +372,153 @@ export function CreateTourForm({ vehicles }: FormProps) {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      <div className="space-y-2">
-        <Label htmlFor="name">Package Name</Label>
-        <Input id="name" name="name" placeholder="e.g. Dreamy Sylhet Getaway" required disabled={isPending} />
-      </div>
+    <form ref={formRef} onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-5">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
+          <BasicsFields disabled={isPending} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="hourlyRate">Hourly Rate (€)</Label>
-          <Input id="hourlyRate" name="hourlyRate" type="number" step="0.01" placeholder="70" required disabled={isPending} />
+          <Section
+            icon={Sparkles}
+            title="Tour Highlights"
+            description="Key selling points shown as bullet points."
+          >
+            <HighlightsEditor />
+          </Section>
         </div>
+
+        <div className="space-y-5">
+          <VehiclePicker
+            vehicles={vehicles}
+            selected={selectedVehicles}
+            onToggle={toggleVehicle}
+            disabled={isPending}
+            idPrefix="vehicle"
+          />
+
+          <Section
+            icon={ImageIcon}
+            title="Media"
+            description="A thumbnail is required. Add 8–10 gallery photos for a complete listing."
+          >
+        {/* Thumbnail */}
         <div className="space-y-2">
-          <Label htmlFor="durationHours">Duration (hours)</Label>
-          <Input id="durationHours" name="durationHours" type="number" min="1" step="1" placeholder="4" required disabled={isPending} />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="maxPersons">Max Persons</Label>
-        <Input id="maxPersons" name="maxPersons" type="number" min="1" placeholder="e.g. 6" required disabled={isPending} />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" placeholder="Describe the tour highlights..." className="min-h-[100px]" disabled={isPending} />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Tour Highlights</Label>
-        <HighlightsEditor />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Assign Vehicles</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded-md p-3 max-h-40 overflow-y-auto">
-          {vehicles.map((v) => (
-            <div key={v.id} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`vehicle-${v.id}`} 
-                checked={selectedVehicles.includes(v.id)}
-                onCheckedChange={() => toggleVehicle(v.id)}
-                disabled={isPending}
-              />
-              <label htmlFor={`vehicle-${v.id}`} className="text-xs font-medium leading-none cursor-pointer">
-                {v.make} {v.model} ({v.licensePlate})
-              </label>
+          <Label htmlFor="thumbnail">
+            Thumbnail <span className="text-destructive">*</span>
+          </Label>
+          {thumbnailPreview && (
+            <div className="relative mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={thumbnailPreview} className="size-full object-cover" alt="Thumbnail preview" />
             </div>
-          ))}
-          {vehicles.length === 0 && <p className="text-xs text-muted-foreground italic">No vehicles available</p>}
+          )}
+          <Input
+            id="thumbnail"
+            name="thumbnail"
+            type="file"
+            accept="image/*"
+            required
+            disabled={isPending}
+            onChange={handleThumbnailChange}
+          />
+        </div>
+
+        {/* Gallery */}
+        <div className="space-y-2">
+          <Label htmlFor="gallery">Gallery Photos</Label>
+          {galleryPreviews.length > 0 && (
+            <div className="mb-2 grid grid-cols-4 gap-2">
+              {galleryPreviews.map((url, i) => (
+                <div key={i} className="aspect-square overflow-hidden rounded border bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
+                </div>
+              ))}
+            </div>
+          )}
+          <Input
+            id="gallery"
+            name="gallery"
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={isPending}
+            onChange={handleGalleryChange}
+          />
+          {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
+            <p className="text-xs text-amber-600">
+              Add at least 8 photos for a complete listing ({galleryPreviews.length} selected).
+            </p>
+          )}
+        </div>
+
+        {/* Promo video */}
+        <div className="space-y-2">
+          <Label htmlFor="promoVideo" className="flex items-center gap-1.5">
+            <Video className="size-3.5 text-muted-foreground" />
+            Promotional Video (optional)
+          </Label>
+          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} />
+          <p className="text-xs text-muted-foreground">
+            Short clip (under ~90s) describing location, attractions, and visitor experience.
+          </p>
+        </div>
+          </Section>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="thumbnail">Thumbnail (Mandatory)</Label>
-        {thumbnailPreview && (
-          <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border mb-2">
-            <img src={thumbnailPreview} className="w-full h-full object-cover" alt="Thumbnail preview" />
-          </div>
-        )}
-        <Input 
-          id="thumbnail" 
-          name="thumbnail" 
-          type="file" 
-          accept="image/*" 
-          required 
-          disabled={isPending} 
-          onChange={handleThumbnailChange}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="gallery">Photos (Recommended: 8–10 images)</Label>
-        {galleryPreviews.length > 0 && (
-          <div className="grid grid-cols-4 gap-2 mb-2">
-            {galleryPreviews.map((url, i) => (
-              <div key={i} className="aspect-square rounded border overflow-hidden bg-muted">
-                <img src={url} className="w-full h-full object-cover" alt={`Preview ${i}`} />
-              </div>
-            ))}
-          </div>
-        )}
-        <Input
-          id="gallery"
-          name="gallery"
-          type="file"
-          accept="image/*"
-          multiple
-          disabled={isPending}
-          onChange={handleGalleryChange}
-        />
-        {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
-          <p className="text-xs text-amber-600">
-            Add at least 8 photos for a complete listing ({galleryPreviews.length} selected).
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="promoVideo">Promotional Video (Optional, single)</Label>
-        <Input
-          id="promoVideo"
-          name="promoVideo"
-          type="file"
-          accept="video/*"
-          disabled={isPending}
-        />
-        <p className="text-xs text-muted-foreground">
-          Short clip (under ~90s) describing location, attractions, and visitor experience.
-        </p>
-      </div>
-
-      <div className="flex gap-4 pt-4">
-        <Button type="submit" className="flex-1" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Tour Package"}
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/dashboard/tours">Cancel</Link>
-        </Button>
-      </div>
+      <ActionBar
+        submitLabel="Create Tour Package"
+        pendingLabel="Creating..."
+        isPending={isPending}
+        onCancel={
+          <Button asChild variant="outline">
+            <Link href="/dashboard/tours">Cancel</Link>
+          </Button>
+        }
+      />
     </form>
   );
 }
 
 // ── Edit Tour Form ────────────────────────────────────────────────────────────
-
-export function EditTourForm({ 
-  tour, 
+export function EditTourForm({
+  tour,
   vehicles,
-  onSuccess
-}: { tour: TourPackage; vehicles: any[]; onSuccess?: () => void }) {
+  onSuccess,
+}: {
+  tour: TourPackage;
+  vehicles: Vehicle[];
+  onSuccess?: () => void;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [keptGallery, setKeptGallery] = useState<string[]>(
+    (tour.gallery || "").split(",").map((s) => s.trim()).filter(Boolean),
+  );
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>(
-    tour.assignedVehicles?.split(",").filter(Boolean) || []
+    tour.assignedVehicles?.split(",").filter(Boolean) || [],
   );
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setThumbnailPreview(URL.createObjectURL(file));
-    } else {
-      setThumbnailPreview(null);
-    }
+    setThumbnailPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-      setGalleryPreviews(urls);
-    } else {
-      setGalleryPreviews([]);
-    }
+    setGalleryPreviews(files ? Array.from(files).map((f) => URL.createObjectURL(f)) : []);
   };
 
-  const toggleVehicle = (id: string) => {
-    setSelectedVehicles(prev => 
-      prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]
+  const toggleVehicle = (id: string) =>
+    setSelectedVehicles((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
     );
-  };
 
-  // Cleanup
+  const removeExisting = (url: string) =>
+    setKeptGallery((prev) => prev.filter((u) => u !== url));
+
   React.useEffect(() => {
     return () => {
       if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
@@ -290,9 +529,8 @@ export function EditTourForm({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
     formData.delete("vehicleIds");
-    selectedVehicles.forEach(id => formData.append("vehicleIds", id));
+    selectedVehicles.forEach((id) => formData.append("vehicleIds", id));
 
     startTransition(async () => {
       const result = await updateTour(tour.id, formData);
@@ -300,198 +538,187 @@ export function EditTourForm({
         toast.error(result.error);
       } else {
         toast.success("Tour package updated successfully");
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          router.push("/dashboard/tours");
-        }
+        if (onSuccess) onSuccess();
+        else router.push("/dashboard/tours");
         router.refresh();
       }
     });
   };
 
+  const totalPhotos = keptGallery.length + galleryPreviews.length;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      <div className="space-y-2">
-        <Label htmlFor="name">Package Name</Label>
-        <Input 
-          id="name" 
-          name="name" 
-          defaultValue={tour.name} 
-          required 
-          disabled={isPending} 
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="hourlyRate">Hourly Rate (€)</Label>
-          <Input
-            id="hourlyRate"
-            name="hourlyRate"
-            type="number"
-            step="0.01"
-            defaultValue={tour.hourlyRate ?? 0}
-            required
+    <form onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-5">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
+          <BasicsFields
             disabled={isPending}
+            defaults={{
+              name: tour.name,
+              description: tour.description || "",
+              hourlyRate: tour.hourlyRate ?? 0,
+              durationHours: tour.durationHours ?? 1,
+              maxPersons: tour.maxPersons,
+            }}
           />
+
+          <Section
+            icon={Sparkles}
+            title="Tour Highlights"
+            description="Key selling points shown as bullet points."
+          >
+            <HighlightsEditor initial={tour.highlights?.split("\n").filter(Boolean) ?? []} />
+          </Section>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="durationHours">Duration (hours)</Label>
-          <Input
-            id="durationHours"
-            name="durationHours"
-            type="number"
-            min="1"
-            step="1"
-            defaultValue={tour.durationHours ?? 1}
-            required
+
+        <div className="space-y-5">
+          <VehiclePicker
+            vehicles={vehicles}
+            selected={selectedVehicles}
+            onToggle={toggleVehicle}
             disabled={isPending}
+            idPrefix="edit-vehicle"
           />
-        </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="maxPersons">Max Persons</Label>
-        <Input 
-          id="maxPersons" 
-          name="maxPersons" 
-          type="number" 
-          min="1" 
-          defaultValue={tour.maxPersons} 
-          required 
-          disabled={isPending} 
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          name="description"
-          defaultValue={tour.description || ""}
-          className="min-h-[100px]"
-          disabled={isPending}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Tour Highlights</Label>
-        <HighlightsEditor initial={tour.highlights?.split("\n").filter(Boolean) ?? []} />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Assign Vehicles</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded-md p-3 max-h-40 overflow-y-auto">
-          {vehicles.map((v) => (
-            <div key={v.id} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`edit-vehicle-${v.id}`} 
-                checked={selectedVehicles.includes(v.id)}
-                onCheckedChange={() => toggleVehicle(v.id)}
-                disabled={isPending}
-              />
-              <label htmlFor={`edit-vehicle-${v.id}`} className="text-xs font-medium leading-none cursor-pointer">
-                {v.make} {v.model} ({v.licensePlate})
-              </label>
+          <Section
+            icon={ImageIcon}
+            title="Media"
+            description="Manage thumbnail, gallery photos, and promotional video."
+          >
+        {/* Thumbnail */}
+        <div className="space-y-2">
+          <Label htmlFor="thumbnail">Thumbnail</Label>
+          {thumbnailPreview ? (
+            <div className="relative mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={thumbnailPreview} className="size-full object-cover" alt="New preview" />
+              <span className="absolute left-2 top-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                New
+              </span>
             </div>
-          ))}
+          ) : tour.thumbnail ? (
+            <div className="mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={tour.thumbnail} className="size-full object-cover" alt="Current thumbnail" />
+            </div>
+          ) : null}
+          <Input
+            id="thumbnail"
+            name="thumbnail"
+            type="file"
+            accept="image/*"
+            disabled={isPending}
+            onChange={handleThumbnailChange}
+          />
+          <p className="text-xs text-muted-foreground">
+            Leave empty to keep the current thumbnail.
+          </p>
+          <input type="hidden" name="existingThumbnail" value={tour.thumbnail} />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="thumbnail">Thumbnail</Label>
-        {thumbnailPreview ? (
-          <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border mb-2">
-            <img src={thumbnailPreview} className="w-full h-full object-cover" alt="New preview" />
-          </div>
-        ) : tour.thumbnail ? (
-          <div className="w-40 aspect-video rounded border overflow-hidden mb-2">
-            <img src={tour.thumbnail} className="w-full h-full object-cover" alt="current" />
-          </div>
-        ) : null}
-        <Input 
-          id="thumbnail" 
-          name="thumbnail" 
-          type="file" 
-          accept="image/*" 
-          disabled={isPending} 
-          onChange={handleThumbnailChange}
-        />
-        <input type="hidden" name="existingThumbnail" value={tour.thumbnail} />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="gallery">Add Photos (Recommended: 8–10 total)</Label>
-        {galleryPreviews.length > 0 && (
-          <div className="grid grid-cols-4 gap-2 mb-2">
-            {galleryPreviews.map((url, i) => (
-              <div key={i} className="aspect-square rounded border overflow-hidden bg-muted">
-                <img src={url} className="w-full h-full object-cover" alt={`Preview ${i}`} />
-              </div>
-            ))}
+        {/* Existing gallery — removable */}
+        {keptGallery.length > 0 && (
+          <div className="space-y-2">
+            <Label>Current Gallery</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {keptGallery.map((url) => (
+                <div
+                  key={url}
+                  className="group relative aspect-square overflow-hidden rounded border bg-muted"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} className="size-full object-cover" alt="Gallery image" />
+                  <button
+                    type="button"
+                    onClick={() => removeExisting(url)}
+                    disabled={isPending}
+                    aria-label="Remove image"
+                    className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-        <Input
-          id="gallery"
-          name="gallery"
-          type="file"
-          accept="image/*"
-          multiple
-          disabled={isPending}
-          onChange={handleGalleryChange}
-        />
-        {(() => {
-          const existingCount = (tour.gallery || "")
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean).length;
-          const total = existingCount + galleryPreviews.length;
-          return total < 8 ? (
+
+        {/* Add gallery */}
+        <div className="space-y-2">
+          <Label htmlFor="gallery">Add Photos</Label>
+          {galleryPreviews.length > 0 && (
+            <div className="mb-2 grid grid-cols-4 gap-2">
+              {galleryPreviews.map((url, i) => (
+                <div key={i} className="relative aspect-square overflow-hidden rounded border bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
+                  <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                    New
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <Input
+            id="gallery"
+            name="gallery"
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={isPending}
+            onChange={handleGalleryChange}
+          />
+          {totalPhotos < 8 ? (
             <p className="text-xs text-amber-600">
-              {total} photo{total === 1 ? "" : "s"} currently. Add at least {8 - total} more to reach 8.
+              {totalPhotos} photo{totalPhotos === 1 ? "" : "s"} total. Add at least{" "}
+              {8 - totalPhotos} more to reach 8.
             </p>
           ) : (
-            <p className="text-xs text-emerald-600">{total} photos total — meets minimum.</p>
-          );
-        })()}
-        <input type="hidden" name="existingGallery" value={tour.gallery || ""} />
+            <p className="flex items-center gap-1 text-xs text-emerald-600">
+              <CheckCircle2 className="size-3.5" />
+              {totalPhotos} photos total — meets minimum.
+            </p>
+          )}
+          <input type="hidden" name="existingGallery" value={keptGallery.join(",")} />
+        </div>
+
+        {/* Promo video */}
+        <div className="space-y-2">
+          <Label htmlFor="promoVideo" className="flex items-center gap-1.5">
+            <Video className="size-3.5 text-muted-foreground" />
+            Promotional Video (optional)
+          </Label>
+          {tour.promoVideoUrl ? (
+            <div className="mb-2 w-full max-w-sm overflow-hidden rounded-lg border bg-muted">
+              <video src={tour.promoVideoUrl} controls preload="metadata" className="w-full" />
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No promotional video uploaded yet.</p>
+          )}
+          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} />
+          <p className="text-xs text-muted-foreground">
+            Uploading a new file replaces the current promotional video.
+          </p>
+          <input type="hidden" name="existingPromoVideoUrl" value={tour.promoVideoUrl || ""} />
+        </div>
+          </Section>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="promoVideo">Promotional Video (Optional)</Label>
-        {tour.promoVideoUrl ? (
-          <div className="rounded-lg border overflow-hidden bg-muted w-full max-w-sm mb-2">
-            <video src={tour.promoVideoUrl} controls preload="metadata" className="w-full" />
-          </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">No promotional video uploaded yet.</p>
-        )}
-        <Input
-          id="promoVideo"
-          name="promoVideo"
-          type="file"
-          accept="video/*"
-          disabled={isPending}
-        />
-        <p className="text-xs text-muted-foreground">
-          Uploading a new file replaces the current promotional video.
-        </p>
-        <input type="hidden" name="existingPromoVideoUrl" value={tour.promoVideoUrl || ""} />
-      </div>
-
-      <div className="flex gap-4 pt-4">
-        <Button type="submit" className="flex-1" disabled={isPending}>
-          {isPending ? "Saving..." : "Save Changes"}
-        </Button>
-        <Button 
-          type="button"
-          variant="outline" 
-          onClick={() => onSuccess ? onSuccess() : router.push("/dashboard/tours")}
-        >
-          Cancel
-        </Button>
-      </div>
+      <ActionBar
+        submitLabel="Save Changes"
+        pendingLabel="Saving..."
+        isPending={isPending}
+        onCancel={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => (onSuccess ? onSuccess() : router.push("/dashboard/tours"))}
+          >
+            Cancel
+          </Button>
+        }
+      />
     </form>
   );
 }
