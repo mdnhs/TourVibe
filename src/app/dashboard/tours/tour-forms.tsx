@@ -32,6 +32,38 @@ import { cn } from "@/lib/utils";
 
 type Vehicle = { id: string; make: string; model: string; licensePlate: string };
 
+// Max 1MB per gallery image, 10MB per promo video
+const MAX_IMAGE_BYTES = 1024 * 1024;
+const MAX_VIDEO_BYTES = 10 * 1024 * 1024;
+
+// Validate a single video file against the size limit; clears the input on reject
+function validateVideo(e: React.ChangeEvent<HTMLInputElement>): boolean {
+  const file = e.target.files?.[0];
+  if (file && file.size > MAX_VIDEO_BYTES) {
+    toast.error(`"${file.name}" is over 10MB. Please choose a smaller video.`);
+    e.target.value = "";
+    return false;
+  }
+  return true;
+}
+
+// Filter a FileList to valid images under the size limit, toasting on rejects
+function collectValidImages(list: FileList | null): File[] {
+  const incoming = Array.from(list ?? []);
+  const valid: File[] = [];
+  const tooBig: string[] = [];
+  for (const f of incoming) {
+    if (f.size > MAX_IMAGE_BYTES) tooBig.push(f.name);
+    else valid.push(f);
+  }
+  if (tooBig.length) {
+    toast.error(
+      `Skipped (over 1MB): ${tooBig.join(", ")}`,
+    );
+  }
+  return valid;
+}
+
 // ── Section wrapper ─────────────────────────────────────────────────────────
 function Section({
   icon: Icon,
@@ -328,36 +360,56 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
   const [isPending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (file && file.size > MAX_IMAGE_BYTES) {
+      toast.error(`"${file.name}" is over 1MB. Please choose a smaller image.`);
+      e.target.value = "";
+      setThumbnailPreview(null);
+      return;
+    }
     setThumbnailPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    setGalleryPreviews(files ? Array.from(files).map((f) => URL.createObjectURL(f)) : []);
+    const added = collectValidImages(e.target.files);
+    e.target.value = ""; // allow re-selecting the same file later
+    if (added.length) setGalleryFiles((prev) => [...prev, ...added]);
   };
+
+  const removeGalleryAt = (i: number) =>
+    setGalleryFiles((prev) => prev.filter((_, idx) => idx !== i));
 
   const toggleVehicle = (id: string) =>
     setSelectedVehicles((prev) =>
       prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
     );
 
+  // Build/revoke object URLs whenever the accumulated files change
+  React.useEffect(() => {
+    const urls = galleryFiles.map((f) => URL.createObjectURL(f));
+    setGalleryPreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [galleryFiles]);
+
   React.useEffect(() => {
     return () => {
       if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
-      galleryPreviews.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [thumbnailPreview, galleryPreviews]);
+  }, [thumbnailPreview]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.delete("vehicleIds");
     selectedVehicles.forEach((id) => formData.append("vehicleIds", id));
+    // Submit the accumulated gallery files (input only holds the last pick)
+    formData.delete("gallery");
+    galleryFiles.forEach((f) => formData.append("gallery", f));
 
     startTransition(async () => {
       const result = await createTour(formData);
@@ -428,9 +480,18 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
           {galleryPreviews.length > 0 && (
             <div className="mb-2 grid grid-cols-4 gap-2">
               {galleryPreviews.map((url, i) => (
-                <div key={i} className="aspect-square overflow-hidden rounded border bg-muted">
+                <div key={i} className="group relative aspect-square overflow-hidden rounded border bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryAt(i)}
+                    disabled={isPending}
+                    className="absolute right-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
+                    aria-label="Remove photo"
+                  >
+                    <X className="size-3" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -444,6 +505,9 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
             disabled={isPending}
             onChange={handleGalleryChange}
           />
+          <p className="text-xs text-muted-foreground">
+            Max 1MB per image. Selecting more photos adds to the list.
+          </p>
           {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
             <p className="text-xs text-amber-600">
               Add at least 8 photos for a complete listing ({galleryPreviews.length} selected).
@@ -457,9 +521,9 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
             <Video className="size-3.5 text-muted-foreground" />
             Promotional Video (optional)
           </Label>
-          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} />
+          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} onChange={validateVideo} />
           <p className="text-xs text-muted-foreground">
-            Short clip (under ~90s) describing location, attractions, and visitor experience.
+            Max 10MB. Short clip (under ~90s) describing location, attractions, and visitor experience.
           </p>
         </div>
           </Section>
@@ -493,6 +557,7 @@ export function EditTourForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [keptGallery, setKeptGallery] = useState<string[]>(
     (tour.gallery || "").split(",").map((s) => s.trim()).filter(Boolean),
@@ -503,13 +568,23 @@ export function EditTourForm({
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (file && file.size > MAX_IMAGE_BYTES) {
+      toast.error(`"${file.name}" is over 1MB. Please choose a smaller image.`);
+      e.target.value = "";
+      setThumbnailPreview(null);
+      return;
+    }
     setThumbnailPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    setGalleryPreviews(files ? Array.from(files).map((f) => URL.createObjectURL(f)) : []);
+    const added = collectValidImages(e.target.files);
+    e.target.value = "";
+    if (added.length) setGalleryFiles((prev) => [...prev, ...added]);
   };
+
+  const removeGalleryAt = (i: number) =>
+    setGalleryFiles((prev) => prev.filter((_, idx) => idx !== i));
 
   const toggleVehicle = (id: string) =>
     setSelectedVehicles((prev) =>
@@ -520,17 +595,24 @@ export function EditTourForm({
     setKeptGallery((prev) => prev.filter((u) => u !== url));
 
   React.useEffect(() => {
+    const urls = galleryFiles.map((f) => URL.createObjectURL(f));
+    setGalleryPreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [galleryFiles]);
+
+  React.useEffect(() => {
     return () => {
       if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
-      galleryPreviews.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [thumbnailPreview, galleryPreviews]);
+  }, [thumbnailPreview]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.delete("vehicleIds");
     selectedVehicles.forEach((id) => formData.append("vehicleIds", id));
+    formData.delete("gallery");
+    galleryFiles.forEach((f) => formData.append("gallery", f));
 
     startTransition(async () => {
       const result = await updateTour(tour.id, formData);
@@ -649,12 +731,21 @@ export function EditTourForm({
           {galleryPreviews.length > 0 && (
             <div className="mb-2 grid grid-cols-4 gap-2">
               {galleryPreviews.map((url, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded border bg-muted">
+                <div key={i} className="group relative aspect-square overflow-hidden rounded border bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
                   <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
                     New
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryAt(i)}
+                    disabled={isPending}
+                    aria-label="Remove photo"
+                    className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                  >
+                    <X className="size-3.5" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -668,6 +759,9 @@ export function EditTourForm({
             disabled={isPending}
             onChange={handleGalleryChange}
           />
+          <p className="text-xs text-muted-foreground">
+            Max 1MB per image. Selecting more photos adds to the list (existing photos are kept).
+          </p>
           {totalPhotos < 8 ? (
             <p className="text-xs text-amber-600">
               {totalPhotos} photo{totalPhotos === 1 ? "" : "s"} total. Add at least{" "}
@@ -695,9 +789,9 @@ export function EditTourForm({
           ) : (
             <p className="text-xs text-muted-foreground">No promotional video uploaded yet.</p>
           )}
-          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} />
+          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} onChange={validateVideo} />
           <p className="text-xs text-muted-foreground">
-            Uploading a new file replaces the current promotional video.
+            Max 10MB. Uploading a new file replaces the current promotional video.
           </p>
           <input type="hidden" name="existingPromoVideoUrl" value={tour.promoVideoUrl || ""} />
         </div>

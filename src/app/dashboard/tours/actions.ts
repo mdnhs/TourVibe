@@ -6,6 +6,9 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { generateOrderId, slugify } from "@/lib/utils";
 
+const MAX_IMAGE_BYTES = 1024 * 1024; // 1MB per gallery image
+const MAX_VIDEO_BYTES = 10 * 1024 * 1024; // 10MB per promo video
+
 export async function createTour(formData: FormData) {
   const { isSuperAdmin } = await requireDashboardSession();
   if (!isSuperAdmin) throw new Error("Unauthorized");
@@ -35,6 +38,9 @@ export async function createTour(formData: FormData) {
   try {
     const thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours", "image");
 
+    if (galleryFiles.some((f) => f.size > MAX_IMAGE_BYTES)) {
+      return { error: "Each gallery image must be 1MB or smaller." };
+    }
     const galleryUrls: string[] = [];
     for (const file of galleryFiles) {
       if (file.size > 0) {
@@ -42,6 +48,9 @@ export async function createTour(formData: FormData) {
       }
     }
 
+    if (promoVideoFile && promoVideoFile.size > MAX_VIDEO_BYTES) {
+      return { error: "Promotional video must be 10MB or smaller." };
+    }
     let promoVideoUrl: string | null = null;
     if (promoVideoFile && promoVideoFile.size > 0) {
       promoVideoUrl = await uploadToCloudinary(promoVideoFile, "tourvibe/tours/videos", "video");
@@ -110,6 +119,9 @@ export async function updateTour(id: string, formData: FormData) {
       thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours", "image");
     }
 
+    if (galleryFiles.some((f) => f.size > MAX_IMAGE_BYTES)) {
+      return { error: "Each gallery image must be 1MB or smaller." };
+    }
     const newGalleryUrls: string[] = [];
     for (const file of galleryFiles) {
       if (file.size > 0) {
@@ -122,6 +134,9 @@ export async function updateTour(id: string, formData: FormData) {
       ...newGalleryUrls,
     ].join(",");
 
+    if (promoVideoFile && promoVideoFile.size > MAX_VIDEO_BYTES) {
+      return { error: "Promotional video must be 10MB or smaller." };
+    }
     let promoVideoUrl: string | null = existingPromoVideoUrl || null;
     if (promoVideoFile && promoVideoFile.size > 0) {
       promoVideoUrl = await uploadToCloudinary(promoVideoFile, "tourvibe/tours/videos", "video");
