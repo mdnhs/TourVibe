@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   Ban,
   Calendar,
+  Car,
   CheckCircle2,
   Clock,
   CreditCard,
@@ -13,6 +14,7 @@ import {
   ExternalLink,
   MapPin,
   MoreVertical,
+  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -65,6 +67,11 @@ export type Booking = {
   whatsapp?: string;
   isGuest?: boolean;
   stripeSessionId?: string | null;
+  hours: number | null;
+  persons: number;
+  startTime: string | null;
+  vehicleName: string | null;
+  vehiclePlate: string | null;
 };
 
 interface BookingTableProps {
@@ -305,16 +312,79 @@ export function BookingTable({ bookings, isAdmin, isDriver = false }: BookingTab
       ),
     },
     {
-      accessorKey: "tourDuration",
+      accessorKey: "hours",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Duration" />
       ),
+      cell: ({ row }) => {
+        const h = row.original.hours;
+        return (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="size-3.5" />
+            {h != null ? `${h} ${h === 1 ? "hour" : "hours"}` : row.original.tourDuration}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "persons",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Guests" />
+      ),
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Clock className="size-3.5" />
-          {row.original.tourDuration}
+          <Users className="size-3.5" />
+          {(row.original.persons || 1)} {(row.original.persons || 1) === 1 ? "guest" : "guests"}
         </div>
       ),
+    },
+    {
+      accessorKey: "vehicleName",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Vehicle" />
+      ),
+      cell: ({ row }) => {
+        const b = row.original;
+        if (!b.vehicleName) {
+          return <span className="text-xs text-muted-foreground">—</span>;
+        }
+        return (
+          <div className="flex items-center gap-1.5 text-xs">
+            <Car className="size-3.5 shrink-0 text-muted-foreground" />
+            <div className="flex flex-col">
+              <span className="font-medium truncate max-w-40" title={b.vehicleName}>
+                {b.vehicleName}
+              </span>
+              {b.vehiclePlate && (
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  {b.vehiclePlate}
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "startTime",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Trip Date" />
+      ),
+      cell: ({ row }) => {
+        const t = row.original.startTime;
+        if (!t) return <span className="text-xs text-muted-foreground">—</span>;
+        return (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Calendar className="size-3.5" />
+            {new Date(t).toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "createdAt",
@@ -355,10 +425,23 @@ export function BookingTable({ bookings, isAdmin, isDriver = false }: BookingTab
     },
     {
       id: "actions",
+      header: () => <span className="sr-only">Actions</span>,
       cell: ({ row }) => {
         const b = row.original;
 
         return (
+          <div className="flex items-center justify-end gap-1">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground"
+            title="View invoice"
+          >
+            <Link href={`/dashboard/bookings/${b.id}/invoice`}>
+              <Eye className="size-4" />
+            </Link>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -443,6 +526,7 @@ export function BookingTable({ bookings, isAdmin, isDriver = false }: BookingTab
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         );
       },
     },

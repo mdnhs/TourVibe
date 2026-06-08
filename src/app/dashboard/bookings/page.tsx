@@ -36,6 +36,7 @@ export default async function BookingsPage({
     include: {
       tourPackage: { select: { name: true, thumbnail: true, duration: true, slug: true } },
       user: { select: { name: true, email: true, image: true } },
+      vehicle: { select: { make: true, model: true, year: true, licensePlate: true } },
     },
   });
 
@@ -43,23 +44,36 @@ export default async function BookingsPage({
     redirect(`/dashboard/bookings/${rawBookings[0].id}/invoice?success=true`);
   }
 
-  const bookings: Booking[] = rawBookings.map((b) => ({
-    ...b,
-    amount: Number(b.amount),
-    currency: b.currency,
-    createdAt: b.createdAt.toISOString(),
-    updatedAt: b.updatedAt.toISOString(),
-    tourName: b.tourPackage.name,
-    tourThumbnail: b.tourPackage.thumbnail,
-    tourDuration: b.tourPackage.duration,
-    tourSlug: b.tourPackage.slug,
-    userName: b.user?.name ?? b.guestName ?? "Guest",
-    userEmail: b.user?.email ?? b.guestEmail ?? "",
-    userImage: b.user?.image ?? null,
-    whatsapp: b.whatsapp ?? "",
-    isGuest: !b.userId,
-    stripeSessionId: b.stripeSessionId,
-  }));
+  const bookings: Booking[] = rawBookings.map((b) => {
+    const hours =
+      b.startTime && b.endTime
+        ? Math.round((b.endTime.getTime() - b.startTime.getTime()) / 3_600_000)
+        : null;
+    return {
+      ...b,
+      amount: Number(b.amount),
+      currency: b.currency,
+      createdAt: b.createdAt.toISOString(),
+      updatedAt: b.updatedAt.toISOString(),
+      tourName: b.tourPackage.name,
+      tourThumbnail: b.tourPackage.thumbnail,
+      tourDuration: b.tourPackage.duration,
+      tourSlug: b.tourPackage.slug,
+      userName: b.user?.name ?? b.guestName ?? "Guest",
+      userEmail: b.user?.email ?? b.guestEmail ?? "",
+      userImage: b.user?.image ?? null,
+      whatsapp: b.whatsapp ?? "",
+      isGuest: !b.userId,
+      stripeSessionId: b.stripeSessionId,
+      hours,
+      persons: b.persons,
+      startTime: b.startTime ? b.startTime.toISOString() : null,
+      vehicleName: b.vehicle
+        ? `${b.vehicle.make} ${b.vehicle.model} (${b.vehicle.year})`
+        : null,
+      vehiclePlate: b.vehicle?.licensePlate ?? null,
+    };
+  });
 
   return (
     <>

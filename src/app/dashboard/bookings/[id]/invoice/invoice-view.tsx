@@ -2,7 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, Printer, CreditCard, Calendar, User, Mail, ShieldCheck, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Printer,
+  CreditCard,
+  Calendar,
+  Car,
+  Clock,
+  User,
+  Users,
+  Mail,
+  ShieldCheck,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -26,15 +39,45 @@ export interface InvoiceData {
   userEmail: string;
   whatsapp?: string;
   isGuest?: boolean;
+  hours: number | null;
+  persons: number;
+  startTime: string | null;
+  vehicleName: string | null;
+  vehiclePlate: string | null;
 }
 
-export function InvoiceView({ booking }: { booking: InvoiceData }) {
+export interface InvoiceCompany {
+  name: string;
+  tagline?: string;
+  email?: string;
+  logoUrl?: string;
+  website?: string;
+}
+
+const DEFAULT_COMPANY: InvoiceCompany = {
+  name: "TourVibe",
+  tagline: "Premium Car Tours",
+  email: "support@tourvibe.com",
+  website: "tourvibe.com",
+};
+
+export function InvoiceView({
+  booking,
+  company = DEFAULT_COMPANY,
+}: {
+  booking: InvoiceData;
+  company?: InvoiceCompany;
+}) {
   const invoiceRef = React.useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = React.useState(false);
+  const companyWebsite =
+    company.website ||
+    (company.email?.includes("@") ? company.email.split("@")[1] : undefined);
 
-  const invoiceNumber = booking.id.length > 16
-    ? booking.id.slice(0, 8).toUpperCase()
-    : booking.id.toUpperCase();
+  const invoiceNumber =
+    booking.id.length > 16
+      ? booking.id.slice(0, 8).toUpperCase()
+      : booking.id.toUpperCase();
   const isPaid = booking.paymentStage === "FULLY_PAID";
   const isAdvancePaid = booking.paymentStage === "ADVANCE_PAID";
   const [balanceLoading, setBalanceLoading] = React.useState(false);
@@ -42,7 +85,9 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
   const handlePayBalance = async () => {
     try {
       setBalanceLoading(true);
-      const payload: { bookingId: string; whatsapp?: string } = { bookingId: booking.id };
+      const payload: { bookingId: string; whatsapp?: string } = {
+        bookingId: booking.id,
+      };
       if (booking.isGuest) {
         const entered = window.prompt(
           "Enter the WhatsApp number used for this booking (international format, e.g. +14155551234):",
@@ -73,7 +118,7 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
     }
   };
 
-  const statusConfig = (isAdvancePaid
+  const statusConfig = isAdvancePaid
     ? {
         color: "#d97706",
         bg: "#fffbeb",
@@ -110,20 +155,38 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
         bg: "#f1f5f9",
         label: booking.status,
         icon: null,
-      });
+      };
 
   const currencySymbol = getCurrencySymbol(booking.currency);
   const fmt = (n: number) =>
-    n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    n.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   const formattedAmount = fmt(booking.totalAmount || booking.amount);
   const formattedPaid = fmt(booking.paidAmount);
   const formattedDue = fmt(booking.dueAmount);
-  
+
   const invoiceDate = new Date(booking.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+
+  const durationLabel =
+    booking.hours != null
+      ? `${booking.hours} ${booking.hours === 1 ? "hour" : "hours"}`
+      : booking.tourDuration;
+  const tripDate = booking.startTime
+    ? new Date(booking.startTime).toLocaleString("en-US", {
+        weekday: "short",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : null;
 
   const handleDownload = async () => {
     if (!invoiceRef.current) return;
@@ -146,14 +209,31 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
         orientation: "portrait",
         unit: "pt",
         format: "a4",
-        compress: true // Enable PDF compression
+        compress: true, // Enable PDF compression
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let imgWidth = pageWidth;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+      // Contain within a single A4 page
+      if (imgHeight > pageHeight) {
+        imgHeight = pageHeight;
+        imgWidth = (canvas.width * imgHeight) / canvas.height;
+      }
+      const offsetX = (pageWidth - imgWidth) / 2;
+
+      pdf.addImage(
+        imgData,
+        "JPEG",
+        offsetX,
+        0,
+        imgWidth,
+        imgHeight,
+        undefined,
+        "FAST",
+      );
       pdf.save(`invoice-${invoiceNumber}.pdf`);
     } finally {
       setIsDownloading(false);
@@ -161,6 +241,13 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
   };
 
   const handlePrint = () => {
+    const el = invoiceRef.current;
+    if (el) {
+      // A4 portrait @96dpi = 794 x 1123 px. Scale card to fit a single page (0.97 safety).
+      const scale =
+        Math.min(794 / el.offsetWidth, 1123 / el.offsetHeight) * 0.97;
+      el.style.setProperty("--print-scale", String(Math.min(scale, 1)));
+    }
     window.print();
   };
 
@@ -168,18 +255,33 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
     <div className="flex flex-col gap-8 py-8 animate-in fade-in duration-700 print-invoice-root">
       {/* Action Bar */}
       <div className="mx-4 lg:mx-auto w-full max-w-4xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
-        <Button asChild variant="ghost" size="sm" className="w-fit hover:bg-slate-100 transition-colors rounded-lg">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="w-fit hover:bg-slate-100 transition-colors rounded-lg"
+        >
           <Link href={booking.isGuest ? "/" : "/dashboard/bookings"}>
             <ArrowLeft className="mr-2 size-4" />
             {booking.isGuest ? "Back to home" : "Back to Bookings"}
           </Link>
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={handlePrint} className="h-9 rounded-lg">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+            className="h-9 rounded-lg"
+          >
             <Printer className="mr-2 size-4" />
             Print Invoice
           </Button>
-          <Button size="sm" onClick={handleDownload} disabled={isDownloading} className="h-9 shadow-sm rounded-lg">
+          <Button
+            size="sm"
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="h-9 shadow-sm rounded-lg"
+          >
             <Download className="mr-2 size-4" />
             {isDownloading ? "Generating..." : "Download PDF"}
           </Button>
@@ -191,29 +293,48 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
         <div
           ref={invoiceRef}
           className="w-full bg-white shadow-[0_8px_40px_rgba(0,0,0,0.04)] rounded-none overflow-hidden print:shadow-none print-invoice-card"
-          style={{ 
+          style={{
             maxWidth: "800px",
-            fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+            fontFamily: "Inter, system-ui, -apple-system, sans-serif",
           }}
         >
           {/* Header */}
-          <div className="bg-slate-900 p-10 md:p-14 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative overflow-hidden">
+          <div className="print-row bg-slate-900 p-8 md:p-10 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
             {/* Decorative element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
-            
+
             <div className="flex items-center gap-4 relative z-10">
-              <div className="size-14 bg-orange-500 rounded-xl flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
-                🚗
+              <div className="size-14 flex items-center justify-center text-3xl ">
+                {company.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={company.logoUrl}
+                    alt={company.name}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  "🚗"
+                )}
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-black tracking-tight">TourVibe</h1>
-                <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">Premium Car Tours</p>
+                <h1 className="text-2xl md:text-3xl font-black tracking-tight">
+                  {company.name}
+                </h1>
+                {company.tagline && (
+                  <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">
+                    {company.tagline}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="text-left md:text-right relative z-10">
-              <h2 className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-1">Invoice Number</h2>
-              <p className="text-3xl font-mono font-bold text-orange-500 mb-2">#{invoiceNumber}</p>
+              <h2 className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-1">
+                Invoice Number
+              </h2>
+              <p className="text-3xl font-mono font-bold text-orange-500 mb-2">
+                #{invoiceNumber}
+              </p>
               <div className="flex items-center md:justify-end gap-2 text-slate-300 text-sm">
                 <Calendar className="size-3.5" />
                 <span>Issued on {invoiceDate}</span>
@@ -221,82 +342,163 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
             </div>
           </div>
 
-          <div className="p-10 md:p-14">
+          <div className="p-8 md:p-10">
             {/* Status & Quick Info */}
-            <div className="flex flex-wrap items-center justify-between gap-6 mb-12 pb-8 border-bottom border-slate-100 border-b">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-bottom border-slate-100 border-b">
               <div className="flex items-center gap-3">
-                <span 
+                <span
                   className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm"
-                  style={{ background: statusConfig.bg, color: statusConfig.color }}
+                  style={{
+                    background: statusConfig.bg,
+                    color: statusConfig.color,
+                  }}
                 >
                   {statusConfig.icon}
                   {statusConfig.label}
                 </span>
                 {isPaid && (
-                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">Verified Payment</span>
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                    Verified Payment
+                  </span>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-8">
                 <div className="text-right">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
-                  <p className="text-2xl font-black text-slate-900">{currencySymbol}{formattedAmount}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                    Total Amount
+                  </p>
+                  <p className="text-2xl font-black text-slate-900">
+                    {currencySymbol}
+                    {formattedAmount}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Billing Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-14">
+            <div className="print-grid-2 grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <User className="size-3" />
                   Billed To
                 </h3>
-                <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
-                  <p className="text-lg font-bold text-slate-900 mb-1">{booking.userName}</p>
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                  <p className="text-lg font-bold text-slate-900 mb-1">
+                    {booking.userName}
+                  </p>
                   <div className="flex items-center gap-2 text-slate-500 text-sm">
                     <Mail className="size-3.5 text-slate-400" />
                     {booking.userEmail}
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <ShieldCheck className="size-3" />
                   From
                 </h3>
-                <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
-                  <p className="text-lg font-bold text-slate-900 mb-1">TourVibe Inc.</p>
-                  <div className="flex items-center gap-2 text-slate-500 text-sm">
-                    <Mail className="size-3.5 text-slate-400" />
-                    support@tourvibe.com
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                  <p className="text-lg font-bold text-slate-900 mb-1">
+                    {company.name}
+                  </p>
+                  {company.email && (
+                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                      <Mail className="size-3.5 text-slate-400" />
+                      {company.email}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Trip Details */}
+            <div className="mb-8 space-y-3">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <Calendar className="size-3" />
+                Trip Details
+              </h3>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    <Calendar className="size-3" /> Trip Date
                   </div>
+                  <p className="text-sm font-bold text-slate-900">
+                    {tripDate ?? "—"}
+                  </p>
+                </div>
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    <Clock className="size-3" /> Duration
+                  </div>
+                  <p className="text-sm font-bold text-slate-900">
+                    {durationLabel}
+                  </p>
+                </div>
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    <Users className="size-3" /> Guests
+                  </div>
+                  <p className="text-sm font-bold text-slate-900">
+                    {booking.persons || 1}{" "}
+                    {(booking.persons || 1) === 1 ? "guest" : "guests"}
+                  </p>
+                </div>
+                <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    <Car className="size-3" /> Vehicle
+                  </div>
+                  <p className="text-sm font-bold text-slate-900">
+                    {booking.vehicleName ?? "—"}
+                  </p>
+                  {booking.vehiclePlate && (
+                    <p className="text-[11px] font-mono text-slate-500 mt-0.5">
+                      {booking.vehiclePlate}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Items Table */}
-            <div className="mb-10 overflow-hidden rounded-2xl border border-slate-100">
+            <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="text-left py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
-                    <th className="text-center py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duration</th>
-                    <th className="text-center py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Qty</th>
-                    <th className="text-right py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+                    <th className="text-left py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Description
+                    </th>
+                    <th className="text-center py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Duration
+                    </th>
+                    <th className="text-center py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Qty
+                    </th>
+                    <th className="text-right py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Amount
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   <tr>
-                    <td className="py-6 px-6">
-                      <p className="font-bold text-slate-900 mb-0.5">{booking.tourName}</p>
-                      <p className="text-xs text-slate-500 font-medium">Premium Tour Package Experience</p>
+                    <td className="py-4 px-6">
+                      <p className="font-bold text-slate-900 mb-0.5">
+                        {booking.tourName}
+                      </p>
+                      <p className="text-xs text-slate-500 font-medium">
+                        Premium Tour Package Experience
+                      </p>
                     </td>
-                    <td className="py-6 px-6 text-center text-sm font-medium text-slate-600">{booking.tourDuration}</td>
-                    <td className="py-6 px-6 text-center text-sm font-medium text-slate-600">01</td>
-                    <td className="py-6 px-6 text-right font-bold text-slate-900">
-                      {currencySymbol}{formattedAmount}
+                    <td className="py-4 px-6 text-center text-sm font-medium text-slate-600">
+                      {durationLabel}
+                    </td>
+                    <td className="py-4 px-6 text-center text-sm font-medium text-slate-600">
+                      {booking.persons || 1} pax
+                    </td>
+                    <td className="py-4 px-6 text-right font-bold text-slate-900">
+                      {currencySymbol}
+                      {formattedAmount}
                     </td>
                   </tr>
                 </tbody>
@@ -304,28 +506,47 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
             </div>
 
             {/* Summary */}
-            <div className="flex justify-end mb-14">
+            <div className="flex justify-end mb-8">
               <div className="w-full max-w-[320px] space-y-3">
                 <div className="flex justify-between text-sm text-slate-500 font-medium px-2">
                   <span>Subtotal</span>
-                  <span className="text-slate-900 font-semibold">{currencySymbol}{formattedAmount}</span>
+                  <span className="text-slate-900 font-semibold">
+                    {currencySymbol}
+                    {formattedAmount}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm text-slate-500 font-medium px-2">
                   <span>Tax (0.00%)</span>
-                  <span className="text-slate-900 font-semibold">{currencySymbol}0.00</span>
+                  <span className="text-slate-900 font-semibold">
+                    {currencySymbol}0.00
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm text-emerald-700 font-medium px-2">
-                  <span>Paid ({booking.paymentType === "ADVANCE" ? "20% advance" : "full"})</span>
-                  <span className="font-semibold">{currencySymbol}{formattedPaid}</span>
+                  <span>
+                    Paid (
+                    {booking.paymentType === "ADVANCE" ? "20% advance" : "full"}
+                    )
+                  </span>
+                  <span className="font-semibold">
+                    {currencySymbol}
+                    {formattedPaid}
+                  </span>
                 </div>
-                <div className={cn(
-                  "flex justify-between items-center rounded-xl p-4 mt-4 shadow-lg transition-transform hover:scale-[1.02] duration-300",
-                  isPaid ? "bg-emerald-600 text-white shadow-emerald-600/10" : "bg-slate-900 text-white shadow-slate-900/10",
-                )}>
+                <div
+                  className={cn(
+                    "flex justify-between items-center rounded-xl p-4 mt-4 shadow-lg transition-transform hover:scale-[1.02] duration-300",
+                    isPaid
+                      ? "bg-emerald-600 text-white shadow-emerald-600/10"
+                      : "bg-slate-900 text-white shadow-slate-900/10",
+                  )}
+                >
                   <span className="font-bold tracking-wide uppercase text-[10px] opacity-70">
                     {isPaid ? "Paid in full" : "Balance Due"}
                   </span>
-                  <span className="text-xl font-black">{currencySymbol}{isPaid ? formattedAmount : formattedDue}</span>
+                  <span className="text-xl font-black">
+                    {currencySymbol}
+                    {isPaid ? formattedAmount : formattedDue}
+                  </span>
                 </div>
 
                 {isAdvancePaid && (
@@ -357,8 +578,12 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
                   <CreditCard className="size-4" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Transaction Reference</p>
-                  <p className="text-xs font-mono font-bold text-slate-900 leading-none">{booking.id}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                    Transaction Reference
+                  </p>
+                  <p className="text-xs font-mono font-bold text-slate-900 leading-none">
+                    {booking.id}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
@@ -369,47 +594,72 @@ export function InvoiceView({ booking }: { booking: InvoiceData }) {
           </div>
 
           {/* Footer */}
-          <div className="bg-slate-50/50 p-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-xs text-slate-400 font-medium">Thank you for traveling with TourVibe. We hope you enjoy your tour!</p>
+          <div className="bg-slate-50/50 p-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-slate-400 font-medium">
+              Thank you for traveling with {company.name}. We hope you enjoy
+              your tour!
+            </p>
             <div className="flex items-center gap-4 text-xs font-bold text-slate-900">
-              <span className="opacity-40">&copy; {new Date().getFullYear()} TourVibe Inc.</span>
-              <div className="w-1 h-1 rounded-full bg-slate-300" />
-              <span>tourvibe.com</span>
+              <span className="opacity-40">
+                &copy; {new Date().getFullYear()} {company.name}
+              </span>
+              {companyWebsite && (
+                <>
+                  <div className="w-1 h-1 rounded-full bg-slate-300" />
+                  <span>{companyWebsite}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
-      
+
       <style jsx global>{`
         @media print {
           @page {
             margin: 0;
-            size: auto;
+            size: A4 portrait;
+          }
+          /* Keep background colors/gradients when printing */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Keep multi-column layouts side-by-side in print (md/sm breakpoints don't apply to print width) */
+          .print-grid-2 {
+            grid-template-columns: 1fr 1fr !important;
+          }
+          .print-row {
+            flex-direction: row !important;
+            align-items: center !important;
           }
           /* Hide everything */
           body * {
             visibility: hidden;
           }
           /* Show only the invoice card */
-          .print-invoice-card, 
+          .print-invoice-card,
           .print-invoice-card * {
             visibility: visible;
           }
-          /* Force the card to be at the top-left and take full width */
+          /* Force the card to the top-left and scale (zoom reflows so it fits one A4 page) */
           .print-invoice-card {
             position: fixed;
             left: 0;
+            right: 0;
             top: 0;
-            width: 100% !important;
+            width: 794px !important;
             max-width: none !important;
-            margin: 0 !important;
+            margin: 0 auto !important;
             padding: 0 !important;
             box-shadow: none !important;
             border: none !important;
             background: white !important;
+            zoom: var(--print-scale, 1);
           }
           /* Ensure no backgrounds or shadows from parent containers */
-          body, html {
+          body,
+          html {
             background: white !important;
           }
           .animate-in {

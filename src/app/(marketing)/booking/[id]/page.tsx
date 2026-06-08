@@ -4,6 +4,7 @@ import { InvoiceView } from "@/app/dashboard/bookings/[id]/invoice/invoice-view"
 import { CheckCircle2 } from "lucide-react";
 import Stripe from "stripe";
 import { getIntegrations } from "@/lib/integrations";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 export default async function PublicBookingConfirmationPage({
   params,
@@ -20,6 +21,7 @@ export default async function PublicBookingConfirmationPage({
     include: {
       tourPackage: { select: { name: true, duration: true } },
       user: { select: { name: true, email: true } },
+      vehicle: { select: { make: true, model: true, year: true, licensePlate: true } },
     },
   });
 
@@ -61,6 +63,7 @@ export default async function PublicBookingConfirmationPage({
             include: {
               tourPackage: { select: { name: true, duration: true } },
               user: { select: { name: true, email: true } },
+              vehicle: { select: { make: true, model: true, year: true, licensePlate: true } },
             },
           });
         }
@@ -87,6 +90,24 @@ export default async function PublicBookingConfirmationPage({
     userEmail: booking.user?.email ?? booking.guestEmail ?? "",
     whatsapp: booking.whatsapp ?? "",
     isGuest: !booking.userId,
+    hours:
+      booking.startTime && booking.endTime
+        ? Math.round((booking.endTime.getTime() - booking.startTime.getTime()) / 3_600_000)
+        : null,
+    persons: booking.persons,
+    startTime: booking.startTime ? booking.startTime.toISOString() : null,
+    vehicleName: booking.vehicle
+      ? `${booking.vehicle.make} ${booking.vehicle.model} (${booking.vehicle.year})`
+      : null,
+    vehiclePlate: booking.vehicle?.licensePlate ?? null,
+  };
+
+  const site = await getSiteConfig();
+  const company = {
+    name: site.siteName,
+    tagline: site.tagline,
+    email: site.contactEmail,
+    logoUrl: site.logoUrl,
   };
 
   return (
@@ -112,7 +133,7 @@ export default async function PublicBookingConfirmationPage({
           </div>
         </div>
       )}
-      <InvoiceView booking={invoiceData} />
+      <InvoiceView booking={invoiceData} company={company} />
     </div>
   );
 }
