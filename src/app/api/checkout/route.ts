@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       vehicleId,
       startTime: startTimeRaw,
       hours: hoursRaw,
+      persons: personsRaw,
     } = body;
 
     if (!tourId) {
@@ -158,6 +159,19 @@ export async function POST(req: NextRequest) {
     }
     const endTime = new Date(startTime.getTime() + bookedHours * 60 * 60 * 1000);
 
+    const maxPersons = tour.maxPersons || 1;
+    let bookedPersons = Number(personsRaw);
+    if (!Number.isFinite(bookedPersons) || bookedPersons <= 0) {
+      bookedPersons = 1;
+    }
+    bookedPersons = Math.round(bookedPersons);
+    if (bookedPersons > maxPersons) {
+      return NextResponse.json(
+        { error: `Maximum ${maxPersons} ${maxPersons === 1 ? "person" : "persons"} for this tour.` },
+        { status: 400 },
+      );
+    }
+
     // Pre-check (fast path, avoids creating Stripe session for obvious conflicts)
     const preConflict = await findVehicleConflict(prisma, {
       vehicleId,
@@ -237,6 +251,7 @@ export async function POST(req: NextRequest) {
             userId,
             tourPackageId: tourId,
             vehicleId,
+            persons: bookedPersons,
             startTime,
             endTime,
             amount: chargeAmount,

@@ -41,6 +41,7 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
     vehicleId: string;
     startTime: string;
     hours: number;
+    persons: number;
   }) => {
     try {
       setLoading(true);
@@ -93,6 +94,7 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={durationHours}
+        maxPersons={maxPersons}
         vehicles={vehicles}
         loading={loading}
         onConfirm={submitCheckout}
@@ -104,6 +106,7 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={durationHours}
+        maxPersons={maxPersons}
         vehicles={vehicles}
       />
       <div

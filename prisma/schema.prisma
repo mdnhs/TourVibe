@@ -181,6 +181,7 @@ model Booking {
   guestName              String?
   guestEmail             String?
   vehicleId              String?
+  persons                Int      @default(1)
   startTime              DateTime?
   endTime                DateTime?
   stripeSessionId        String?  @unique

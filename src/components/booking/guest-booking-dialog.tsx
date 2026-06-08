@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, Lock, ShieldCheck, UserRound, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -30,6 +30,7 @@ interface GuestBookingDialogProps {
   hourlyRate: number;
   currency?: string;
   minHours: number;
+  maxPersons: number;
   vehicles: PickerVehicle[];
 }
 
@@ -40,6 +41,7 @@ export function GuestBookingDialog({
   hourlyRate,
   currency,
   minHours,
+  maxPersons,
   vehicles,
 }: GuestBookingDialogProps) {
   const [name, setName] = useState("");
@@ -50,7 +52,8 @@ export function GuestBookingDialog({
     date: "",
     time: "",
     vehicleId: "",
-    hours: minHours,
+    hours: Math.max(minHours, 6),
+    persons: Math.min(maxPersons, 4),
   });
   const [available, setAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,6 +64,7 @@ export function GuestBookingDialog({
   );
   const advance = Math.round(total * 0.2 * 100) / 100;
   const balance = Math.round((total - advance) * 100) / 100;
+  const due = paymentType === "ADVANCE" ? advance : total;
 
   const ready =
     !!schedule.date && !!schedule.time && !!schedule.vehicleId && available;
@@ -103,6 +107,7 @@ export function GuestBookingDialog({
           vehicleId: schedule.vehicleId,
           startTime,
           hours: schedule.hours,
+          persons: schedule.persons,
         }),
       });
       const data = await res.json();
@@ -123,139 +128,197 @@ export function GuestBookingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Book as guest</DialogTitle>
-          <DialogDescription>
-            No account needed. We will use WhatsApp to confirm your booking.
-          </DialogDescription>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-2xl max-h-[92vh]">
+        {/* Header */}
+        <DialogHeader className="border-b bg-linear-to-br from-slate-50 to-white px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
+              <UserRound className="size-5" />
+            </div>
+            <div className="space-y-0.5">
+              <DialogTitle className="text-lg">Book as guest</DialogTitle>
+              <DialogDescription className="text-xs">
+                No account needed · we confirm via WhatsApp
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="guest-name">
-              Full name <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="guest-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Jane Smith"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="flex max-h-[calc(92vh-8rem)] flex-col">
+          <div className="grid gap-5 overflow-y-auto px-6 py-5 sm:grid-cols-[1fr_300px]">
+            {/* Left: contact + schedule */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <UserRound className="size-3.5" /> Your details
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="guest-name" className="text-xs">
+                    Full name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="guest-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    disabled={loading}
+                    placeholder="Jane Smith"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="guest-whatsapp" className="text-xs">
+                    WhatsApp <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="guest-whatsapp"
+                    type="tel"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    required
+                    disabled={loading}
+                    placeholder="+14155551234"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="guest-whatsapp">
-              WhatsApp number <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="guest-whatsapp"
-              type="tel"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="+14155551234"
-            />
-            <p className="text-xs text-muted-foreground">
-              Include country code with leading +.
-            </p>
-          </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="guest-email" className="text-xs">
+                  Email{" "}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id="guest-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  placeholder="jane@example.com"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="guest-email">
-              Email{" "}
-              <span className="text-xs font-normal text-muted-foreground">(optional)</span>
-            </Label>
-            <Input
-              id="guest-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              placeholder="jane@example.com"
-            />
-          </div>
+              <div className="flex items-center gap-1.5 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <Clock className="size-3.5" /> Trip details
+              </div>
+              <ScheduleVehiclePicker
+                vehicles={vehicles}
+                minHours={minHours}
+                maxPersons={maxPersons}
+                value={schedule}
+                onChange={setSchedule}
+                onAvailabilityChange={setAvailable}
+              />
+            </div>
 
-          <div className="pt-2">
-            <ScheduleVehiclePicker
-              vehicles={vehicles}
-              minHours={minHours}
-              value={schedule}
-              onChange={setSchedule}
-              onAvailabilityChange={setAvailable}
-            />
-          </div>
+            {/* Right: summary + payment */}
+            <div className="space-y-4 sm:border-l sm:pl-5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <ShieldCheck className="size-3.5" /> Order summary
+              </div>
 
-          <div className="rounded-lg border bg-slate-50 p-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">
-                {schedule.hours} {schedule.hours === 1 ? "hour" : "hours"} × {formatPrice(hourlyRate, currency)}
-              </span>
-              <span className="font-bold text-slate-900">{formatPrice(total, currency)}</span>
+              <div className="rounded-xl border bg-slate-50/80 p-4">
+                <dl className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between text-slate-600">
+                    <dt className="flex items-center gap-1.5">
+                      <Clock className="size-3.5 text-slate-400" />
+                      {schedule.hours} {schedule.hours === 1 ? "hour" : "hours"} × {formatPrice(hourlyRate, currency)}
+                    </dt>
+                    <dd>{formatPrice(total, currency)}</dd>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-600">
+                    <dt className="flex items-center gap-1.5">
+                      <Users className="size-3.5 text-slate-400" />
+                      {schedule.persons} {schedule.persons === 1 ? "guest" : "guests"}
+                    </dt>
+                    <dd className="text-slate-400">included</dd>
+                  </div>
+                  <div className="my-1 border-t border-dashed" />
+                  <div className="flex items-end justify-between">
+                    <dt className="font-semibold text-slate-900">Total</dt>
+                    <dd className="text-xl font-extrabold text-slate-900">{formatPrice(total, currency)}</dd>
+                  </div>
+                  {paymentType === "ADVANCE" && (
+                    <div className="flex items-center justify-between rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700">
+                      <span>Due now (20%)</span>
+                      <span>{formatPrice(advance, currency)}</span>
+                    </div>
+                  )}
+                </dl>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Payment option
+                </Label>
+                <RadioGroup
+                  value={paymentType}
+                  onValueChange={(v) => setPaymentType(v as "ADVANCE" | "FULL")}
+                  className="gap-2"
+                >
+                  <Label
+                    htmlFor="g-pay-full"
+                    className="relative flex cursor-pointer flex-col items-start gap-0.5 rounded-xl border-2 p-3 transition-colors hover:bg-accent/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                  >
+                    <RadioGroupItem id="g-pay-full" value="FULL" className="sr-only" />
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-sm font-semibold">Pay in full</span>
+                      <span className="text-sm font-bold">{formatPrice(total, currency)}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Booking confirmed instantly.</span>
+                  </Label>
+                  <Label
+                    htmlFor="g-pay-advance"
+                    className="relative flex cursor-pointer flex-col items-start gap-0.5 rounded-xl border-2 p-3 transition-colors hover:bg-accent/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                  >
+                    <RadioGroupItem id="g-pay-advance" value="ADVANCE" className="sr-only" />
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-sm font-semibold">20% advance</span>
+                      <span className="text-sm font-bold">{formatPrice(advance, currency)}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatPrice(balance, currency)} due before tour date.
+                    </span>
+                  </Label>
+                </RadioGroup>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2 pt-2">
-            <Label>Payment option</Label>
-            <RadioGroup
-              value={paymentType}
-              onValueChange={(v) => setPaymentType(v as "ADVANCE" | "FULL")}
-              className="gap-2"
-            >
-              <Label
-                htmlFor="g-pay-advance"
-                className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-              >
-                <RadioGroupItem id="g-pay-advance" value="ADVANCE" className="mt-1" />
-                <div className="flex-1 text-sm">
-                  <div className="font-semibold">
-                    Pay 20% advance ({formatPrice(advance, currency)})
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Balance {formatPrice(balance, currency)} due before tour date.
-                  </div>
-                </div>
-              </Label>
-              <Label
-                htmlFor="g-pay-full"
-                className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-              >
-                <RadioGroupItem id="g-pay-full" value="FULL" className="mt-1" />
-                <div className="flex-1 text-sm">
-                  <div className="font-semibold">
-                    Pay full amount ({formatPrice(total, currency)})
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Booking confirmed instantly.
-                  </div>
-                </div>
-              </Label>
-            </RadioGroup>
+          {/* Footer */}
+          <div className="space-y-3 border-t bg-slate-50/60 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <span className="text-slate-500">Due now</span>
+                <span className="ml-2 text-lg font-bold text-slate-900">{formatPrice(due, currency)}</span>
+              </div>
+              <DialogFooter className="gap-2 sm:gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading || !ready} className="min-w-44">
+                  {loading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="size-3.5" />
+                      Continue to payment
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+            <p className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+              <CheckCircle2 className="size-3 text-emerald-500" />
+              Secure payment via Stripe · Instant confirmation
+            </p>
           </div>
-
-          <DialogFooter className="pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading || !ready}>
-              {loading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Continue to payment"
-              )}
-            </Button>
-          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

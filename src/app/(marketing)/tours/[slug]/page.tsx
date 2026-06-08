@@ -645,6 +645,7 @@ export default async function TourDetailsPage({
                   hourlyRate={tour.hourlyRate}
                   currency={currency}
                   minHours={tour.durationHours}
+                  maxPersons={tour.maxPersons}
                   vehicles={tour.vehicles}
                   className="w-full h-14 text-lg"
                 />

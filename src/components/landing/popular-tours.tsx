@@ -142,8 +142,9 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
             const category = categories[i % categories.length];
 
             return (
-              <div
+              <Link
                 key={tour.id}
+                href={`/tours/${tour.slug}`}
                 style={{ animationDelay: `${200 + i * 80}ms` }}
                 className="group animate-in fade-in slide-in-from-bottom-4 duration-500
                            relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white
@@ -239,15 +240,14 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
                   </div>
 
                   {/* CTA */}
-                  <Link
-                    href={`/tours/${tour.slug}`}
-                    className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 ${accent.btnFrom} ${accent.btnShadow}`}
+                  <div
+                    className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r py-2.5 text-sm font-bold text-white shadow-md transition-all group-hover:-translate-y-0.5 ${accent.btnFrom} ${accent.btnShadow}`}
                   >
                     Book this tour
-                    <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />
-                  </Link>
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

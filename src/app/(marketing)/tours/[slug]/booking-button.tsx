@@ -14,6 +14,7 @@ interface BookingButtonProps {
   hourlyRate: number;
   currency?: string;
   minHours: number;
+  maxPersons: number;
   vehicles: PickerVehicle[];
   className?: string;
 }
@@ -23,6 +24,7 @@ export function BookingButton({
   hourlyRate,
   currency,
   minHours,
+  maxPersons,
   vehicles,
   className,
 }: BookingButtonProps) {
@@ -36,6 +38,7 @@ export function BookingButton({
     vehicleId: string;
     startTime: string;
     hours: number;
+    persons: number;
   }) => {
     try {
       setLoading(true);
@@ -88,6 +91,7 @@ export function BookingButton({
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={minHours}
+        maxPersons={maxPersons}
         vehicles={vehicles}
         loading={loading}
         onConfirm={submitCheckout}
@@ -99,6 +103,7 @@ export function BookingButton({
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={minHours}
+        maxPersons={maxPersons}
         vehicles={vehicles}
       />
       <button

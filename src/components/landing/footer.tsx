@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { CarFront, MapPin, ArrowRight, Sparkles } from "lucide-react";
-import { IconBrandFacebook, IconBrandInstagram, IconBrandX, IconBrandYoutube } from "@tabler/icons-react";
+import {
+  IconBrandFacebook,
+  IconBrandInstagram,
+  IconBrandX,
+  IconBrandYoutube,
+} from "@tabler/icons-react";
 import Image from "next/image";
 import type { SiteConfig } from "@/app/dashboard/site-config/types";
 
 const colAccents = [
   { bar: "from-amber-400 to-orange-500", hover: "group-hover:text-amber-400" },
-  { bar: "from-cyan-400 to-sky-500",    hover: "group-hover:text-cyan-400" },
-  { bar: "from-violet-400 to-purple-500", hover: "group-hover:text-violet-400" },
+  { bar: "from-cyan-400 to-sky-500", hover: "group-hover:text-cyan-400" },
+  {
+    bar: "from-violet-400 to-purple-500",
+    hover: "group-hover:text-violet-400",
+  },
 ];
 
 type FooterProps = {
@@ -15,19 +23,43 @@ type FooterProps = {
   tagline?: string;
   location?: string;
   logoUrl?: string;
-} & Partial<Pick<SiteConfig,
-  | "footerCol1Heading" | "footerCol1Link1Label" | "footerCol1Link1Url"
-  | "footerCol1Link2Label" | "footerCol1Link2Url" | "footerCol1Link3Label" | "footerCol1Link3Url"
-  | "footerCol1Link4Label" | "footerCol1Link4Url"
-  | "footerCol2Heading" | "footerCol2Link1Label" | "footerCol2Link1Url"
-  | "footerCol2Link2Label" | "footerCol2Link2Url" | "footerCol2Link3Label" | "footerCol2Link3Url"
-  | "footerCol2Link4Label" | "footerCol2Link4Url"
-  | "footerCol3Heading" | "footerCol3Link1Label" | "footerCol3Link1Url"
-  | "footerCol3Link2Label" | "footerCol3Link2Url" | "footerCol3Link3Label" | "footerCol3Link3Url"
-  | "footerCol3Link4Label" | "footerCol3Link4Url"
-  | "footerFacebookUrl" | "footerInstagramUrl" | "footerTwitterUrl" | "footerYoutubeUrl"
-  | "footerPoweredByText"
->>;
+} & Partial<
+  Pick<
+    SiteConfig,
+    | "footerCol1Heading"
+    | "footerCol1Link1Label"
+    | "footerCol1Link1Url"
+    | "footerCol1Link2Label"
+    | "footerCol1Link2Url"
+    | "footerCol1Link3Label"
+    | "footerCol1Link3Url"
+    | "footerCol1Link4Label"
+    | "footerCol1Link4Url"
+    | "footerCol2Heading"
+    | "footerCol2Link1Label"
+    | "footerCol2Link1Url"
+    | "footerCol2Link2Label"
+    | "footerCol2Link2Url"
+    | "footerCol2Link3Label"
+    | "footerCol2Link3Url"
+    | "footerCol2Link4Label"
+    | "footerCol2Link4Url"
+    | "footerCol3Heading"
+    | "footerCol3Link1Label"
+    | "footerCol3Link1Url"
+    | "footerCol3Link2Label"
+    | "footerCol3Link2Url"
+    | "footerCol3Link3Label"
+    | "footerCol3Link3Url"
+    | "footerCol3Link4Label"
+    | "footerCol3Link4Url"
+    | "footerFacebookUrl"
+    | "footerInstagramUrl"
+    | "footerTwitterUrl"
+    | "footerYoutubeUrl"
+    | "footerPoweredByText"
+  >
+>;
 
 export function Footer({
   siteName = "TourVibe",
@@ -35,20 +67,32 @@ export function Footer({
   location = "Cobh, Ireland",
   logoUrl,
   footerCol1Heading = "Services",
-  footerCol1Link1Label = "City Tours", footerCol1Link1Url = "#",
-  footerCol1Link2Label = "Airport Transfers", footerCol1Link2Url = "#",
-  footerCol1Link3Label = "Corporate Travel", footerCol1Link3Url = "#",
-  footerCol1Link4Label = "Private Chauffeur", footerCol1Link4Url = "#",
+  footerCol1Link1Label = "City Tours",
+  footerCol1Link1Url = "#",
+  footerCol1Link2Label = "Airport Transfers",
+  footerCol1Link2Url = "#",
+  footerCol1Link3Label = "Corporate Travel",
+  footerCol1Link3Url = "#",
+  footerCol1Link4Label = "Private Chauffeur",
+  footerCol1Link4Url = "#",
   footerCol2Heading = "Company",
-  footerCol2Link1Label = "About Us", footerCol2Link1Url = "/#about",
-  footerCol2Link2Label = "Our Fleet", footerCol2Link2Url = "#",
-  footerCol2Link3Label = "Blog", footerCol2Link3Url = "/blog",
-  footerCol2Link4Label = "Reviews", footerCol2Link4Url = "/#reviews",
+  footerCol2Link1Label = "About Us",
+  footerCol2Link1Url = "/#about",
+  footerCol2Link2Label = "Our Fleet",
+  footerCol2Link2Url = "#",
+  footerCol2Link3Label = "Blog",
+  footerCol2Link3Url = "/blog",
+  footerCol2Link4Label = "Reviews",
+  footerCol2Link4Url = "/#reviews",
   footerCol3Heading = "Support",
-  footerCol3Link1Label = "Help Center", footerCol3Link1Url = "#",
-  footerCol3Link2Label = "Terms of Service", footerCol3Link2Url = "#",
-  footerCol3Link3Label = "Privacy Policy", footerCol3Link3Url = "#",
-  footerCol3Link4Label = "Safety", footerCol3Link4Url = "#",
+  footerCol3Link1Label = "Help Center",
+  footerCol3Link1Url = "#",
+  footerCol3Link2Label = "Terms of Service",
+  footerCol3Link2Url = "#",
+  footerCol3Link3Label = "Privacy Policy",
+  footerCol3Link3Url = "#",
+  footerCol3Link4Label = "Safety",
+  footerCol3Link4Url = "#",
   footerFacebookUrl = "",
   footerInstagramUrl = "",
   footerTwitterUrl = "",
@@ -86,10 +130,10 @@ export function Footer({
   ];
 
   const socials = [
-    { url: footerFacebookUrl,  Icon: IconBrandFacebook,  label: "Facebook" },
+    { url: footerFacebookUrl, Icon: IconBrandFacebook, label: "Facebook" },
     { url: footerInstagramUrl, Icon: IconBrandInstagram, label: "Instagram" },
-    { url: footerTwitterUrl,   Icon: IconBrandX,         label: "Twitter / X" },
-    { url: footerYoutubeUrl,   Icon: IconBrandYoutube,   label: "YouTube" },
+    { url: footerTwitterUrl, Icon: IconBrandX, label: "Twitter / X" },
+    { url: footerYoutubeUrl, Icon: IconBrandYoutube, label: "YouTube" },
   ].filter((s) => s.url);
 
   return (
@@ -107,7 +151,8 @@ export function Footer({
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)",
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)",
           backgroundSize: "30px 30px",
         }}
       />
@@ -125,19 +170,26 @@ export function Footer({
 
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
-
           {/* Brand column */}
           <div className="col-span-1 space-y-5 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
-              <div className="relative flex size-9 items-center justify-center rounded-xl overflow-hidden shadow-lg shadow-amber-400/30 transition-transform duration-300 group-hover:scale-105">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
+              <div className="relative flex size-9 items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                {/* <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" /> */}
                 {logoUrl ? (
-                  <Image src={logoUrl} alt={siteName} width={36} height={36} className="relative object-cover" />
+                  <Image
+                    src={logoUrl}
+                    alt={siteName}
+                    width={36}
+                    height={36}
+                    className="relative object-cover"
+                  />
                 ) : (
                   <CarFront className="relative size-5 text-white" />
                 )}
               </div>
-              <span className="font-heading text-xl font-extrabold tracking-tight">{siteName}</span>
+              <span className="font-heading text-xl font-extrabold tracking-tight">
+                {siteName}
+              </span>
             </Link>
 
             <p className="text-sm leading-7 text-white/50">{tagline}</p>
@@ -177,23 +229,29 @@ export function Footer({
           {columns.map((col, colIdx) => (
             <div key={col.heading} className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${colAccents[colIdx].bar}`} />
+                <div
+                  className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${colAccents[colIdx].bar}`}
+                />
                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
                   {col.heading}
                 </h3>
               </div>
               <ul className="space-y-3">
-                {col.links.filter((l) => l.label).map((item) => (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href || "#"}
-                      className="group inline-flex items-center gap-1.5 text-sm text-white/50 transition-all hover:text-white"
-                    >
-                      <ArrowRight className={`size-3 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 ${colAccents[colIdx].hover}`} />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+                {col.links
+                  .filter((l) => l.label)
+                  .map((item) => (
+                    <li key={item.label}>
+                      <Link
+                        href={item.href || "#"}
+                        className="group inline-flex items-center gap-1.5 text-sm text-white/50 transition-all hover:text-white"
+                      >
+                        <ArrowRight
+                          className={`size-3 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 ${colAccents[colIdx].hover}`}
+                        />
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
           ))}
