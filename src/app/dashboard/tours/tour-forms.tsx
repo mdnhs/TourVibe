@@ -16,6 +16,7 @@ import Link from "next/link";
 import {
   Plus,
   X,
+  Search,
   Sparkles,
   ImageIcon,
   Video,
@@ -272,6 +273,64 @@ function BasicsFields({
   );
 }
 
+// ── SEO fields ────────────────────────────────────────────────────────────────
+function SeoFields({
+  disabled,
+  defaults,
+}: {
+  disabled?: boolean;
+  defaults?: { metaTitle?: string; metaDescription?: string };
+}) {
+  const [metaTitle, setMetaTitle] = useState(defaults?.metaTitle ?? "");
+  const [metaDescription, setMetaDescription] = useState(defaults?.metaDescription ?? "");
+
+  return (
+    <Section
+      icon={Search}
+      title="SEO"
+      description="Overrides for search result title and description."
+    >
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="metaTitle">Meta Title</Label>
+          <span
+            className={`text-[11px] ${metaTitle.length > 60 ? "text-destructive" : "text-muted-foreground"}`}
+          >
+            {metaTitle.length}/60
+          </span>
+        </div>
+        <Input
+          id="metaTitle"
+          name="metaTitle"
+          value={metaTitle}
+          onChange={(e) => setMetaTitle(e.target.value)}
+          placeholder="SEO page title (leave blank to use tour name)"
+          disabled={disabled}
+        />
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="metaDescription">Meta Description</Label>
+          <span
+            className={`text-[11px] ${metaDescription.length > 160 ? "text-destructive" : "text-muted-foreground"}`}
+          >
+            {metaDescription.length}/160
+          </span>
+        </div>
+        <Textarea
+          id="metaDescription"
+          name="metaDescription"
+          value={metaDescription}
+          onChange={(e) => setMetaDescription(e.target.value)}
+          placeholder="SEO description (leave blank to use tour description)"
+          rows={2}
+          disabled={disabled}
+        />
+      </div>
+    </Section>
+  );
+}
+
 // ── Vehicle picker ─────────────────────────────────────────────────────────
 function VehiclePicker({
   vehicles,
@@ -436,6 +495,8 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
           >
             <HighlightsEditor />
           </Section>
+
+          <SeoFields disabled={isPending} />
         </div>
 
         <div className="space-y-5">
@@ -651,6 +712,14 @@ export function EditTourForm({
           >
             <HighlightsEditor initial={tour.highlights?.split("\n").filter(Boolean) ?? []} />
           </Section>
+
+          <SeoFields
+            disabled={isPending}
+            defaults={{
+              metaTitle: tour.metaTitle ?? "",
+              metaDescription: tour.metaDescription ?? "",
+            }}
+          />
         </div>
 
         <div className="space-y-5">

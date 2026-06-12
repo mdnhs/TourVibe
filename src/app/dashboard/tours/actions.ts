@@ -21,6 +21,8 @@ export async function createTour(formData: FormData) {
   const vehicleIds = formData.getAll("vehicleIds") as string[];
   const highlightsRaw = formData.getAll("highlights") as string[];
   const highlights = highlightsRaw.filter(Boolean).join("\n") || null;
+  const metaTitle = (formData.get("metaTitle") as string) || "";
+  const metaDescription = (formData.get("metaDescription") as string) || "";
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -71,6 +73,8 @@ export async function createTour(formData: FormData) {
         gallery: galleryUrls.join(","),
         promoVideoUrl,
         highlights,
+        metaTitle,
+        metaDescription,
         vehicles: {
           create: vehicleIds.map((vehicleId) => ({ vehicleId })),
         },
@@ -97,6 +101,8 @@ export async function updateTour(id: string, formData: FormData) {
   const vehicleIds = formData.getAll("vehicleIds") as string[];
   const highlightsRaw = formData.getAll("highlights") as string[];
   const highlights = highlightsRaw.filter(Boolean).join("\n") || null;
+  const metaTitle = (formData.get("metaTitle") as string) || "";
+  const metaDescription = (formData.get("metaDescription") as string) || "";
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -145,7 +151,7 @@ export async function updateTour(id: string, formData: FormData) {
     await prisma.$transaction([
       prisma.tourPackage.update({
         where: { id },
-        data: { name, slug, description, price, hourlyRate, durationHours, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, promoVideoUrl, highlights },
+        data: { name, slug, description, price, hourlyRate, durationHours, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, promoVideoUrl, highlights, metaTitle, metaDescription },
       }),
       prisma.tourPackageVehicle.deleteMany({ where: { tourPackageId: id } }),
       prisma.tourPackageVehicle.createMany({

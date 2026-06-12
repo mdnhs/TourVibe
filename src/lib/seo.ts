@@ -107,7 +107,9 @@ export function buildMetadata(
       description: ogDescription,
       ...(s.twitterSite ? { site: s.twitterSite } : {}),
       ...(s.twitterCreator ? { creator: s.twitterCreator } : {}),
-      ...(s.twitterImage || image ? { images: [s.twitterImage || image!] } : {}),
+      ...(override.image || s.twitterImage || image
+        ? { images: [override.image || s.twitterImage || image!] }
+        : {}),
     },
     verification: {
       ...(s.googleSiteVerification ? { google: s.googleSiteVerification } : {}),

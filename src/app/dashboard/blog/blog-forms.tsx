@@ -2,8 +2,17 @@
 
 import { useState, useTransition, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
-import { ImageIcon, UploadCloud, X } from "lucide-react";
+import {
+  FileText,
+  ImageIcon,
+  Info,
+  Search,
+  Tag,
+  UploadCloud,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,14 +49,78 @@ interface BlogPost {
   status: string;
 }
 
+// ── Section wrapper ─────────────────────────────────────────────────────────
+function Section({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border bg-card shadow-sm">
+      <div className="flex items-start gap-3 border-b px-5 py-4">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-4.5" />
+        </div>
+        <div className="space-y-0.5">
+          <h3 className="text-sm font-semibold leading-none">{title}</h3>
+          {description && (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          )}
+        </div>
+      </div>
+      <div className="space-y-4 p-5">{children}</div>
+    </section>
+  );
+}
+
+// ── Char counter ──────────────────────────────────────────────────────────────
+function CharCount({ value, max }: { value: string; max: number }) {
+  return (
+    <span
+      className={`text-[11px] ${value.length > max ? "text-destructive" : "text-muted-foreground"}`}
+    >
+      {value.length}/{max}
+    </span>
+  );
+}
+
+// ── Sticky action bar ─────────────────────────────────────────────────────────
+function ActionBar({
+  submitLabel,
+  pendingLabel,
+  isPending,
+}: {
+  submitLabel: string;
+  pendingLabel: string;
+  isPending: boolean;
+}) {
+  return (
+    <div className="sticky bottom-0 -mx-1 flex gap-3 border-t bg-background/80 px-1 py-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <Button type="submit" className="flex-1 sm:flex-none sm:min-w-48" disabled={isPending}>
+        {isPending ? pendingLabel : submitLabel}
+      </Button>
+      <Button asChild variant="outline">
+        <Link href="/dashboard/blog">Cancel</Link>
+      </Button>
+    </div>
+  );
+}
+
 // ── Cover image uploader ──────────────────────────────────────────────────────
 
 interface CoverImageUploaderProps {
   existingUrl: string;
   onFileChange: (file: File | null, previewUrl: string) => void;
+  disabled?: boolean;
 }
 
-function CoverImageUploader({ existingUrl, onFileChange }: CoverImageUploaderProps) {
+function CoverImageUploader({ existingUrl, onFileChange, disabled }: CoverImageUploaderProps) {
   const [preview, setPreview] = useState<string>(existingUrl);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +147,7 @@ function CoverImageUploader({ existingUrl, onFileChange }: CoverImageUploaderPro
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    if (disabled) return;
     const file = e.dataTransfer.files?.[0];
     if (file) handleFile(file);
   };
@@ -99,6 +173,7 @@ function CoverImageUploader({ existingUrl, onFileChange }: CoverImageUploaderPro
               type="button"
               size="sm"
               variant="secondary"
+              disabled={disabled}
               onClick={() => inputRef.current?.click()}
             >
               <UploadCloud className="size-4 mr-1.5" /> Change
@@ -107,6 +182,7 @@ function CoverImageUploader({ existingUrl, onFileChange }: CoverImageUploaderPro
               type="button"
               size="sm"
               variant="destructive"
+              disabled={disabled}
               onClick={handleRemove}
             >
               <X className="size-4 mr-1.5" /> Remove
@@ -115,7 +191,7 @@ function CoverImageUploader({ existingUrl, onFileChange }: CoverImageUploaderPro
         </div>
       ) : (
         <div
-          onClick={() => inputRef.current?.click()}
+          onClick={() => !disabled && inputRef.current?.click()}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
@@ -144,6 +220,7 @@ function CoverImageUploader({ existingUrl, onFileChange }: CoverImageUploaderPro
         type="file"
         accept="image/png,image/jpeg,image/webp,image/gif"
         className="hidden"
+        disabled={disabled}
         onChange={handleInputChange}
       />
     </div>
@@ -210,144 +287,169 @@ function BlogFormFields({ defaults, isPending, onSubmit, submitLabel, pendingLab
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Title + Slug */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="blog-title">
-            Title <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="blog-title"
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder="My Awesome Post"
-            required
-          />
+    <form onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-5">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
+          <Section icon={Info} title="Basics" description="Title and URL slug for this post.">
+            <div className="space-y-2">
+              <Label htmlFor="blog-title">
+                Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="blog-title"
+                value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                placeholder="My Awesome Post"
+                required
+                disabled={isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="blog-slug">Slug</Label>
+              <Input
+                id="blog-slug"
+                value={slug}
+                onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
+                placeholder="my-awesome-post"
+                disabled={isPending}
+              />
+              {slug && (
+                <p className="text-[11px] text-muted-foreground">
+                  Preview: /blog/<span className="font-mono text-primary">{slug}</span>
+                </p>
+              )}
+            </div>
+          </Section>
+
+          <Section
+            icon={FileText}
+            title="Content"
+            description="Excerpt shown in listings, body shown on the post page."
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="blog-excerpt">Excerpt</Label>
+                <CharCount value={excerpt} max={160} />
+              </div>
+              <Textarea
+                id="blog-excerpt"
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                placeholder="Short summary shown in listings…"
+                rows={3}
+                disabled={isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="blog-content">
+                Content <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="blog-content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your post content here. Separate paragraphs with blank lines."
+                rows={14}
+                className="font-mono text-sm"
+                required
+                disabled={isPending}
+              />
+            </div>
+          </Section>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="blog-slug">Slug</Label>
-          <Input
-            id="blog-slug"
-            value={slug}
-            onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
-            placeholder="my-awesome-post"
-          />
-          {slug && (
-            <p className="text-[11px] text-muted-foreground">
-              Preview: /blog/<span className="font-mono text-primary">{slug}</span>
-            </p>
-          )}
+
+        <div className="space-y-5">
+          <Section
+            icon={ImageIcon}
+            title="Cover Image"
+            description="Shown in listings and at the top of the post."
+          >
+            <CoverImageUploader
+              existingUrl={defaults?.coverImage ?? ""}
+              onFileChange={handleCoverChange}
+              disabled={isPending}
+            />
+          </Section>
+
+          <Section
+            icon={Tag}
+            title="Publishing"
+            description="Tags for discovery and the post's visibility."
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="blog-tags">
+                  Tags{" "}
+                  <span className="text-muted-foreground text-[11px]">(comma-separated)</span>
+                </Label>
+                <Input
+                  id="blog-tags"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="travel, ireland, adventure"
+                  disabled={isPending}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="blog-status">Status</Label>
+                <Select
+                  value={status}
+                  onValueChange={(v) => setStatus(v ?? "published")}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id="blog-status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </Section>
+
+          <Section
+            icon={Search}
+            title="SEO"
+            description="Overrides for search result title and description."
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="blog-meta-title">Meta Title</Label>
+                <CharCount value={metaTitle} max={60} />
+              </div>
+              <Input
+                id="blog-meta-title"
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                placeholder="SEO page title (leave blank to use post title)"
+                disabled={isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="blog-meta-desc">Meta Description</Label>
+                <CharCount value={metaDescription} max={160} />
+              </div>
+              <Textarea
+                id="blog-meta-desc"
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                placeholder="SEO description (leave blank to use excerpt)"
+                rows={2}
+                disabled={isPending}
+              />
+            </div>
+          </Section>
         </div>
       </div>
 
-      {/* Excerpt */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="blog-excerpt">Excerpt</Label>
-          <span className={`text-[11px] ${excerpt.length > 160 ? "text-destructive" : "text-muted-foreground"}`}>
-            {excerpt.length}/160
-          </span>
-        </div>
-        <Textarea
-          id="blog-excerpt"
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          placeholder="Short summary shown in listings…"
-          rows={3}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="space-y-1.5">
-        <Label htmlFor="blog-content">
-          Content <span className="text-destructive">*</span>
-        </Label>
-        <Textarea
-          id="blog-content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your post content here. Separate paragraphs with blank lines."
-          rows={14}
-          className="font-mono text-sm"
-          required
-        />
-      </div>
-
-      {/* Cover image */}
-      <div className="space-y-1.5">
-        <Label>Cover Image</Label>
-        <CoverImageUploader
-          existingUrl={defaults?.coverImage ?? ""}
-          onFileChange={handleCoverChange}
-        />
-      </div>
-
-      {/* Tags + Status */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="blog-tags">
-            Tags{" "}
-            <span className="text-muted-foreground text-[11px]">(comma-separated)</span>
-          </Label>
-          <Input
-            id="blog-tags"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="travel, ireland, adventure"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="blog-status">Status</Label>
-          <Select value={status} onValueChange={setStatus as any}>
-            <SelectTrigger id="blog-status">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* SEO */}
-      <div className="rounded-lg border bg-muted/20 p-4 space-y-4">
-        <p className="text-sm font-semibold">SEO Settings</p>
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="blog-meta-title">Meta Title</Label>
-            <span className={`text-[11px] ${metaTitle.length > 60 ? "text-destructive" : "text-muted-foreground"}`}>
-              {metaTitle.length}/60
-            </span>
-          </div>
-          <Input
-            id="blog-meta-title"
-            value={metaTitle}
-            onChange={(e) => setMetaTitle(e.target.value)}
-            placeholder="SEO page title (leave blank to use post title)"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="blog-meta-desc">Meta Description</Label>
-            <span className={`text-[11px] ${metaDescription.length > 160 ? "text-destructive" : "text-muted-foreground"}`}>
-              {metaDescription.length}/160
-            </span>
-          </div>
-          <Textarea
-            id="blog-meta-desc"
-            value={metaDescription}
-            onChange={(e) => setMetaDescription(e.target.value)}
-            placeholder="SEO description (leave blank to use excerpt)"
-            rows={2}
-          />
-        </div>
-      </div>
-
-      <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
-        {isPending ? pendingLabel : submitLabel}
-      </Button>
+      <ActionBar
+        submitLabel={submitLabel}
+        pendingLabel={pendingLabel}
+        isPending={isPending}
+      />
     </form>
   );
 }

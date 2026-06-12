@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   ChevronLeft,
+  ExternalLink,
   Eye,
   MoreVertical,
   Pencil,
@@ -35,6 +36,7 @@ import { formatPrice } from "@/lib/currency";
 
 export type TourPackage = {
   id: string;
+  slug: string;
   name: string;
   description: string | null;
   price: number;
@@ -46,6 +48,8 @@ export type TourPackage = {
   gallery: string | null;
   promoVideoUrl: string | null;
   highlights: string | null;
+  metaTitle?: string;
+  metaDescription?: string;
   assignedVehicles?: string; // Comma separated IDs
   vehicleCount?: number;
 };
@@ -194,6 +198,12 @@ export function TourTable({ tours, vehicles, currency }: TourTableProps) {
               <DropdownMenuItem onClick={() => setViewId(tour.id)}>
                 <Eye className="mr-2 size-4" />
                 View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={`/tours/${tour.slug}`} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 size-4" />
+                  View Tour
+                </a>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push(`/dashboard/tours/${tour.id}/edit`)}>

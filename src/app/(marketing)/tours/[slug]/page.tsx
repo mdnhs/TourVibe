@@ -83,8 +83,8 @@ export async function generateMetadata({
 
   const s = await getSeoSettingsSync();
   return buildMetadata(s, {
-    title: tour.name,
-    description: tour.description || "",
+    title: tour.metaTitle || tour.name,
+    description: tour.metaDescription || tour.description || "",
     canonical: `/tours/${tour.slug || tour.id}`,
     image: tour.thumbnail,
   });
