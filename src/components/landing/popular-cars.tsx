@@ -16,6 +16,7 @@ interface PopularCar {
   year: number;
   licensePlate: string;
   thumbnail: string;
+  gallery: string | null;
   tourCount: number;
 }
 
@@ -60,13 +61,6 @@ const cardColors = [
     yearBg: "bg-fuchsia-400/15 text-fuchsia-200 border-fuchsia-400/30",
     btnBorder: "border-fuchsia-400/30 hover:border-fuchsia-400/60 hover:bg-fuchsia-400/10 text-fuchsia-300 hover:text-fuchsia-200",
   },
-];
-
-const features = [
-  { icon: UserCheck,   label: "Pro driver",      color: "text-amber-400" },
-  { icon: ShieldCheck, label: "Fully insured",   color: "text-emerald-400" },
-  { icon: Thermometer, label: "Air conditioned", color: "text-cyan-400" },
-  { icon: Star,        label: "Top rated",       color: "text-violet-400" },
 ];
 
 export function PopularCars({ cars }: PopularCarsProps) {
@@ -153,24 +147,6 @@ export function PopularCars({ cars }: PopularCarsProps) {
             </div>
           </div>
 
-          {/* Feature strip */}
-          <div
-            className="mt-8 grid grid-cols-2 gap-2 sm:mt-10 sm:grid-cols-4 sm:gap-3 animate-in fade-in slide-in-from-bottom-3 duration-500"
-            style={{ animationDelay: "200ms" }}
-          >
-            {features.map((f) => {
-              const Icon = f.icon;
-              return (
-                <div key={f.label} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 py-2 sm:gap-2.5 sm:px-4 sm:py-3 backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-white/12">
-                  <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-white/8 sm:size-7">
-                    <Icon className={`size-3 sm:size-3.5 ${f.color}`} />
-                  </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-white/70">{f.label}</span>
-                </div>
-              );
-            })}
-          </div>
-
           {/* Cards */}
           <CarouselContent className="mt-8 -ml-5">
             {cars.map((car, i) => {
@@ -234,22 +210,26 @@ export function PopularCars({ cars }: PopularCarsProps) {
 
                     {/* Content */}
                     <div className="flex flex-1 flex-col gap-4 p-5">
-                      {/* Comfort features */}
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { icon: UserCheck,   label: "Pro driver",  color: "text-amber-400" },
-                          { icon: ShieldCheck, label: "Insured",     color: "text-emerald-400" },
-                          { icon: Thermometer, label: "Air con",     color: "text-cyan-400" },
-                          { icon: Star,        label: "Top rated",   color: "text-violet-400" },
-                        ].map((f) => {
-                          const Icon = f.icon;
-                          return (
-                            <div key={f.label} className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-[11px] font-medium text-white/60 border border-white/5">
-                              <Icon className={`size-3 shrink-0 ${f.color}`} />
-                              {f.label}
-                            </div>
-                          );
-                        })}
+                      {/* Car gallery thumbnails */}
+                      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                        {[car.thumbnail, ...(car.gallery?.split(",").map(s => s.trim()).filter(Boolean) || [])].slice(0, 5).map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5"
+                          >
+                            <Image
+                              src={img}
+                              alt={`${car.make} ${car.model} thumb ${idx}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                        {car.gallery && car.gallery.split(",").filter(Boolean).length > 4 && (
+                          <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-[10px] font-bold text-white/40">
+                            +{car.gallery.split(",").filter(Boolean).length - 4}
+                          </div>
+                        )}
                       </div>
 
                       {/* CTA */}

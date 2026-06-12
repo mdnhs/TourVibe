@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, CalendarIcon, ImageIcon, TagIcon, UserIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarIcon, ImageIcon, UserIcon } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata, buildBlogPostSchema } from "@/lib/seo";
@@ -90,9 +90,6 @@ export default async function BlogPostPage({
   const tagList = post.tags ? post.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
   const displayDate = post.publishedAt ?? post.createdAt;
 
-  // Render content: split by double newlines into paragraphs
-  const paragraphs = post.content.split(/\n\n+/).filter((p) => p.trim());
-
   return (
     <div className="min-h-screen">
       {jsonLdSchema && (
@@ -112,10 +109,10 @@ export default async function BlogPostPage({
               src={post.coverImage}
               alt={post.title}
               fill
-              className="object-cover opacity-25"
+              className="object-cover opacity-60"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/60" />
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/60 to-transparent" />
           </div>
         ) : (
           <div className="pointer-events-none absolute inset-0">
@@ -132,21 +129,6 @@ export default async function BlogPostPage({
             <ArrowLeft className="size-3.5 sm:size-4" />
             Back to Blog
           </Link>
-
-          {/* Tags */}
-          {tagList.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5">
-              {tagList.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/15 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-amber-300"
-                >
-                  <TagIcon className="size-2.5 sm:size-3" />
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
 
           <h1 className="font-heading text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl mb-4 sm:mb-6 leading-tight">
             {post.title}
@@ -183,17 +165,13 @@ export default async function BlogPostPage({
       {/* Content */}
       <section className="px-4 py-10 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-3xl">
-          <div className="prose prose-slate prose-base sm:prose-lg max-w-none">
-            {paragraphs.map((para, i) => (
-              <p
-                key={i}
-                className="text-slate-700 leading-relaxed sm:leading-8 mb-5 sm:mb-6 last:mb-0"
-                style={{ whiteSpace: "pre-wrap" }}
-              >
-                {para.trim()}
-              </p>
-            ))}
-          </div>
+          <article 
+            className="prose prose-slate prose-base sm:prose-lg max-w-none 
+                       prose-headings:font-heading prose-headings:font-bold 
+                       prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline
+                       prose-img:rounded-2xl prose-img:shadow-lg"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
 
           {/* Tags footer */}
           {tagList.length > 0 && (

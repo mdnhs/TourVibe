@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import TiptapEditor from "@/components/tiptap-editor";
 import Link from "next/link";
 import {
   Plus,
@@ -155,6 +156,7 @@ function BasicsFields({
 }) {
   const [rate, setRate] = useState(defaults?.hourlyRate?.toString() ?? "");
   const [hours, setHours] = useState(defaults?.durationHours?.toString() ?? "");
+  const [description, setDescription] = useState(defaults?.description ?? "");
 
   const rateNum = parseFloat(rate);
   const hoursNum = parseInt(hours);
@@ -179,14 +181,12 @@ function BasicsFields({
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            defaultValue={defaults?.description ?? ""}
-            placeholder="Describe the tour — what travelers will see, do, and experience..."
-            className="min-h-27.5"
+          <TiptapEditor
+            content={description}
+            onChange={setDescription}
             disabled={disabled}
           />
+          <input type="hidden" name="description" value={description} />
         </div>
       </Section>
 

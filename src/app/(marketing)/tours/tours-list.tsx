@@ -2,6 +2,7 @@ import { Clock, Users, Star, ArrowRight, MapPin, Car, Sparkles } from "lucide-re
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/currency";
+import { stripHtml } from "@/lib/utils";
 
 interface Tour {
   id: string;
@@ -115,7 +116,7 @@ export function ToursList({ tours, currency }: ToursListProps) {
             <div className="flex flex-1 flex-col gap-4 p-5">
               {tour.description && (
                 <p className="text-xs leading-6 text-slate-500 line-clamp-2">
-                  {tour.description}
+                  {stripHtml(tour.description)}
                 </p>
               )}
 

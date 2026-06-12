@@ -3,6 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, Images } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface GalleryLightboxProps {
   images: string[];
@@ -17,6 +25,7 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
+  const autoplay = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
 
   const go = useCallback(
     (idx: number) => {
@@ -66,49 +75,70 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
 
   return (
     <>
-      {/* Thumbnail strip */}
+      {/* Thumbnail strip with Shadcn Carousel */}
       <div className="mt-5 mb-1">
-        <div className="flex items-center gap-2 mb-3">
-          <Images className="size-4 text-slate-400" />
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Gallery &middot; {images.length} photos
-          </span>
-        </div>
-        <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-          {images.map((img, idx) => (
-            <button
-              key={idx}
-              onClick={() => { setCurrent(idx); setOpen(true); }}
-              className="group relative shrink-0 overflow-hidden rounded-2xl focus:outline-none"
-              style={{ width: 128, height: 86 }}
-            >
-              <Image
-                src={img}
-                alt={`${tourName} photo ${idx + 1}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/30 transition-colors duration-300 rounded-2xl" />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="font-mono text-sm font-bold text-white drop-shadow-lg">
-                  {String(idx + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <div className="absolute inset-0 rounded-2xl ring-2 ring-inset ring-indigo-400/0 group-hover:ring-indigo-400/80 transition-all duration-300" />
-            </button>
-          ))}
-
-          <button
-            onClick={() => { setCurrent(0); setOpen(true); }}
-            className="group relative shrink-0 overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50 transition-colors duration-300 flex flex-col items-center justify-center gap-1 focus:outline-none"
-            style={{ width: 128, height: 86 }}
-          >
-            <Images className="size-5 text-slate-300 group-hover:text-indigo-400 transition-colors" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-500 transition-colors">
-              View all
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center gap-2">
+            <Images className="size-4 text-slate-400" />
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              Gallery &middot; {images.length} photos
             </span>
-          </button>
+          </div>
         </div>
+        
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          plugins={[autoplay.current]}
+          className="w-full group/carousel"
+        >
+          <CarouselContent className="-ml-3">
+            {images.map((img, idx) => (
+              <CarouselItem key={idx} className="pl-3 basis-auto">
+                <button
+                  onClick={() => { setCurrent(idx); setOpen(true); }}
+                  className="group relative block overflow-hidden rounded-2xl focus:outline-none ring-1 ring-slate-200"
+                  style={{ width: 140, height: 94 }}
+                >
+                  <Image
+                    src={img}
+                    alt={`${tourName} photo ${idx + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/30 transition-colors duration-300 rounded-2xl" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="font-mono text-sm font-bold text-white drop-shadow-lg">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                </button>
+              </CarouselItem>
+            ))}
+
+            <CarouselItem className="pl-3 basis-auto">
+              <button
+                onClick={() => { setCurrent(0); setOpen(true); }}
+                className="group relative flex flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50 transition-colors duration-300 focus:outline-none"
+                style={{ width: 140, height: 94 }}
+              >
+                <Images className="size-5 text-slate-300 group-hover:text-indigo-400 transition-colors" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-500 transition-colors">
+                  View all
+                </span>
+              </button>
+            </CarouselItem>
+          </CarouselContent>
+          
+          <div className="absolute top-1/2 -left-4 -translate-y-1/2 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
+            <CarouselPrevious className="static translate-y-0 h-8 w-8 bg-white/90 backdrop-blur-sm border-slate-200 text-slate-600 hover:text-primary" />
+          </div>
+          <div className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
+            <CarouselNext className="static translate-y-0 h-8 w-8 bg-white/90 backdrop-blur-sm border-slate-200 text-slate-600 hover:text-primary" />
+          </div>
+        </Carousel>
       </div>
 
       {/* Lightbox */}

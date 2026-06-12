@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import TiptapEditor from "@/components/tiptap-editor";
 
 import { createBlogPost, updateBlogPost } from "./actions";
 
@@ -344,14 +345,9 @@ function BlogFormFields({ defaults, isPending, onSubmit, submitLabel, pendingLab
               <Label htmlFor="blog-content">
                 Content <span className="text-destructive">*</span>
               </Label>
-              <Textarea
-                id="blog-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your post content here. Separate paragraphs with blank lines."
-                rows={14}
-                className="font-mono text-sm"
-                required
+              <TiptapEditor
+                content={content}
+                onChange={setContent}
                 disabled={isPending}
               />
             </div>

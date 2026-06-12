@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Clock, Star, Users, MapPin, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/currency";
+import { stripHtml } from "@/lib/utils";
+import Autoplay from "embla-carousel-autoplay";
+import { useRef } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -88,6 +93,7 @@ const cardColors = [
 ];
 
 export function PopularTours({ tours, currency }: PopularToursProps) {
+  const plugin = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
   if (tours.length === 0) return null;
 
   return (
@@ -100,7 +106,10 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
       </div>
 
       <div className="mx-auto max-w-6xl">
-        <Carousel opts={{ align: "start" }}>
+        <Carousel 
+          opts={{ align: "start", loop: true }}
+          plugins={[plugin.current]}
+        >
           {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2 sm:space-y-4">
@@ -235,7 +244,7 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
                       {tour.name}
                     </h3>
                     {tour.description && (
-                      <p className="mt-1 text-xs leading-6 text-slate-500 line-clamp-2">{tour.description}</p>
+                      <p className="mt-1 text-xs leading-6 text-slate-500 line-clamp-2">{stripHtml(tour.description)}</p>
                     )}
                   </div>
 

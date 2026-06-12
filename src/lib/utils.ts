@@ -26,3 +26,7 @@ export function slugify(text: string) {
     .replace(/^-+/, "") // Trim - from start of text
     .replace(/-+$/, ""); // Trim - from end of text
 }
+
+export function stripHtml(html: string) {
+  return html.replace(/<[^>]*>?/gm, "");
+}

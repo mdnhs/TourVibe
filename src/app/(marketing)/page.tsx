@@ -155,12 +155,13 @@ export default async function Home() {
     year: number;
     licensePlate: string;
     thumbnail: string;
+    gallery: string | null;
     tourCount: bigint;
   }
 
   const popularCarsRaw = (await db.$queryRaw`
     SELECT
-      v.id, v.make, v.model, v.year, v."licensePlate", v.thumbnail,
+      v.id, v.make, v.model, v.year, v."licensePlate", v.thumbnail, v.gallery,
       COUNT(tpv."tourPackageId") as "tourCount"
     FROM vehicle v
     LEFT JOIN tour_package_vehicle tpv ON tpv."vehicleId" = v.id

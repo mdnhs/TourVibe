@@ -360,11 +360,13 @@ export default async function TourDetailsPage({
                   Experience Description
                 </h2>
               </div>
-              <div className="prose prose-slate prose-base sm:prose-lg max-w-none text-slate-600 leading-relaxed">
-                {tour.description.split("\n\n").map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
+              <article 
+                className="prose prose-slate prose-base sm:prose-lg max-w-none text-slate-600 leading-relaxed
+                           prose-headings:font-heading prose-headings:font-bold 
+                           prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                           prose-img:rounded-2xl prose-img:shadow-lg"
+                dangerouslySetInnerHTML={{ __html: tour.description }}
+              />
             </section>
 
             {/* Highlights */}
