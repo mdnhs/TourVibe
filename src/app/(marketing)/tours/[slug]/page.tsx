@@ -225,7 +225,7 @@ export default async function TourDetailsPage({
   }
 
   return (
-    <div className="relative  pb-28 mx-auto max-w-6xl pt-4">
+    <div className="relative pb-28 mx-auto max-w-6xl pt-2 sm:pt-4 px-4 sm:px-0">
       {jsonLdSchema && (
         <Script
           id={`tour-schema-${tour.id}`}
@@ -235,9 +235,9 @@ export default async function TourDetailsPage({
         />
       )}
 
-      {/* ── Cinematic Hero — full width ── */}
+      {/* ── Cinematic Hero ── */}
       <div>
-        <div className="relative h-[70vh] min-h-130 overflow-hidden rounded-[2.5rem] shadow-2xl">
+        <div className="relative h-[50vh] sm:h-[70vh] min-h-100 sm:min-h-130 overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] shadow-2xl">
           {/* Background image */}
           <Image
             src={cloudinaryImage(tour.thumbnail, 1600)}
@@ -247,25 +247,25 @@ export default async function TourDetailsPage({
             priority
           />
           {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/50 to-slate-900/10" />
-          <div className="absolute inset-0 bg-linear-to-r from-slate-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-slate-900/10" />
+          <div className="absolute inset-0 bg-linear-to-r from-slate-950/30 to-transparent" />
 
           {/* Back link */}
-          <div className="absolute left-5 top-6">
+          <div className="absolute left-4 top-4 sm:left-5 sm:top-6">
             <Link
               href="/tours"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
             >
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-3.5 sm:size-4" />
               All Tours
             </Link>
           </div>
 
           {/* Gallery count badge */}
           {tour.gallery && (
-            <div className="absolute right-5 top-6">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
-                <Camera className="size-3.5" />
+            <div className="absolute right-4 top-4 sm:right-5 sm:top-6">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-white backdrop-blur-md">
+                <Camera className="size-3 sm:size-3.5" />
                 {tour.gallery
                   .split(",")
                   .map((s) => s.trim())
@@ -276,63 +276,49 @@ export default async function TourDetailsPage({
           )}
 
           {/* Bottom content */}
-          <div className="absolute inset-x-0 bottom-0 px-6 pb-8">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="space-y-4 max-w-3xl">
+          <div className="absolute inset-x-0 bottom-0 px-4 pb-6 sm:px-6 sm:pb-8">
+            <div className="flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-3 sm:space-y-4 max-w-3xl">
                 {/* Badges */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 border border-amber-400/30 px-3 py-1 text-xs font-bold text-amber-300 backdrop-blur-sm">
-                    <Star className="size-3 fill-amber-400 text-amber-400" />
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-amber-400/20 border border-amber-400/30 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold text-amber-300 backdrop-blur-sm">
+                    <Star className="size-2.5 sm:size-3 fill-amber-400 text-amber-400" />
                     {tour.avgRating ? tour.avgRating.toFixed(1) : "New"} ·{" "}
                     {tour.reviewCount}{" "}
                     {tour.reviewCount === 1 ? "review" : "reviews"}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur-sm">
-                    <Clock className="size-3" />
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-white/10 border border-white/20 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-white/80 backdrop-blur-sm">
+                    <Clock className="size-2.5 sm:size-3" />
                     {tour.duration}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur-sm">
-                    <Users className="size-3" />
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-white/10 border border-white/20 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-white/80 backdrop-blur-sm">
+                    <Users className="size-2.5 sm:size-3" />
                     Up to {tour.maxPersons}
                   </span>
                 </div>
 
                 {/* Title */}
-                <h1 className="font-heading text-4xl font-extrabold leading-tight tracking-tight text-white drop-shadow-sm sm:text-5xl lg:text-6xl">
+                <h1 className="font-heading text-2xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white drop-shadow-sm">
                   {tour.name}
                 </h1>
               </div>
-
-              {/* Price + CTA */}
-              {/* <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl">
-                <div className="flex flex-col items-center justify-center rounded-xl bg-white/15 px-5 py-3 text-white">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
-                    From
-                  </span>
-                  <span className="text-2xl font-black leading-none">
-                    {formatPrice(tour.price, currency)}
-                  </span>
-                  <span className="text-[10px] text-white/50">per hour</span>
-                </div>
-                <BookingButton tourId={tour.id} hourlyRate={tour.hourlyRate} currency={currency} minHours={tour.durationHours} vehicles={tour.vehicles} className="shrink-0" />
-              </div> */}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Gallery + content — right padding reserves space for sidebar ── */}
+      {/* ── Gallery + content ── */}
       <div className="lg:pr-[22rem]">
         {/* ── Promo video ── */}
         {tour.promoVideoUrl && (
-          <section className="mt-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-8 w-1.5 rounded-full bg-primary" />
-              <h2 className="font-heading text-2xl font-bold text-slate-950">
+          <section className="mt-6 sm:mt-8">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-primary" />
+              <h2 className="font-heading text-lg sm:text-2xl font-bold text-slate-950">
                 Tour preview
               </h2>
             </div>
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 shadow-xl">
+            <div className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 bg-slate-950 shadow-xl">
               <video
                 src={tour.promoVideoUrl}
                 poster={tour.thumbnail || undefined}
@@ -357,22 +343,24 @@ export default async function TourDetailsPage({
               .filter(Boolean)
               .map((u) => cloudinaryImage(u, 1600));
             return imgs.length > 0 ? (
-              <GalleryLightbox images={imgs} tourName={tour.name} />
+              <div className="mt-2 sm:mt-0">
+                <GalleryLightbox images={imgs} tourName={tour.name} />
+              </div>
             ) : null;
           })()}
 
-        <div className="pt-8">
+        <div className="pt-6 sm:pt-8">
           {/* ── Main content ── */}
-          <div className="space-y-16">
+          <div className="space-y-10 sm:space-y-16">
             {/* Description */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-1.5 rounded-full bg-primary" />
-                <h2 className="font-heading text-3xl font-bold text-slate-950">
+            <section className="space-y-4 sm:space-y-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-primary" />
+                <h2 className="font-heading text-xl sm:text-3xl font-bold text-slate-950">
                   Experience Description
                 </h2>
               </div>
-              <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed">
+              <div className="prose prose-slate prose-base sm:prose-lg max-w-none text-slate-600 leading-relaxed">
                 {tour.description.split("\n\n").map((para, i) => (
                   <p key={i}>{para}</p>
                 ))}
@@ -381,19 +369,19 @@ export default async function TourDetailsPage({
 
             {/* Highlights */}
             {tour.highlights && tour.highlights.split("\n").filter(Boolean).length > 0 && (
-              <section className="rounded-[2.5rem] bg-slate-50 p-8 md:p-12 border border-slate-100">
-                <h3 className="mb-8 font-heading text-2xl font-bold text-slate-950">
+              <section className="rounded-[1.5rem] sm:rounded-[2.5rem] bg-slate-50 p-6 sm:p-12 border border-slate-100">
+                <h3 className="mb-6 sm:mb-8 font-heading text-lg sm:text-2xl font-bold text-slate-950">
                   Tour Highlights
                 </h3>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                   {tour.highlights.split("\n").filter(Boolean).map((item, i) => (
-                    <div key={i} className="flex items-start gap-4">
-                      <div className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-                        <svg className="size-3 fill-current" viewBox="0 0 20 20">
+                    <div key={i} className="flex items-start gap-3 sm:gap-4">
+                      <div className="mt-1 flex size-4 sm:size-5 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                        <svg className="size-2.5 sm:size-3 fill-current" viewBox="0 0 20 20">
                           <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
                         </svg>
                       </div>
-                      <span className="text-lg font-medium text-slate-700">
+                      <span className="text-sm sm:text-lg font-medium text-slate-700">
                         {item}
                       </span>
                     </div>
@@ -404,14 +392,14 @@ export default async function TourDetailsPage({
 
             {/* Vehicles */}
             {tour.vehicles.length > 0 && (
-              <section className="space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-1.5 rounded-full bg-indigo-500" />
-                  <h2 className="font-heading text-3xl font-bold text-slate-950">
+              <section className="space-y-6 sm:space-y-8">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-indigo-500" />
+                  <h2 className="font-heading text-xl sm:text-3xl font-bold text-slate-950">
                     Vehicles for this tour
                   </h2>
                 </div>
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
                   {tour.vehicles.map((v) => {
                     const photos = [
                       v.thumbnail,
@@ -420,7 +408,7 @@ export default async function TourDetailsPage({
                     return (
                       <div
                         key={v.id}
-                        className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-xl hover:shadow-slate-200/50"
+                        className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-xl hover:shadow-slate-200/50"
                       >
                         <div className="relative aspect-video bg-slate-100">
                           {photos[0] && (
@@ -433,18 +421,18 @@ export default async function TourDetailsPage({
                             />
                           )}
                         </div>
-                        <div className="space-y-3 p-5">
+                        <div className="space-y-2 sm:space-y-3 p-4 sm:p-5">
                           <div className="flex items-center gap-2">
-                            <Car className="size-5 text-indigo-500" />
-                            <p className="font-heading text-lg font-bold text-slate-950">
+                            <Car className="size-4 sm:size-5 text-indigo-500" />
+                            <p className="font-heading text-base sm:text-lg font-bold text-slate-950">
                               {v.make} {v.model}
                             </p>
-                            <span className="ml-auto text-sm font-medium text-slate-400">
+                            <span className="ml-auto text-xs sm:text-sm font-medium text-slate-400">
                               {v.year}
                             </span>
                           </div>
                           {photos.length > 1 && (
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                               {photos.slice(1, 5).map((url) => (
                                 <a
                                   key={url}
@@ -473,11 +461,11 @@ export default async function TourDetailsPage({
             )}
 
             {/* Reviews */}
-            <section className="space-y-10">
+            <section className="space-y-6 sm:space-y-10">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-1.5 rounded-full bg-amber-400" />
-                  <h2 className="font-heading text-3xl font-bold text-slate-950">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-amber-400" />
+                  <h2 className="font-heading text-xl sm:text-3xl font-bold text-slate-950">
                     Traveler Reviews
                   </h2>
                 </div>
@@ -499,16 +487,16 @@ export default async function TourDetailsPage({
               )}
 
               {tour.reviews.length > 0 ? (
-                <div className="grid gap-5 sm:gap-6">
+                <div className="grid gap-4 sm:gap-6">
                   {tour.reviews.map((rev) => (
                     <div
                       key={rev.id}
-                      className="group relative rounded-2xl sm:rounded-[2rem] bg-white p-5 sm:p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 ring-1 ring-slate-100"
+                      className="group relative rounded-[1.25rem] sm:rounded-[2rem] bg-white p-5 sm:p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 ring-1 ring-slate-100"
                     >
                       <Quote className="hidden sm:block absolute right-8 top-8 size-12 text-slate-50 transition-colors group-hover:text-indigo-50" />
                       <div className="relative flex flex-col gap-4 sm:gap-6">
                         <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                          <div className="relative size-12 sm:size-14 overflow-hidden rounded-2xl ring-2 ring-white shadow-md shrink-0">
+                          <div className="relative size-10 sm:size-14 overflow-hidden rounded-xl sm:rounded-2xl ring-2 ring-white shadow-md shrink-0">
                             {rev.userImage ? (
                               <Image
                                 src={rev.userImage}
@@ -518,12 +506,12 @@ export default async function TourDetailsPage({
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-                                <Users className="size-6" />
+                                <Users className="size-5 sm:size-6" />
                               </div>
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-slate-950 truncate">
+                            <p className="text-sm sm:text-base font-bold text-slate-950 truncate">
                               {rev.userName}
                             </p>
                             <div className="mt-0.5 flex gap-0.5">
@@ -531,7 +519,7 @@ export default async function TourDetailsPage({
                                 <Star
                                   key={i}
                                   className={cn(
-                                    "size-3",
+                                    "size-2.5 sm:size-3",
                                     i < rev.rating
                                       ? "fill-amber-400 text-amber-400"
                                       : "text-slate-200",
@@ -540,7 +528,7 @@ export default async function TourDetailsPage({
                               ))}
                             </div>
                           </div>
-                          <span className="ml-auto text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400">
+                          <span className="ml-auto text-[9px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400">
                             {new Date(rev.createdAt).toLocaleDateString(
                               "en-US",
                               { month: "short", year: "numeric" },
@@ -548,12 +536,12 @@ export default async function TourDetailsPage({
                           </span>
                         </div>
                         {rev.comment && (
-                          <p className="text-base sm:text-lg leading-relaxed text-slate-600">
+                          <p className="text-sm sm:text-lg leading-relaxed text-slate-600">
                             {rev.comment}
                           </p>
                         )}
                         {rev.photos.length > 0 && (
-                          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                          <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
                             {rev.photos.map((url) => (
                               <a
                                 key={url}
@@ -578,14 +566,14 @@ export default async function TourDetailsPage({
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl sm:rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 py-14 sm:py-20 text-center">
-                  <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
-                    <Star className="size-8 text-slate-200" />
+                <div className="rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 py-12 sm:py-20 text-center">
+                  <div className="mx-auto mb-3 sm:mb-4 flex size-14 sm:size-16 items-center justify-center rounded-2xl sm:rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+                    <Star className="size-6 sm:size-8 text-slate-200" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-950">
+                  <h3 className="text-base sm:text-xl font-bold text-slate-950">
                     No reviews yet
                   </h3>
-                  <p className="text-slate-500 px-4 text-sm sm:text-base">
+                  <p className="text-slate-500 px-4 text-xs sm:text-base">
                     Be the first traveler to share your experience!
                   </p>
                 </div>
@@ -596,9 +584,9 @@ export default async function TourDetailsPage({
       </div>
 
       {/* Sidebar — absolute on desktop: overlays hero at 40% from top */}
-      <aside className="mt-8 space-y-8 lg:absolute lg:right-5 lg:top-[45vh] lg:mt-0 lg:w-80 lg:z-10">
+      <aside className="mt-8 space-y-6 sm:space-y-8 lg:absolute lg:right-5 lg:top-[45vh] lg:mt-0 lg:w-80 lg:z-10">
         <div
-          className="relative overflow-hidden rounded-[2.5rem] bg-[#05020f] p-8 text-white shadow-md shadow-black/30"
+          className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] bg-[#05020f] p-6 sm:p-8 text-white shadow-md shadow-black/30"
           style={{
             backgroundImage:
               "linear-gradient(135deg, #0a0520 0%, #0d0a2e 40%, #130826 70%, #0a0318 100%)",
@@ -624,25 +612,25 @@ export default async function TourDetailsPage({
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/60 to-transparent" />
 
           <div className="relative">
-            <h3 className="mb-6 font-heading text-2xl font-bold">
+            <h3 className="mb-4 sm:mb-6 font-heading text-xl sm:text-2xl font-bold">
               Booking Details
             </h3>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <span className="text-white/50">Price per hour</span>
-                <span className="text-2xl font-black">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+                <span className="text-sm sm:text-base text-white/50">Price per hour</span>
+                <span className="text-xl sm:text-2xl font-black">
                   {formatPrice(tour.price, currency)}
                 </span>
               </div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <span className="text-white/50">Total Duration</span>
-                <span className="font-bold">{tour.duration}</span>
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+                <span className="text-sm sm:text-base text-white/50">Total Duration</span>
+                <span className="text-sm sm:text-base font-bold">{tour.duration}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <span className="text-white/50">Group Size</span>
-                <span className="font-bold">Max {tour.maxPersons}</span>
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+                <span className="text-sm sm:text-base text-white/50">Group Size</span>
+                <span className="text-sm sm:text-base font-bold">Max {tour.maxPersons}</span>
               </div>
-              <div className="space-y-4 pt-4">
+              <div className="space-y-3 sm:space-y-4 pt-2 sm:pt-4">
                 <BookingButton
                   tourId={tour.id}
                   hourlyRate={tour.hourlyRate}
@@ -650,9 +638,9 @@ export default async function TourDetailsPage({
                   minHours={tour.durationHours}
                   maxPersons={tour.maxPersons}
                   vehicles={tour.vehicles}
-                  className="w-full h-14 text-lg"
+                  className="w-full h-12 sm:h-14 text-base sm:text-lg"
                 />
-                <p className="text-center text-xs font-medium text-white/30">
+                <p className="text-center text-[10px] sm:text-xs font-medium text-white/30">
                   Secure payment via Stripe &middot; Instant confirmation
                 </p>
               </div>
@@ -660,20 +648,20 @@ export default async function TourDetailsPage({
           </div>
         </div>
 
-        <div className="rounded-[2.5rem] bg-indigo-50 p-8 ring-1 ring-indigo-100">
-          <h4 className="mb-4 font-bold text-indigo-900">Need Help?</h4>
-          <p className="mb-6 text-sm leading-relaxed text-indigo-700/80">
+        <div className="rounded-[1.5rem] sm:rounded-[2.5rem] bg-indigo-50 p-6 sm:p-8 ring-1 ring-indigo-100">
+          <h4 className="mb-3 sm:mb-4 font-bold text-indigo-900">Need Help?</h4>
+          <p className="mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed text-indigo-700/80">
             Have questions about this tour or need a custom itinerary? Our
             experts are available 24/7.
           </p>
-          <div className="flex flex-col gap-3">
-            <button className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white font-bold text-indigo-900 shadow-sm transition-transform active:scale-95">
-              <MapPin className="size-4" />
+          <div className="flex flex-col gap-2.5 sm:gap-3">
+            <button className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-white text-sm sm:text-base font-bold text-indigo-900 shadow-sm transition-transform active:scale-95">
+              <MapPin className="size-3.5 sm:size-4" />
               View Route Map
             </button>
             <Link
               href="/#contact"
-              className="flex h-12 items-center justify-center rounded-2xl bg-indigo-600 font-bold text-white shadow-lg shadow-indigo-200 transition-transform active:scale-95"
+              className="flex h-11 sm:h-12 items-center justify-center rounded-xl sm:rounded-2xl bg-indigo-600 text-sm sm:text-base font-bold text-white shadow-lg shadow-indigo-200 transition-transform active:scale-95"
             >
               Contact Support
             </Link>

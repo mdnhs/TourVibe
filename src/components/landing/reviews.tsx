@@ -1,5 +1,12 @@
 import { Star, Quote, BadgeCheck, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface Review {
   name: string;
@@ -86,160 +93,163 @@ export function Reviews({ reviews }: ReviewsProps) {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
 
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-gradient-to-r from-violet-400/10 to-indigo-400/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-violet-300 animate-in fade-in slide-in-from-left-4 duration-500">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-violet-400" />
-              </span>
-              Traveler Stories
-            </div>
-
-            <h2
-              className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
-              style={{ animationDelay: "80ms" }}
-            >
-              Loved by{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 bg-gradient-to-r from-violet-300 to-indigo-300 bg-clip-text text-transparent">travelers</span>
-                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-violet-400/50 to-indigo-400/50" aria-hidden="true" />
-              </span>{" "}
-              worldwide
-            </h2>
-
-            <p
-              className="max-w-md text-sm leading-7 text-white/50 animate-in fade-in duration-500"
-              style={{ animationDelay: "140ms" }}
-            >
-              Real words from real adventurers — unfiltered experiences straight from the road.
-            </p>
-          </div>
-
-          {/* Stats cluster */}
-          <div
-            className="flex shrink-0 items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm animate-in fade-in slide-in-from-right-4 duration-500"
-            style={{ animationDelay: "160ms" }}
-          >
-            <div className="text-center">
-              <div className="flex justify-center gap-0.5 mb-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
-                ))}
+        <Carousel opts={{ align: "start" }}>
+          {/* Header */}
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-gradient-to-r from-violet-400/10 to-indigo-400/10 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-violet-300 animate-in fade-in slide-in-from-left-4 duration-500">
+                <span className="relative flex size-1 sm:size-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
+                  <span className="relative inline-flex size-1 sm:size-1.5 rounded-full bg-violet-400" />
+                </span>
+                Traveler Stories
               </div>
-              <p className="font-heading text-xl font-bold leading-none bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">4.9</p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/35">Rating</p>
-            </div>
-            <div className="h-10 w-px bg-white/10" />
-            <div className="text-center">
-              <p className="font-heading text-xl font-bold leading-none bg-gradient-to-r from-cyan-300 to-sky-400 bg-clip-text text-transparent">500+</p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/35">Travelers</p>
-            </div>
-            <div className="h-10 w-px bg-white/10" />
-            <div className="text-center">
-              <p className="font-heading text-xl font-bold leading-none bg-gradient-to-r from-emerald-300 to-teal-400 bg-clip-text text-transparent">98%</p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/35">Happy</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Cards */}
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {reviews.map((review, i) => {
-            const accent = cardAccents[i % cardAccents.length];
-            const initials = review.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-
-            return (
-              <div
-                key={review.name}
-                style={{ animationDelay: `${200 + i * 80}ms` }}
-                className="group animate-in fade-in slide-in-from-bottom-4 duration-500
-                           relative flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06]
-                           backdrop-blur-sm transition-all hover:-translate-y-1.5 hover:border-white/20 hover:bg-white/10 hover:shadow-xl hover:shadow-black/40"
+              <h2
+                className="font-heading text-2xl font-extrabold tracking-tight sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
+                style={{ animationDelay: "80ms" }}
               >
-                {/* Hover glow */}
-                <div className={`pointer-events-none absolute -top-10 -right-10 size-44 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
+                Loved by{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10 bg-gradient-to-r from-violet-300 to-indigo-300 bg-clip-text text-transparent">travelers</span>
+                  <span className="absolute -bottom-0.5 left-0 h-0.5 sm:-bottom-1 sm:h-1 w-full rounded-full bg-gradient-to-r from-violet-400/50 to-indigo-400/50" aria-hidden="true" />
+                </span>{" "}
+                worldwide
+              </h2>
 
-                {/* Top gradient bar */}
-                <div className={`h-1.5 w-full bg-gradient-to-r ${accent.bar}`} />
+              <p
+                className="max-w-md text-xs sm:text-sm leading-relaxed sm:leading-7 text-white/50 animate-in fade-in duration-500"
+                style={{ animationDelay: "140ms" }}
+              >
+                Real words from real adventurers — unfiltered experiences.
+              </p>
+            </div>
 
-                <div className="flex flex-1 flex-col gap-4 p-6">
-                  {/* Trip type + quote icon */}
-                  <div className="flex items-center justify-between">
-                    <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-sm ${accent.tripBorder}`}>
-                      {accent.trip}
-                    </span>
-                    <Quote className="size-6 text-white/10" />
+            {/* Right side controls and stats */}
+            <div className="flex flex-col gap-4 sm:items-end">
+              <div className="flex items-center gap-2 sm:gap-4 animate-in fade-in slide-in-from-right-4 duration-500" style={{ animationDelay: "160ms" }}>
+                {/* Stats cluster - more compact on mobile */}
+                <div className="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-sm sm:gap-4 sm:rounded-2xl sm:px-5 sm:py-4">
+                  <div className="text-center">
+                    <p className="font-heading text-base font-bold leading-none bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent sm:text-xl">4.9</p>
+                    <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-widest text-white/35 sm:text-[10px]">Rating</p>
                   </div>
-
-                  {/* Stars */}
-                  <div className="flex gap-1">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <Star key={idx} className="size-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-
-                  {/* Quote text */}
-                  <p className="flex-1 text-sm leading-7 text-white/70">
-                    &ldquo;{review.quote}&rdquo;
-                  </p>
-
-                  {/* Traveler photos */}
-                  {review.photos && review.photos.length > 0 && (
-                    <div className="flex gap-2">
-                      {review.photos.slice(0, 4).map((url, idx) => (
-                        <div
-                          key={url}
-                          className="relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={url} alt="Traveler photo" className="size-full object-cover" />
-                          {idx === 3 && review.photos!.length > 4 && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-xs font-bold text-white">
-                              +{review.photos!.length - 4}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Divider */}
-                  <div className={`h-px w-full bg-gradient-to-r ${accent.bar} opacity-20`} />
-
-                  {/* Author */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white shadow-md overflow-hidden ${accent.avatarGrad} ${accent.avatarShadow}`}>
-                        {review.image ? (
-                          <img src={review.image} alt={review.name} className="size-full object-cover" />
-                        ) : (
-                          initials
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-white leading-none">{review.name}</p>
-                        <p className="mt-1 text-xs text-white/40">{review.role}</p>
-                      </div>
-                    </div>
-                    {/* Verified badge */}
-                    <div className="flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-400">
-                      <BadgeCheck className="size-3" />
-                      Verified
-                    </div>
-                  </div>
-
-                  {/* Bottom accent */}
-                  <div className="flex items-center gap-2">
-                    <div className={`h-0.5 w-10 rounded-full bg-gradient-to-r ${accent.bar}`} />
-                    <div className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${accent.bar} opacity-40`} />
+                  <div className="h-6 w-px bg-white/10 sm:h-10" />
+                  <div className="text-center">
+                    <p className="font-heading text-base font-bold leading-none bg-gradient-to-r from-cyan-300 to-sky-400 bg-clip-text text-transparent sm:text-xl">500+</p>
+                    <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-widest text-white/35 sm:text-[10px]">Travelers</p>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <CarouselPrevious className="static h-8 w-8 translate-y-0 border-white/10 bg-white/5 text-white shadow-sm transition-all hover:bg-white/10 hover:text-violet-400 disabled:opacity-20 sm:h-10 sm:w-10" />
+                  <CarouselNext className="static h-8 w-8 translate-y-0 border-white/10 bg-white/5 text-white shadow-sm transition-all hover:bg-white/10 hover:text-violet-400 disabled:opacity-20 sm:h-10 sm:w-10" />
+                </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+
+          {/* Cards */}
+          <CarouselContent className="mt-12 -ml-5">
+            {reviews.map((review, i) => {
+              const accent = cardAccents[i % cardAccents.length];
+              const initials = review.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+
+              return (
+                <CarouselItem
+                  key={review.name}
+                  className="basis-full pl-5 sm:basis-1/2 lg:basis-1/3"
+                >
+                  <div
+                    style={{ animationDelay: `${200 + i * 80}ms` }}
+                    className="group animate-in fade-in slide-in-from-bottom-4 duration-500
+                               relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06]
+                               backdrop-blur-sm transition-all hover:-translate-y-1.5 hover:border-white/20 hover:bg-white/10 hover:shadow-xl hover:shadow-black/40"
+                  >
+                    {/* Hover glow */}
+                    <div className={`pointer-events-none absolute -top-10 -right-10 size-44 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
+
+                    {/* Top gradient bar */}
+                    <div className={`h-1.5 w-full bg-gradient-to-r ${accent.bar}`} />
+
+                    <div className="flex flex-1 flex-col gap-4 p-6">
+                      {/* Trip type + quote icon */}
+                      <div className="flex items-center justify-between">
+                        <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-sm ${accent.tripBorder}`}>
+                          {accent.trip}
+                        </span>
+                        <Quote className="size-6 text-white/10" />
+                      </div>
+
+                      {/* Stars */}
+                      <div className="flex gap-1">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <Star key={idx} className="size-3.5 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+
+                      {/* Quote text */}
+                      <p className="flex-1 text-sm leading-7 text-white/70">
+                        &ldquo;{review.quote}&rdquo;
+                      </p>
+
+                      {/* Traveler photos */}
+                      {review.photos && review.photos.length > 0 && (
+                        <div className="flex gap-2">
+                          {review.photos.slice(0, 4).map((url, idx) => (
+                            <div
+                              key={url}
+                              className="relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={url} alt="Traveler photo" className="size-full object-cover" />
+                              {idx === 3 && review.photos!.length > 4 && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-xs font-bold text-white">
+                                  +{review.photos!.length - 4}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Divider */}
+                      <div className={`h-px w-full bg-gradient-to-r ${accent.bar} opacity-20`} />
+
+                      {/* Author */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white shadow-md overflow-hidden ${accent.avatarGrad} ${accent.avatarShadow}`}>
+                            {review.image ? (
+                              <img src={review.image} alt={review.name} className="size-full object-cover" />
+                            ) : (
+                              initials
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-white leading-none">{review.name}</p>
+                            <p className="mt-1 text-xs text-white/40">{review.role}</p>
+                          </div>
+                        </div>
+                        {/* Verified badge */}
+                        <div className="flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-400">
+                          <BadgeCheck className="size-3" />
+                          Verified
+                        </div>
+                      </div>
+
+                      {/* Bottom accent */}
+                      <div className="flex items-center gap-2">
+                        <div className={`h-0.5 w-10 rounded-full bg-gradient-to-r ${accent.bar}`} />
+                        <div className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${accent.bar} opacity-40`} />
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
 
         {/* Bottom CTA */}
         <div

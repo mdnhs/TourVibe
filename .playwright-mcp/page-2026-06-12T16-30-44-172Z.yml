@@ -1,0 +1,785 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e12]:
+      - generic [ref=e13]:
+        - link "A1 Tour A1 Tour Travel Beyond Expectation" [ref=e14] [cursor=pointer]:
+          - /url: /
+          - img "A1 Tour" [ref=e16]
+          - generic [ref=e17]:
+            - paragraph [ref=e18]: A1 Tour
+            - paragraph [ref=e19]: Travel Beyond Expectation
+        - navigation [ref=e20]:
+          - link "Home" [ref=e21] [cursor=pointer]:
+            - /url: /
+            - text: Home
+          - link "Tours" [ref=e23] [cursor=pointer]:
+            - /url: /tours
+            - text: Tours
+          - link "Blog" [ref=e24] [cursor=pointer]:
+            - /url: /blog
+            - text: Blog
+          - link "About" [ref=e25] [cursor=pointer]:
+            - /url: /#about
+            - text: About
+          - link "Contact" [ref=e26] [cursor=pointer]:
+            - /url: /#contact
+            - text: Contact
+        - generic [ref=e27]:
+          - link "Login" [ref=e28] [cursor=pointer]:
+            - /url: /login
+          - link "Get Started" [ref=e29] [cursor=pointer]:
+            - /url: /signup
+            - img [ref=e30]
+            - text: Get Started
+            - img [ref=e33]
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]: Your Journey Starts Here
+            - generic [ref=e46]:
+              - heading "Discover Ireland." [level=1] [ref=e47]:
+                - text: Discover
+                - generic [ref=e48]: Ireland.
+              - paragraph [ref=e50]: Book your next adventure with our curated selection of scenic road trips across the Emerald Isle.
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - img [ref=e53]
+                - textbox "Search tour, city or place..." [ref=e56]
+              - button "Search" [ref=e57]
+            - generic [ref=e58]:
+              - generic [ref=e59]: Popular
+              - button "🏖️ Cork" [ref=e60]:
+                - generic [ref=e61]: 🏖️
+                - text: Cork
+                - img [ref=e62]
+              - button "🏔️ Galway" [ref=e64]:
+                - generic [ref=e65]: 🏔️
+                - text: Galway
+                - img [ref=e66]
+              - button "🏝️ Killarney" [ref=e68]:
+                - generic [ref=e69]: 🏝️
+                - text: Killarney
+                - img [ref=e70]
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - img [ref=e75]
+                - paragraph [ref=e78]: 62+
+                - paragraph [ref=e80]: Tour Packages
+              - generic [ref=e81]:
+                - img [ref=e83]
+                - paragraph [ref=e87]: 22+
+                - paragraph [ref=e89]: Fleet Vehicles
+              - generic [ref=e90]:
+                - img [ref=e92]
+                - paragraph [ref=e94]: 1002+
+                - paragraph [ref=e96]: Happy Travelers
+              - generic [ref=e97]:
+                - img [ref=e99]
+                - paragraph [ref=e104]: 152+
+                - paragraph [ref=e106]: Guest Reviews
+          - generic [ref=e107]:
+            - generic [ref=e109]:
+              - img [ref=e111]
+              - generic [ref=e115]:
+                - paragraph [ref=e116]: Weather
+                - paragraph [ref=e117]: 14°C · Breezy
+            - generic [ref=e119]:
+              - generic [ref=e120]:
+                - generic [ref=e121]: Active Route
+                - generic [ref=e122]: Live
+              - paragraph [ref=e124]: Kinsale & Blarney Castle Shore Excursion from Cork, Cobh & Ringaskiddy
+              - paragraph [ref=e125]: 1 Hour
+              - generic [ref=e126]:
+                - generic [ref=e127]:
+                  - paragraph [ref=e128]: €70
+                  - paragraph [ref=e129]: Price
+                - generic [ref=e131]:
+                  - paragraph [ref=e132]: "1"
+                  - paragraph [ref=e133]: Reviews
+                - generic [ref=e135]:
+                  - paragraph [ref=e136]: 5.0★
+                  - paragraph [ref=e137]: Rating
+            - generic [ref=e138]:
+              - generic [ref=e145]:
+                - img [ref=e146]
+                - text: Live Tracking
+              - generic [ref=e157]:
+                - generic [ref=e158]: 1 driver live
+                - generic [ref=e159]: ·
+                - generic [ref=e160]: less than a minute ago
+                - button "Refresh" [ref=e161]:
+                  - img [ref=e162]
+              - generic [ref=e167]:
+                - generic [ref=e170]: Cobh
+                - generic [ref=e173]: Galway
+                - generic [ref=e176]: Cork
+        - generic [ref=e178]:
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - generic [ref=e181]: Most Loved Tours
+              - heading "Handpicked adventures across Ireland" [level=2] [ref=e185]:
+                - text: Handpicked
+                - generic [ref=e186]: adventures
+                - text: across Ireland
+              - paragraph [ref=e188]: Each tour is personally curated by our team — chosen for its scenery, culture and the memories it creates.
+            - link "Explore all tours" [ref=e189] [cursor=pointer]:
+              - /url: /tours
+              - text: Explore all tours
+              - img [ref=e190]
+          - region [ref=e192]:
+            - generic [ref=e194]:
+              - group [ref=e195]:
+                - link "Kinsale & Blarney Castle Shore Excursion from Cork, Cobh & Ringaskiddy Coastal 5.0 From €70 /hour 1 Hour Kinsale & Blarney Castle Shore Excursion from Cork, Cobh & Ringaskiddy Experience one of Ireland’s most popular day tours with a visit to the charming seaside town of Kinsale and the world-famous Blarney Castle. This private tour is ideal for cruise passengers arriving at Cobh Port or Ringaskiddy Port, as well as visitors staying in Cork. Discover the colorful streets of Kinsale, explore the historic Charles Fort, enjoy breathtaking views from the Old Head of Kinsale, and visit the legendary Blarney Castle where you can kiss the famous Blarney Stone. Complete your journey with shopping and Irish souvenirs at Blarney Woollen Mills. Our comfortable vehicle accommodates up to 6 passengers, making it perfect for families and small groups. Up to 6 guests 1 review Book this tour" [ref=e196] [cursor=pointer]:
+                  - /url: /tours/kinsale-blarney-castle-shore-excursion-from-cork-cobh-ringaskiddy
+                  - generic [ref=e197]:
+                    - img "Kinsale & Blarney Castle Shore Excursion from Cork, Cobh & Ringaskiddy" [ref=e198]
+                    - generic [ref=e200]: Coastal
+                    - generic [ref=e201]:
+                      - img [ref=e202]
+                      - text: "5.0"
+                    - generic [ref=e204]:
+                      - paragraph [ref=e205]: From
+                      - paragraph [ref=e206]: €70 /hour
+                    - generic [ref=e207]:
+                      - img [ref=e208]
+                      - text: 1 Hour
+                  - generic [ref=e212]:
+                    - generic [ref=e213]:
+                      - heading "Kinsale & Blarney Castle Shore Excursion from Cork, Cobh & Ringaskiddy" [level=3] [ref=e214]
+                      - paragraph [ref=e215]: Experience one of Ireland’s most popular day tours with a visit to the charming seaside town of Kinsale and the world-famous Blarney Castle. This private tour is ideal for cruise passengers arriving at Cobh Port or Ringaskiddy Port, as well as visitors staying in Cork. Discover the colorful streets of Kinsale, explore the historic Charles Fort, enjoy breathtaking views from the Old Head of Kinsale, and visit the legendary Blarney Castle where you can kiss the famous Blarney Stone. Complete your journey with shopping and Irish souvenirs at Blarney Woollen Mills. Our comfortable vehicle accommodates up to 6 passengers, making it perfect for families and small groups.
+                    - generic [ref=e216]:
+                      - generic [ref=e217]:
+                        - img [ref=e218]
+                        - text: Up to 6 guests
+                      - generic [ref=e224]:
+                        - img [ref=e225]
+                        - text: 1 review
+                    - generic [ref=e227]:
+                      - text: Book this tour
+                      - img [ref=e228]
+              - group [ref=e230]:
+                - link "Test Package Heritage 5.0 From €10 /hour 5 to 6 hours Test Package Test Desc Up to 6 guests 1 review Book this tour" [ref=e231] [cursor=pointer]:
+                  - /url: /tours/test-package
+                  - generic [ref=e232]:
+                    - img "Test Package" [ref=e233]
+                    - generic [ref=e235]: Heritage
+                    - generic [ref=e236]:
+                      - img [ref=e237]
+                      - text: "5.0"
+                    - generic [ref=e239]:
+                      - paragraph [ref=e240]: From
+                      - paragraph [ref=e241]: €10 /hour
+                    - generic [ref=e242]:
+                      - img [ref=e243]
+                      - text: 5 to 6 hours
+                  - generic [ref=e247]:
+                    - generic [ref=e248]:
+                      - heading "Test Package" [level=3] [ref=e249]
+                      - paragraph [ref=e250]: Test Desc
+                    - generic [ref=e251]:
+                      - generic [ref=e252]:
+                        - img [ref=e253]
+                        - text: Up to 6 guests
+                      - generic [ref=e259]:
+                        - img [ref=e260]
+                        - text: 1 review
+                    - generic [ref=e262]:
+                      - text: Book this tour
+                      - img [ref=e263]
+              - group [ref=e265]:
+                - link [ref=e266] [cursor=pointer]:
+                  - /url: /tours/torc-waterfall-killarney-nature-escape-tour
+                  - generic [ref=e267]:
+                    - img "Torc Waterfall & Killarney Nature Escape Tour" [ref=e268]
+                    - generic [ref=e270]: Mountain
+                    - generic [ref=e271]:
+                      - img [ref=e272]
+                      - text: New
+                    - generic [ref=e275]:
+                      - paragraph [ref=e276]: From
+                      - paragraph [ref=e277]: €70 /hour
+                    - generic [ref=e278]:
+                      - img [ref=e279]
+                      - text: 5 to 6 hours
+                  - generic [ref=e283]:
+                    - generic [ref=e284]:
+                      - heading "Torc Waterfall & Killarney Nature Escape Tour" [level=3] [ref=e285]
+                      - paragraph [ref=e286]: Escape into the breathtaking natural beauty of Ireland with our premium Torc Waterfall & Killarney Nature Escape Tour by A1Tour.ie. This luxury private experience takes guests deep into the heart of County Kerry, where stunning landscapes, peaceful forests, mountain scenery, and authentic Irish charm create one of Ireland’s most unforgettable travel experiences. Located within the world-famous Killarney National Park, Torc Waterfall is one of Ireland’s most iconic natural attractions. Surrounded by ancient woodland and scenic walking trails, the waterfall cascades beautifully through the forest landscape, offering visitors a peaceful and refreshing connection to Ireland’s wild natural beauty. Guests will enjoy a scenic private journey through picturesque countryside roads, lakeside viewpoints, and mountain landscapes while traveling in comfort with a professional driver service. The tour also provides opportunities to explore nearby Killarney attractions, traditional Irish scenery, and stunning photography locations throughout the experience. Perfect for couples, families, nature lovers, photographers, and private groups, this professionally curated tour combines luxury travel comfort with the tranquility and beauty of Ireland’s most celebrated natural landscapes.
+                    - generic [ref=e287]:
+                      - generic [ref=e288]:
+                        - img [ref=e289]
+                        - text: Up to 6 guests
+                      - generic [ref=e295]: Be the first to review
+                    - generic [ref=e296]:
+                      - text: Book this tour
+                      - img [ref=e297]
+              - group [ref=e299]:
+                - link [ref=e300] [cursor=pointer]:
+                  - /url: /tours/kinsale-coastal-charm-heritage-private-tour
+                  - generic [ref=e301]:
+                    - img "Kinsale Coastal Charm & Heritage Private Tour" [ref=e302]
+                    - generic [ref=e304]: City
+                    - generic [ref=e305]:
+                      - img [ref=e306]
+                      - text: New
+                    - generic [ref=e309]:
+                      - paragraph [ref=e310]: From
+                      - paragraph [ref=e311]: €70 /hour
+                    - generic [ref=e312]:
+                      - img [ref=e313]
+                      - text: 5 to 6 hours
+                  - generic [ref=e317]:
+                    - generic [ref=e318]:
+                      - heading "Kinsale Coastal Charm & Heritage Private Tour" [level=3] [ref=e319]
+                      - paragraph [ref=e320]: Experience the beauty, culture, and coastal elegance of Ireland with our exclusive Kinsale Coastal Charm & Heritage Private Tour by A1Tour.ie. This premium private journey takes guests to one of Ireland’s most picturesque seaside towns, famous for its colorful streets, maritime heritage, gourmet food culture, and spectacular Atlantic scenery. Located in County Cork along Ireland’s stunning southern coastline, Kinsale is widely celebrated as one of the country’s most charming destinations. Visitors can stroll through vibrant harbor streets, admire historic architecture, enjoy breathtaking ocean views, and discover the town’s rich connection to Irish history and maritime traditions. Travel in luxury through scenic countryside and coastal routes while enjoying personalized sightseeing opportunities tailored to your interests. Whether you are exploring local heritage sites, relaxing beside the harbor, capturing unforgettable photography, or simply experiencing authentic Irish hospitality, this tour delivers a refined and memorable travel experience. Perfect for couples, families, cruise visitors, photographers, and private groups, the Kinsale experience combines premium comfort, cultural exploration, and scenic coastal beauty with the trusted service and professionalism of A1Tour.ie.
+                    - generic [ref=e321]:
+                      - generic [ref=e322]:
+                        - img [ref=e323]
+                        - text: Up to 6 guests
+                      - generic [ref=e329]: Be the first to review
+                    - generic [ref=e330]:
+                      - text: Book this tour
+                      - img [ref=e331]
+              - group [ref=e333]:
+                - link [ref=e334] [cursor=pointer]:
+                  - /url: /tours/charles-fort-heritage-kinsale-scenic-tour
+                  - generic [ref=e335]:
+                    - img "Charles Fort Heritage & Kinsale Scenic Tour" [ref=e336]
+                    - generic [ref=e338]: Countryside
+                    - generic [ref=e339]:
+                      - img [ref=e340]
+                      - text: New
+                    - generic [ref=e343]:
+                      - paragraph [ref=e344]: From
+                      - paragraph [ref=e345]: €70 /hour
+                    - generic [ref=e346]:
+                      - img [ref=e347]
+                      - text: 5 to 6 hours
+                  - generic [ref=e351]:
+                    - generic [ref=e352]:
+                      - heading "Charles Fort Heritage & Kinsale Scenic Tour" [level=3] [ref=e353]
+                      - paragraph [ref=e354]: Step into Ireland’s fascinating military and maritime history with our premium Charles Fort Heritage & Kinsale Scenic Tour by A1Tour.ie. This luxury private experience takes guests to one of Ireland’s most impressive historic fortresses while showcasing the beauty, culture, and coastal charm of County Cork. Located overlooking the spectacular waters of Kinsale Harbour, Charles Fort is a beautifully preserved 17th-century star-shaped military fortress that played a significant role in Irish history. Visitors can explore ancient stone walls, dramatic battlements, scenic viewpoints, and fascinating historical exhibits while enjoying panoramic views of Ireland’s stunning southern coastline. Travel comfortably through picturesque countryside and coastal routes in a luxury private vehicle with flexible sightseeing tailored to your interests. Guests can also enjoy time in the colorful harbor town of Kinsale, famous for its charming streets, local culture, and scenic waterfront atmosphere. Ideal for families, couples, history enthusiasts, photographers, and private groups, this professionally curated tour offers the perfect combination of Irish heritage, coastal scenery, and premium travel comfort with the trusted service of A1Tour.ie.
+                    - generic [ref=e355]:
+                      - generic [ref=e356]:
+                        - img [ref=e357]
+                        - text: Up to 6 guests
+                      - generic [ref=e363]: Be the first to review
+                    - generic [ref=e364]:
+                      - text: Book this tour
+                      - img [ref=e365]
+              - group [ref=e367]:
+                - link [ref=e368] [cursor=pointer]:
+                  - /url: /tours/old-head-of-kinsale-coastal-cliffs-scenic-ireland-tour
+                  - generic [ref=e369]:
+                    - img "Old Head of Kinsale Coastal Cliffs & Scenic Ireland Tour" [ref=e370]
+                    - generic [ref=e372]: Adventure
+                    - generic [ref=e373]:
+                      - img [ref=e374]
+                      - text: New
+                    - generic [ref=e377]:
+                      - paragraph [ref=e378]: From
+                      - paragraph [ref=e379]: €70 /hour
+                    - generic [ref=e380]:
+                      - img [ref=e381]
+                      - text: 5 to 6 hours
+                  - generic [ref=e385]:
+                    - generic [ref=e386]:
+                      - heading "Old Head of Kinsale Coastal Cliffs & Scenic Ireland Tour" [level=3] [ref=e387]
+                      - paragraph [ref=e388]: Experience one of Ireland’s most breathtaking coastal destinations with our premium Old Head of Kinsale Coastal Cliffs & Scenic Ireland Tour by A1Tour.ie. This luxury private tour offers an unforgettable journey along the dramatic Atlantic coastline, combining spectacular ocean views, Irish heritage, charming countryside scenery, and relaxed premium travel comfort. Located near the historic town of Kinsale in County Cork, the Old Head of Kinsale is renowned for its towering sea cliffs, panoramic Atlantic Ocean views, and iconic lighthouse setting. Surrounded by rugged natural beauty, this stunning headland is one of Ireland’s most photographed coastal landmarks and a must-visit destination for travelers seeking authentic Irish scenery. Guests will travel in comfort through picturesque Irish countryside routes while enjoying personalized sightseeing opportunities and flexible tour scheduling. Along the journey, visitors can explore scenic viewpoints, charming villages, coastal landscapes, and local Irish culture at their own pace. Perfect for couples, families, photographers, nature lovers, and private groups, this professionally curated experience delivers the ideal combination of luxury transportation, Irish coastal beauty, and memorable sightseeing with the trusted service of A1Tour.ie.
+                    - generic [ref=e389]:
+                      - generic [ref=e390]:
+                        - img [ref=e391]
+                        - text: Up to 6 guests
+                      - generic [ref=e397]: Be the first to review
+                    - generic [ref=e398]:
+                      - text: Book this tour
+                      - img [ref=e399]
+            - button "Previous slide" [disabled]:
+              - img
+              - generic: Previous slide
+            - button "Next slide" [disabled]:
+              - img
+              - generic: Next slide
+        - generic [ref=e403]:
+          - generic [ref=e404]:
+            - generic [ref=e405]:
+              - generic [ref=e406]: Our Premium Fleet
+              - heading "Travel in comfort & style" [level=2] [ref=e410]:
+                - text: Travel in
+                - generic [ref=e411]: comfort
+                - text: "& style"
+              - paragraph [ref=e413]: Every vehicle in our fleet is handpicked for comfort, safety and style — professionally maintained and driven by our expert team.
+            - link "Browse tours" [ref=e414] [cursor=pointer]:
+              - /url: /tours
+              - text: Browse tours
+              - img [ref=e415]
+          - generic [ref=e417]:
+            - generic [ref=e418]:
+              - img [ref=e420]
+              - generic [ref=e424]: Pro driver
+            - generic [ref=e425]:
+              - img [ref=e427]
+              - generic [ref=e430]: Fully insured
+            - generic [ref=e431]:
+              - img [ref=e433]
+              - generic [ref=e435]: Air conditioned
+            - generic [ref=e436]:
+              - img [ref=e438]
+              - generic [ref=e440]: Top rated
+          - generic [ref=e441]:
+            - generic [ref=e442]:
+              - generic [ref=e443]:
+                - img "Toyota RAV4 2023 (Black) platinum edition Toyota RAV4 2023" [ref=e444]
+                - generic [ref=e446]: "2026"
+                - generic [ref=e447]:
+                  - img [ref=e448]
+                  - text: 11 tours
+                - generic [ref=e450]:
+                  - paragraph [ref=e451]: Toyota RAV4 2023 (Black) platinum edition Toyota RAV4 2023
+                  - paragraph [ref=e452]: Premium fleet vehicle
+              - generic [ref=e454]:
+                - generic [ref=e455]:
+                  - generic [ref=e456]:
+                    - img [ref=e457]
+                    - text: Pro driver
+                  - generic [ref=e461]:
+                    - img [ref=e462]
+                    - text: Insured
+                  - generic [ref=e465]:
+                    - img [ref=e466]
+                    - text: Air con
+                  - generic [ref=e468]:
+                    - img [ref=e469]
+                    - text: Top rated
+                - link "Book with this vehicle" [ref=e471] [cursor=pointer]:
+                  - /url: /tours?vehicle=9fef6e2c-91a0-4cd7-9ad9-c73a74fc0804
+                  - text: Book with this vehicle
+                  - img [ref=e472]
+            - generic [ref=e474]:
+              - generic [ref=e475]:
+                - img "Nissan Ariya Evolve 2026 Edition Nissan Ariya Evolve" [ref=e476]
+                - generic [ref=e478]: "2026"
+                - generic [ref=e479]:
+                  - img [ref=e480]
+                  - text: 1 tour
+                - generic [ref=e482]:
+                  - paragraph [ref=e483]: Nissan Ariya Evolve 2026 Edition Nissan Ariya Evolve
+                  - paragraph [ref=e484]: Premium fleet vehicle
+              - generic [ref=e486]:
+                - generic [ref=e487]:
+                  - generic [ref=e488]:
+                    - img [ref=e489]
+                    - text: Pro driver
+                  - generic [ref=e493]:
+                    - img [ref=e494]
+                    - text: Insured
+                  - generic [ref=e497]:
+                    - img [ref=e498]
+                    - text: Air con
+                  - generic [ref=e500]:
+                    - img [ref=e501]
+                    - text: Top rated
+                - link "Book with this vehicle" [ref=e503] [cursor=pointer]:
+                  - /url: /tours?vehicle=d3e6eff5-f628-4e3e-93e8-92661bfb9d46
+                  - text: Book with this vehicle
+                  - img [ref=e504]
+        - generic [ref=e507]:
+          - generic [ref=e508]:
+            - generic [ref=e509]:
+              - generic [ref=e510]: What We Offer
+              - heading "Every journey, perfectly arranged" [level=2] [ref=e514]:
+                - text: Every journey,
+                - generic [ref=e515]: perfectly
+                - text: arranged
+            - paragraph [ref=e517]: From scenic coastal drives to private airport transfers — we handle every detail so you can focus on the experience.
+          - generic [ref=e518]:
+            - generic [ref=e522]:
+              - generic [ref=e523]:
+                - img [ref=e525]
+                - generic [ref=e528]:
+                  - img [ref=e529]
+                  - text: Most Popular
+              - generic [ref=e532]:
+                - heading "Scenic Road Tours" [level=3] [ref=e533]
+                - paragraph
+            - generic [ref=e539]:
+              - generic [ref=e540]:
+                - img [ref=e542]
+                - generic [ref=e544]: "02"
+              - generic [ref=e545]:
+                - heading "Airport Transfers" [level=3] [ref=e546]
+                - paragraph
+            - generic [ref=e552]:
+              - generic [ref=e553]:
+                - img [ref=e555]
+                - generic [ref=e560]: "03"
+              - generic [ref=e561]:
+                - heading "Group Adventures" [level=3] [ref=e562]
+                - paragraph
+            - generic [ref=e568]:
+              - generic [ref=e569]:
+                - img [ref=e571]
+                - generic [ref=e573]: "04"
+              - generic [ref=e574]:
+                - heading "Custom Itineraries" [level=3] [ref=e575]
+                - paragraph
+            - generic [ref=e581]:
+              - generic [ref=e582]:
+                - img [ref=e584]
+                - generic [ref=e587]: "05"
+              - generic [ref=e588]:
+                - heading "24/7 Guest Support" [level=3] [ref=e589]
+                - paragraph
+        - generic [ref=e595]:
+          - generic [ref=e596]:
+            - generic [ref=e597]: Live GPS Tracking
+            - heading "Know exactly where your driver is" [level=2] [ref=e599]:
+              - text: Know exactly where
+              - generic [ref=e600]: your driver is
+            - paragraph [ref=e601]: Every A1 Tour driver shares their real-time GPS location during active tours. Watch them navigate to tourist spots live — no guessing, no waiting.
+            - list [ref=e602]:
+              - listitem [ref=e603]:
+                - img [ref=e605]
+                - text: Real-time GPS updates every 20 seconds
+              - listitem [ref=e607]:
+                - img [ref=e609]
+                - text: Driver name, vehicle and current spot name
+              - listitem [ref=e611]:
+                - img [ref=e613]
+                - text: Online / offline status at a glance
+              - listitem [ref=e615]:
+                - img [ref=e617]
+                - text: Accessible from admin, driver & tourist dashboards
+            - generic [ref=e620]:
+              - img [ref=e621]
+              - generic [ref=e625]: 1 driver live right now
+          - generic [ref=e628]:
+            - generic [ref=e629]:
+              - generic [ref=e631]: Live Driver Tracking
+              - generic [ref=e632]: Auto-refreshes every 20s
+            - generic [ref=e641]:
+              - generic [ref=e642]: 1 driver live
+              - generic [ref=e643]: ·
+              - generic [ref=e644]: less than a minute ago
+              - button "Refresh" [ref=e645]:
+                - img [ref=e646]
+        - generic [ref=e653]:
+          - generic [ref=e654]:
+            - generic [ref=e656]: Our Story
+            - heading "Born from a passion for unforgettable Irish roads." [level=2] [ref=e660]:
+              - text: Born from a passion for
+              - generic [ref=e661]: unforgettable
+              - text: Irish roads.
+            - paragraph [ref=e663]: TourVibe was founded by a team of travel enthusiasts who believed that the real Ireland is best discovered from the window of a car — not a tour bus. Every route we offer has been personally driven, refined and handpicked for its scenery, culture and hidden surprises.
+            - generic [ref=e664]:
+              - generic [ref=e665]:
+                - paragraph [ref=e667]: 8+
+                - paragraph [ref=e668]: Years operating
+              - generic [ref=e669]:
+                - paragraph [ref=e671]: 50+
+                - paragraph [ref=e672]: Destinations
+              - generic [ref=e673]:
+                - paragraph [ref=e675]: 98%
+                - paragraph [ref=e676]: Happy guests
+          - generic [ref=e681]:
+            - generic [ref=e682]:
+              - img [ref=e685]
+              - heading "Safety first, always" [level=3] [ref=e688]
+              - paragraph [ref=e689]: All our drivers are fully licensed, background-checked and trained in first aid. Your safety is built into every route we operate.
+              - generic [ref=e690]:
+                - text: Learn more
+                - img [ref=e691]
+            - generic [ref=e696]:
+              - img [ref=e699]
+              - heading "Award-winning guides" [level=3] [ref=e702]
+              - paragraph [ref=e703]: Our expert local guides bring each destination to life with fascinating stories, insider knowledge and genuine passion for Ireland.
+              - generic [ref=e704]:
+                - text: Learn more
+                - img [ref=e705]
+            - generic [ref=e712]:
+              - img [ref=e714]
+              - generic [ref=e716]:
+                - heading "Crafted with care, every time" [level=3] [ref=e717]
+                - paragraph [ref=e718]: We don't do cookie-cutter tours. Every booking is reviewed by our team to ensure the route, vehicle and timing are perfectly matched to your group's needs — because great travel is all in the details.
+        - generic [ref=e724]:
+          - generic [ref=e725]:
+            - generic [ref=e726]:
+              - generic [ref=e727]: Traveler Stories
+              - heading "Loved by travelers worldwide" [level=2] [ref=e731]:
+                - text: Loved by
+                - generic [ref=e732]: travelers
+                - text: worldwide
+              - paragraph [ref=e734]: Real words from real adventurers — unfiltered experiences straight from the road.
+            - generic [ref=e735]:
+              - generic [ref=e736]:
+                - generic [ref=e737]:
+                  - img [ref=e738]
+                  - img [ref=e740]
+                  - img [ref=e742]
+                  - img [ref=e744]
+                  - img [ref=e746]
+                - paragraph [ref=e748]: "4.9"
+                - paragraph [ref=e749]: Rating
+              - generic [ref=e751]:
+                - paragraph [ref=e752]: 500+
+                - paragraph [ref=e753]: Travelers
+              - generic [ref=e755]:
+                - paragraph [ref=e756]: 98%
+                - paragraph [ref=e757]: Happy
+          - generic [ref=e758]:
+            - generic [ref=e761]:
+              - generic [ref=e762]:
+                - generic [ref=e763]: 🌊 Coastal Tour
+                - img [ref=e764]
+              - generic [ref=e767]:
+                - img [ref=e768]
+                - img [ref=e770]
+                - img [ref=e772]
+                - img [ref=e774]
+                - img [ref=e776]
+              - paragraph [ref=e778]: “Excellent service from start to finish! We arrived at Cobh Port and our driver was waiting exactly where promised. The tour to Kinsale and Blarney Castle was well organized, comfortable, and stress-free. The driver shared interesting local history and gave us enough time at each stop. Highly recommended for cruise passengers visiting Ireland.”
+              - generic [ref=e780]:
+                - generic [ref=e781]:
+                  - img "Sarah M., United States" [ref=e783]
+                  - generic [ref=e784]:
+                    - paragraph [ref=e785]: Sarah M., United States
+                    - paragraph [ref=e786]: Tourist
+                - generic [ref=e787]:
+                  - img [ref=e788]
+                  - text: Verified
+            - generic [ref=e796]:
+              - generic [ref=e797]:
+                - generic [ref=e798]: 🏔️ Mountain Tour
+                - img [ref=e799]
+              - generic [ref=e802]:
+                - img [ref=e803]
+                - img [ref=e805]
+                - img [ref=e807]
+                - img [ref=e809]
+                - img [ref=e811]
+              - paragraph [ref=e813]: “Everything felt polished, from the airport pickup to the hill-view stopovers. The driver updates were especially useful.”
+              - img "Traveler photo" [ref=e816]
+              - generic [ref=e818]:
+                - generic [ref=e819]:
+                  - img "Test" [ref=e821]
+                  - generic [ref=e822]:
+                    - paragraph [ref=e823]: Test
+                    - paragraph [ref=e824]: Tourist
+                - generic [ref=e825]:
+                  - img [ref=e826]
+                  - text: Verified
+          - generic [ref=e832]:
+            - generic [ref=e833]:
+              - img [ref=e834]
+              - text: Start your journey
+            - paragraph [ref=e837]: Ready to create your own story?
+            - link "Start your adventure" [ref=e838] [cursor=pointer]:
+              - /url: /tours
+              - text: Start your adventure
+              - img [ref=e839]
+        - generic [ref=e842]:
+          - generic [ref=e843]:
+            - generic [ref=e844]:
+              - generic [ref=e845]: Latest Stories
+              - heading "From Our Blog" [level=2] [ref=e849]:
+                - text: From
+                - generic [ref=e850]: Our Blog
+              - paragraph [ref=e852]: Travel tips, destination guides and insider stories from the A1 Tour team.
+            - link "View All Posts" [ref=e853] [cursor=pointer]:
+              - /url: /blog
+              - text: View All Posts
+              - img [ref=e854]
+          - generic [ref=e856]:
+            - article [ref=e857]:
+              - generic [ref=e858]:
+                - img "Private Cork Shore Excursions and Day Tours from Cobh, Ringaskiddy & Cork" [ref=e859]
+                - generic [ref=e861]:
+                  - img [ref=e862]
+                  - text: Featured
+              - generic [ref=e866]:
+                - generic [ref=e867]:
+                  - generic [ref=e868]: Cork tours
+                  - generic [ref=e869]: Cobh shore excursion
+                - generic [ref=e870]:
+                  - heading "Private Cork Shore Excursions and Day Tours from Cobh, Ringaskiddy & Cork" [level=3] [ref=e871]
+                  - paragraph [ref=e872]: Explore the best of County Cork with private day tours from Cork, Cobh Port, or Ringaskiddy Port. Visit historic castles, scenic coastal towns, and famous Irish landmarks with a comfortable private vehicle for up to 6 guests.
+                - generic [ref=e873]:
+                  - generic [ref=e874]:
+                    - img [ref=e875]
+                    - generic [ref=e878]: TourVibe Super Admin
+                  - generic [ref=e880]:
+                    - img [ref=e881]
+                    - text: 27 Apr 2026
+                - link "Read more" [ref=e883] [cursor=pointer]:
+                  - /url: /blog/private-cork-shore-excursions-day-tours
+                  - text: Read more
+                  - img [ref=e884]
+            - article [ref=e886]:
+              - img "Test Title" [ref=e888]
+              - generic [ref=e891]:
+                - generic [ref=e892]:
+                  - generic [ref=e893]: tracel
+                  - generic [ref=e894]: tour
+                - generic [ref=e895]:
+                  - heading "Test Title" [level=3] [ref=e896]
+                  - paragraph [ref=e897]: Test Excerpt
+                - generic [ref=e898]:
+                  - generic [ref=e899]:
+                    - img [ref=e900]
+                    - generic [ref=e903]: TourVibe Super Admin
+                  - generic [ref=e905]:
+                    - img [ref=e906]
+                    - text: 22 Apr 2026
+                - link "Read more" [ref=e908] [cursor=pointer]:
+                  - /url: /blog/test-title
+                  - text: Read more
+                  - img [ref=e909]
+        - generic [ref=e913]:
+          - generic [ref=e914]:
+            - generic [ref=e915]: Get in Touch
+            - heading "Ready to plan your next adventure ?" [level=2] [ref=e919]:
+              - text: Ready to plan your
+              - generic [ref=e920]: next adventure
+              - text: "?"
+            - paragraph [ref=e922]: Whether you have a specific destination in mind or just want to explore — our team is here to help you build the perfect Irish road trip.
+            - generic [ref=e923]:
+              - generic [ref=e924]:
+                - img [ref=e927]
+                - paragraph [ref=e930]: Email Us
+                - paragraph [ref=e931]: hello@tourvibe.ie
+              - generic [ref=e932]:
+                - img [ref=e935]
+                - paragraph [ref=e937]: Call Us
+                - paragraph [ref=e938]: +353 1 800 0000
+              - generic [ref=e939]:
+                - img [ref=e942]
+                - paragraph [ref=e945]: 24/7 Support
+                - paragraph [ref=e946]: Always on call
+              - generic [ref=e947]:
+                - img [ref=e950]
+                - paragraph [ref=e953]: Based In
+                - paragraph [ref=e954]: Cobh, Ireland
+            - generic [ref=e955]:
+              - link "Book a tour" [ref=e956] [cursor=pointer]:
+                - /url: /tours
+                - text: Book a tour
+                - img [ref=e957]
+              - link "Learn more" [ref=e959] [cursor=pointer]:
+                - /url: /#about
+                - img [ref=e960]
+                - text: Learn more
+          - generic [ref=e969]:
+            - generic [ref=e970]:
+              - paragraph [ref=e971]: Send a message
+              - heading "We'd love to hear from you" [level=3] [ref=e972]
+              - paragraph [ref=e973]: We reply within 24 hours.
+            - generic [ref=e974]:
+              - generic [ref=e975]:
+                - generic [ref=e976]:
+                  - generic [ref=e977]: Full Name *
+                  - textbox "John Doe" [ref=e978]
+                - generic [ref=e979]:
+                  - generic [ref=e980]: Email *
+                  - textbox "john@example.com" [ref=e981]
+              - generic [ref=e982]:
+                - generic [ref=e983]:
+                  - text: Phone
+                  - textbox "+353 87 000 0000" [ref=e984]
+                - generic [ref=e985]:
+                  - generic [ref=e986]: Subject *
+                  - textbox "Tour enquiry" [ref=e987]
+              - generic [ref=e988]:
+                - generic [ref=e989]: Message *
+                - textbox "Tell us about your trip plans, questions or anything else…" [ref=e990]
+              - button "Send Message" [ref=e991]:
+                - img [ref=e992]
+                - text: Send Message
+    - contentinfo [ref=e995]:
+      - generic [ref=e997]:
+        - generic [ref=e998]:
+          - generic [ref=e999]:
+            - link "A1 Tour A1 Tour" [ref=e1000] [cursor=pointer]:
+              - /url: /
+              - img "A1 Tour" [ref=e1002]
+              - generic [ref=e1003]: A1 Tour
+            - paragraph [ref=e1004]: Travel Beyond Expectation
+            - generic [ref=e1005]:
+              - img [ref=e1006]
+              - text: Cobh, Ireland
+            - generic [ref=e1009]:
+              - img [ref=e1010]
+              - text: Powered by A1Tour
+          - generic [ref=e1013]:
+            - heading "Services" [level=3] [ref=e1016]
+            - list [ref=e1017]:
+              - listitem [ref=e1018]:
+                - link "City Tours" [ref=e1019] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1020]
+                  - text: City Tours
+              - listitem [ref=e1022]:
+                - link "Airport Transfers" [ref=e1023] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1024]
+                  - text: Airport Transfers
+              - listitem [ref=e1026]:
+                - link "Corporate Travel" [ref=e1027] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1028]
+                  - text: Corporate Travel
+              - listitem [ref=e1030]:
+                - link "Private Chauffeur" [ref=e1031] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1032]
+                  - text: Private Chauffeur
+          - generic [ref=e1034]:
+            - heading "Company" [level=3] [ref=e1037]
+            - list [ref=e1038]:
+              - listitem [ref=e1039]:
+                - link "About Us" [ref=e1040] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1041]
+                  - text: About Us
+              - listitem [ref=e1043]:
+                - link "Our Fleet" [ref=e1044] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1045]
+                  - text: Our Fleet
+              - listitem [ref=e1047]:
+                - link "Blog" [ref=e1048] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1049]
+                  - text: Blog
+              - listitem [ref=e1051]:
+                - link "Reviews" [ref=e1052] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1053]
+                  - text: Reviews
+          - generic [ref=e1055]:
+            - heading "Support" [level=3] [ref=e1058]
+            - list [ref=e1059]:
+              - listitem [ref=e1060]:
+                - link "Help Center" [ref=e1061] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1062]
+                  - text: Help Center
+              - listitem [ref=e1064]:
+                - link "Terms of Service" [ref=e1065] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1066]
+                  - text: Terms of Service
+              - listitem [ref=e1068]:
+                - link "Privacy Policy" [ref=e1069] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1070]
+                  - text: Privacy Policy
+              - listitem [ref=e1072]:
+                - link "Safety" [ref=e1073] [cursor=pointer]:
+                  - /url: "#"
+                  - img [ref=e1074]
+                  - text: Safety
+        - paragraph [ref=e1077]: © 2026 A1 Tour. All rights reserved.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e1086] [cursor=pointer]:
+    - img [ref=e1087]

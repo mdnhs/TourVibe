@@ -2,6 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Clock, Star, Users, MapPin, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/currency";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface PopularTour {
   id: string;
@@ -93,61 +100,71 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
       </div>
 
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 animate-in fade-in slide-in-from-left-4 duration-500">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-emerald-600" />
-              </span>
-              Most Loved Tours
+        <Carousel opts={{ align: "start" }}>
+          {/* Header */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 animate-in fade-in slide-in-from-left-4 duration-500">
+                <span className="relative flex size-1 sm:size-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex size-1 sm:size-1.5 rounded-full bg-emerald-600" />
+                </span>
+                Most Loved Tours
+              </div>
+
+              <h2
+                className="font-heading text-2xl font-extrabold tracking-tight sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
+                style={{ animationDelay: "80ms" }}
+              >
+                Handpicked{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">adventures</span>
+                  <span className="absolute -bottom-0.5 left-0 h-0.5 sm:-bottom-1 sm:h-1 w-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 opacity-50" aria-hidden="true" />
+                </span>{" "}
+                across Ireland
+              </h2>
+
+              <p
+                className="max-w-lg text-xs sm:text-sm leading-relaxed sm:leading-7 text-slate-500 animate-in fade-in duration-500"
+                style={{ animationDelay: "140ms" }}
+              >
+                Personally curated chosen for scenery, culture and memories.
+              </p>
             </div>
 
-            <h2
-              className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
-              style={{ animationDelay: "80ms" }}
-            >
-              Handpicked{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">adventures</span>
-                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 opacity-50" aria-hidden="true" />
-              </span>{" "}
-              across Ireland
-            </h2>
+            <div className="flex items-center justify-between gap-3 sm:gap-4 sm:justify-end animate-in fade-in slide-in-from-right-4 duration-500" style={{ animationDelay: "160ms" }}>
+              <Link
+                href="/tours"
+                className="group inline-flex shrink-0 items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/35 hover:from-indigo-500 hover:to-violet-500"
+              >
+                Explore all
+                <ArrowRight className="size-3 sm:size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
 
-            <p
-              className="max-w-lg text-sm leading-7 text-slate-500 animate-in fade-in duration-500"
-              style={{ animationDelay: "140ms" }}
-            >
-              Each tour is personally curated by our team — chosen for its scenery, culture and the memories it creates.
-            </p>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <CarouselPrevious className="static h-8 w-8 translate-y-0 border-slate-200 bg-white text-slate-950 shadow-sm transition-all hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-40 sm:h-10 sm:w-10" />
+                <CarouselNext className="static h-8 w-8 translate-y-0 border-slate-200 bg-white text-slate-950 shadow-sm transition-all hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-40 sm:h-10 sm:w-10" />
+              </div>
+            </div>
           </div>
 
-          <Link
-            href="/tours"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/35 hover:from-indigo-500 hover:to-violet-500 animate-in fade-in slide-in-from-right-4 duration-500"
-            style={{ animationDelay: "160ms" }}
-          >
-            Explore all tours
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-
-        {/* Cards */}
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {/* Cards */}
+          <CarouselContent className="mt-8 sm:mt-12 -ml-6">
           {tours.map((tour, i) => {
             const accent = cardColors[i % cardColors.length];
             const rating = tour.avgRating ? tour.avgRating.toFixed(1) : null;
             const category = categories[i % categories.length];
 
             return (
-              <Link
+              <CarouselItem
                 key={tour.id}
+                className="basis-full pl-6 sm:basis-1/2 lg:basis-1/3"
+              >
+              <Link
                 href={`/tours/${tour.slug}`}
                 style={{ animationDelay: `${200 + i * 80}ms` }}
                 className="group animate-in fade-in slide-in-from-bottom-4 duration-500
-                           relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white
+                           relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white
                            shadow-lg shadow-slate-200/60
                            transition-all hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-300/60"
               >
@@ -248,9 +265,11 @@ export function PopularTours({ tours, currency }: PopularToursProps) {
                   </div>
                 </div>
               </Link>
+              </CarouselItem>
             );
           })}
-        </div>
+          </CarouselContent>
+        </Carousel>
       </div>
     </section>
   );

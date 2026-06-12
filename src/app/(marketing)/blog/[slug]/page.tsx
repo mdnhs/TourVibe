@@ -124,51 +124,55 @@ export default async function BlogPostPage({
           </div>
         )}
 
-        <div className="relative mx-auto max-w-4xl px-4 py-24 sm:px-6">
+        <div className="relative mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-24">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white mb-8"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-sm font-medium text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white mb-6 sm:mb-8"
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-3.5 sm:size-4" />
             Back to Blog
           </Link>
 
           {/* Tags */}
           {tagList.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-5">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5">
               {tagList.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-xs font-semibold text-amber-300"
+                  className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/15 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-amber-300"
                 >
-                  <TagIcon className="size-3" />
+                  <TagIcon className="size-2.5 sm:size-3" />
                   {tag}
                 </span>
               ))}
             </div>
           )}
 
-          <h1 className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl mb-6">
+          <h1 className="font-heading text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl mb-4 sm:mb-6 leading-tight">
             {post.title}
           </h1>
 
           {post.excerpt && (
-            <p className="text-lg text-white/60 leading-8 mb-8 max-w-2xl">{post.excerpt}</p>
+            <p className="text-base sm:text-lg text-white/60 leading-relaxed sm:leading-8 mb-6 sm:mb-8 max-w-2xl">
+              {post.excerpt}
+            </p>
           )}
 
-          <div className="flex items-center gap-4 text-sm text-white/50">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] sm:text-sm text-white/50">
             <div className="flex items-center gap-2">
-              <div className="size-8 rounded-full bg-amber-400/20 flex items-center justify-center">
-                <UserIcon className="size-4 text-amber-400" />
+              <div className="size-7 sm:size-8 rounded-full bg-amber-400/20 flex items-center justify-center">
+                <UserIcon className="size-3.5 sm:size-4 text-amber-400" />
               </div>
-              <span className="font-medium text-white/70">{post.authorName || s.ogSiteName || s.siteTitle}</span>
+              <span className="font-medium text-white/70">
+                {post.authorName || s.ogSiteName || s.siteTitle}
+              </span>
             </div>
-            <span className="text-white/30">·</span>
+            <span className="text-white/30 hidden sm:inline">·</span>
             <div className="flex items-center gap-1.5">
-              <CalendarIcon className="size-3.5" />
+              <CalendarIcon className="size-3 sm:size-3.5" />
               {new Date(displayDate).toLocaleDateString("en-IE", {
                 day: "numeric",
-                month: "long",
+                month: "short",
                 year: "numeric",
               })}
             </div>
@@ -177,13 +181,13 @@ export default async function BlogPostPage({
       </section>
 
       {/* Content */}
-      <section className="px-4 py-16 sm:px-6">
+      <section className="px-4 py-10 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-3xl">
-          <div className="prose prose-slate max-w-none">
+          <div className="prose prose-slate prose-base sm:prose-lg max-w-none">
             {paragraphs.map((para, i) => (
               <p
                 key={i}
-                className="text-slate-700 leading-8 text-base mb-6 last:mb-0"
+                className="text-slate-700 leading-relaxed sm:leading-8 mb-5 sm:mb-6 last:mb-0"
                 style={{ whiteSpace: "pre-wrap" }}
               >
                 {para.trim()}
@@ -193,12 +197,14 @@ export default async function BlogPostPage({
 
           {/* Tags footer */}
           {tagList.length > 0 && (
-            <div className="mt-12 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-8">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide mr-1">Tags:</span>
+            <div className="mt-10 sm:mt-12 flex flex-wrap items-center gap-1.5 sm:gap-2 border-t border-slate-100 pt-6 sm:pt-8">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wide mr-1">
+                Tags:
+              </span>
               {tagList.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
+                  className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-medium text-slate-600"
                 >
                   {tag}
                 </span>
@@ -210,12 +216,12 @@ export default async function BlogPostPage({
 
       {/* Related posts */}
       {relatedPosts.length > 0 && (
-        <section className="relative overflow-hidden bg-slate-50 px-4 py-16 sm:px-6">
+        <section className="relative overflow-hidden bg-slate-50 px-4 py-12 sm:px-6 sm:py-16">
           <div className="mx-auto max-w-6xl">
-            <h2 className="font-heading text-2xl font-bold tracking-tight text-slate-950 mb-8">
+            <h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-slate-950 mb-6 sm:mb-8">
               More from our blog
             </h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((rp) => {
                 const rpDate = rp.publishedAt ?? rp.createdAt;
                 const rpTags = rp.tags ? rp.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];

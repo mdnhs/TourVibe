@@ -1,12 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
-  Clock,
   MapPin,
   Search,
-  Star,
   Users,
   Car,
   MessageSquareText,
@@ -82,6 +80,71 @@ const statColors = [
     bar: "bg-gradient-to-r from-violet-400 to-violet-300",
   },
 ];
+
+// ─── Drag-to-scroll row ───────────────────────────────────────────────────────
+function DragScrollRow({
+  className,
+  style,
+  children,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const drag = useRef({ down: false, startX: 0, scrollLeft: 0, moved: false });
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    drag.current = {
+      down: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const el = ref.current;
+    if (!el || !drag.current.down) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 5) {
+      drag.current.moved = true;
+      el.setPointerCapture(e.pointerId);
+    }
+    el.scrollLeft = drag.current.scrollLeft - dx;
+  };
+
+  const endDrag = () => {
+    drag.current.down = false;
+  };
+
+  // Swallow the click that follows a drag so tags don't navigate
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (drag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current.moved = false;
+    }
+  };
+
+  return (
+    <div
+      ref={ref}
+      style={style}
+      className={`cursor-grab select-none active:cursor-grabbing ${className ?? ""}`}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerLeave={endDrag}
+      onPointerCancel={endDrag}
+      onClickCapture={onClickCapture}
+    >
+      {children}
+    </div>
+  );
+}
 
 // ─── Floating route card ──────────────────────────────────────────────────────
 function FloatingRouteCard({
@@ -213,9 +276,9 @@ export function Hero({
   };
 
   return (
-    <section className="relative overflow-hidden px-4 pb-24 pt-6 sm:px-6">
+    <section className="relative overflow-hidden px-4 pb-14 pt-6 sm:px-6 sm:pb-24">
       {/* ── Full-bleed background cover image ── */}
-      <div className="absolute inset-x-0 top-5 h-130 overflow-hidden mx-auto max-w-6xl rounded-[1.5rem]">
+      <div className="absolute inset-x-3 top-5 h-130 overflow-hidden mx-auto max-w-6xl rounded-[1.5rem] sm:inset-x-0">
         <Image
           src={heroImage}
           alt=""
@@ -225,13 +288,13 @@ export function Hero({
         />
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-5">
-        <div className="grid gap-12 pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:pt-20">
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-5">
+        <div className="grid gap-8 pt-10 sm:gap-12 sm:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:pt-20">
           {/* ── LEFT: Text + search + stats ── */}
-          <div className="space-y-8">
+          <div className="min-w-0 space-y-5 sm:space-y-8">
             {/* Pill badge */}
             <div
-              className="inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-md
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-md sm:gap-2.5 sm:px-4 sm:py-1.5 sm:text-sm
                          animate-in fade-in slide-in-from-left-4 duration-500"
             >
               <span className="relative flex size-2">
@@ -243,10 +306,10 @@ export function Hero({
 
             {/* Headline */}
             <div
-              className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-500"
+              className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-left-4 duration-500"
               style={{ animationDelay: "100ms" }}
             >
-              <h1 className="font-heading max-w-lg text-5xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl">
+              <h1 className="font-heading max-w-lg text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl">
                 {heroTitleHighlight &&
                 heroTitle.includes(heroTitleHighlight) ? (
                   <>
@@ -269,7 +332,7 @@ export function Hero({
                   heroTitle
                 )}
               </h1>
-              <p className="max-w-md text-base leading-relaxed text-white/75">
+              <p className="max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
                 {heroSubtitle}
               </p>
             </div>
@@ -277,12 +340,12 @@ export function Hero({
             {/* Search bar */}
             <form
               onSubmit={handleSearch}
-              className="relative flex max-w-lg items-center gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 shadow-2xl shadow-slate-900/30 backdrop-blur-md
+              className="relative flex w-full max-w-lg items-center gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 shadow-2xl shadow-slate-900/30 backdrop-blur-md
                          transition-all focus-within:border-amber-400/60 focus-within:bg-white/15 focus-within:ring-4 focus-within:ring-amber-400/20
                          animate-in fade-in slide-in-from-bottom-4 duration-500"
               style={{ animationDelay: "200ms" }}
             >
-              <div className="flex flex-1 items-center gap-2 px-3">
+              <div className="flex min-w-0 flex-1 items-center gap-2 px-3">
                 <Search className="size-4 shrink-0 text-white/50" />
                 <Input
                   type="text"
@@ -294,15 +357,15 @@ export function Hero({
               </div>
               <Button
                 type="submit"
-                className="h-10 rounded-xl bg-amber-400 px-6 font-semibold text-slate-950 hover:bg-amber-300 transition-colors"
+                className="h-9 rounded-xl bg-amber-400 px-4 font-semibold text-slate-950 hover:bg-amber-300 transition-colors sm:h-10 sm:px-6"
               >
                 Search
               </Button>
             </form>
 
             {/* Quick links */}
-            <div
-              className="flex flex-wrap items-center gap-2 animate-in fade-in duration-500"
+            <DragScrollRow
+              className="flex w-full items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden animate-in fade-in duration-500"
               style={{ animationDelay: "300ms" }}
             >
               <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35 mr-1 shrink-0">
@@ -315,7 +378,7 @@ export function Hero({
                     tag.url?.trim() ||
                     `/tours?q=${encodeURIComponent(tag.label)}`;
                   const tagClass =
-                    "group animate-in fade-in slide-in-from-bottom-2 duration-500 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:bg-amber-400/15 hover:text-white hover:shadow-lg hover:shadow-amber-400/10 active:scale-95";
+                    "group shrink-0 whitespace-nowrap animate-in fade-in slide-in-from-bottom-2 duration-500 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm transition-all hover:border-amber-400/50 hover:bg-amber-400/15 hover:text-white hover:shadow-lg hover:shadow-amber-400/10 active:scale-95";
                   const inner = (
                     <>
                       <span className="text-sm leading-none">{tag.emoji}</span>
@@ -347,9 +410,9 @@ export function Hero({
                     </button>
                   );
                 })}
-            </div>
+            </DragScrollRow>
             {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
+            <div className="mt-40 grid w-full grid-cols-4 gap-2 pt-1 sm:mt-0 sm:gap-3 sm:pt-2">
               {stats.map((stat, i) => {
                 const Icon = statIcons[i] ?? MapPin;
                 const colors = statColors[i] ?? statColors[0];
@@ -358,8 +421,8 @@ export function Hero({
                     key={`${stat.label}-${i}`}
                     style={{ animationDelay: `${400 + i * 70}ms` }}
                     className="group animate-in fade-in slide-in-from-bottom-3 duration-500
-          relative overflow-hidden rounded-2xl border border-white/15
-          bg-white/10 p-4 backdrop-blur-md
+          relative overflow-hidden rounded-xl border border-white/15
+          bg-white/10 p-2 backdrop-blur-md sm:rounded-2xl sm:p-4
           transition-all hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/15"
                   >
                     {/* Accent glow */}
@@ -371,23 +434,23 @@ export function Hero({
 
                     {/* Icon */}
                     <div
-                      className={`mb-3 inline-flex size-9 items-center justify-center rounded-xl ${colors.iconBg}`}
+                      className={`mb-1.5 inline-flex size-6 items-center justify-center rounded-lg sm:mb-3 sm:size-9 sm:rounded-xl ${colors.iconBg}`}
                     >
-                      <Icon className={`size-4 ${colors.icon}`} />
+                      <Icon className={`size-3 sm:size-4 ${colors.icon}`} />
                     </div>
 
                     {/* Value */}
-                    <p className="font-heading text-2xl font-extrabold leading-none text-black tabular-nums">
+                    <p className="font-heading text-sm font-extrabold leading-none text-black tabular-nums sm:text-2xl">
                       {stat.value}
                     </p>
 
                     {/* Accent bar */}
                     <div
-                      className={`my-2 h-[3px] w-8 rounded-full ${colors.bar}`}
+                      className={`my-1.5 h-0.5 w-5 rounded-full sm:my-2 sm:h-0.75 sm:w-8 ${colors.bar}`}
                     />
 
                     {/* Label */}
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-black/45">
+                    <p className="text-[7px] font-bold uppercase tracking-widest text-black/45 sm:text-[9px] sm:tracking-[0.2em]">
                       {stat.label}
                     </p>
                   </div>
@@ -398,7 +461,7 @@ export function Hero({
 
           {/* ── RIGHT: Map card ── */}
           <div
-            className="relative mt-8 lg:mt-0 animate-in fade-in slide-in-from-right-6 duration-700"
+            className="relative mt-2 sm:mt-8 lg:mt-0 animate-in fade-in slide-in-from-right-6 duration-700"
             style={{ animationDelay: "150ms" }}
           >
             {/* Glow orbs */}
@@ -428,7 +491,7 @@ export function Hero({
               </div>
 
               {/* Map itself */}
-              <div className="relative h-[460px] w-full overflow-hidden rounded-[1.5rem] border border-white/10">
+              <div className="relative h-80 w-full overflow-hidden rounded-[1.5rem] border border-white/10 sm:h-115">
                 <DriverTrackerMap
                   initialDrivers={initialDrivers}
                   className="h-full"

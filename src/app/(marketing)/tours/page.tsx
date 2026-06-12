@@ -4,6 +4,18 @@ import { db } from "@/lib/db";
 import { toursSearchParamsCache } from "./search-params";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
 import { getCurrencyCode } from "@/lib/currency-server";
+import { ToursList } from "./tours-list";
+import { ToursFilter } from "./tours-filter";
+import { ToursPagination } from "./tours-pagination";
+import { SearchParams } from "nuqs/server";
+import { SlidersHorizontal } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSeoSettingsSync();
@@ -13,10 +25,6 @@ export async function generateMetadata(): Promise<Metadata> {
     canonical: "/tours",
   });
 }
-import { ToursList } from "./tours-list";
-import { ToursFilter } from "./tours-filter";
-import { ToursPagination } from "./tours-pagination";
-import { SearchParams } from "nuqs/server";
 
 interface Tour {
   id: string;
@@ -118,7 +126,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
       </div>
 
       {/* ── Page header ── */}
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-12 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-12">
         <div className="space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700
                           animate-in fade-in slide-in-from-left-4 duration-500">
@@ -129,9 +137,9 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
             Explore
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <h1
-              className="font-heading text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl
+              className="font-heading text-3xl font-extrabold tracking-tight text-slate-950 sm:text-5xl
                          animate-in fade-in slide-in-from-left-4 duration-500"
               style={{ animationDelay: "80ms" }}
             >
@@ -139,19 +147,39 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
               <span className="relative inline-block">
                 <span className="relative z-10">Tour Packages</span>
                 <span
-                  className="absolute -bottom-1 left-0 h-1.25 w-full rounded-full bg-amber-400/60"
+                  className="absolute -bottom-0.5 sm:-bottom-1 left-0 h-1 sm:h-1.25 w-full rounded-full bg-amber-400/60"
                   aria-hidden="true"
                 />
               </span>
             </h1>
 
             <div
-              className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-500"
+              className="flex items-center justify-between gap-3 animate-in fade-in slide-in-from-right-4 duration-500 sm:justify-end"
               style={{ animationDelay: "120ms" }}
             >
-              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                <span className="font-heading text-lg font-extrabold text-slate-950">{totalTours}</span>
-                <span className="text-xs font-medium text-slate-400">experience{totalTours !== 1 ? "s" : ""} found</span>
+              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 shadow-sm">
+                <span className="font-heading text-base font-extrabold text-slate-950 sm:text-lg">{totalTours}</span>
+                <span className="text-[10px] font-medium text-slate-400 sm:text-xs">found</span>
+              </div>
+
+              {/* Mobile Filter Trigger */}
+              <div className="md:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <button className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all">
+                      <SlidersHorizontal className="size-3.5" />
+                      Filters
+                    </button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
+                    <SheetHeader className="border-b p-6 pb-4">
+                      <SheetTitle className="text-left">Adjust Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto p-6">
+                      <ToursFilter vehicles={vehicleOptions} />
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
           </div>
@@ -161,9 +189,9 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
       {/* ── Content ── */}
       <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
         <div className="flex flex-col gap-8 md:flex-row">
-          <aside className="w-full shrink-0 md:w-64">
+          {/* Desktop Sidebar */}
+          <aside className="hidden w-64 shrink-0 md:block">
             <div className="sticky top-24 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50">
-              {/* Sidebar top bar */}
               <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-cyan-500" />
               <div className="p-6">
                 <ToursFilter vehicles={vehicleOptions} />

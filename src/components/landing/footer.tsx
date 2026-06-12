@@ -168,35 +168,34 @@ export function Footer({
       {/* Top gradient bar */}
       <div className="relative h-px w-full bg-gradient-to-r from-amber-400 via-violet-500 to-cyan-500" />
 
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
           {/* Brand column */}
-          <div className="col-span-1 space-y-5 md:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2.5 group">
-              <div className="relative flex size-9 items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                {/* <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" /> */}
+          <div className="col-span-2 space-y-4 sm:space-y-5 md:col-span-1">
+            <Link href="/" className="inline-flex items-center gap-2 group">
+              <div className="relative flex size-8 sm:size-9 items-center justify-center transition-transform duration-300 group-hover:scale-105">
                 {logoUrl ? (
                   <Image
                     src={logoUrl}
                     alt={siteName}
-                    width={36}
-                    height={36}
-                    className="relative object-cover"
+                    width={32}
+                    height={32}
+                    className="relative object-cover sm:w-9 sm:h-9"
                   />
                 ) : (
-                  <CarFront className="relative size-5 text-white" />
+                  <CarFront className="relative size-4 sm:size-5 text-white" />
                 )}
               </div>
-              <span className="font-heading text-xl font-extrabold tracking-tight">
+              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight">
                 {siteName}
               </span>
             </Link>
 
-            <p className="text-sm leading-7 text-white/50">{tagline}</p>
+            <p className="text-xs sm:text-sm leading-relaxed sm:leading-7 text-white/50 max-w-xs">{tagline}</p>
 
             {/* Location pill */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/50 transition-colors hover:border-white/15 hover:text-white/60">
-              <MapPin className="size-3.5 text-amber-400" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] sm:text-xs font-medium text-white/50 transition-colors hover:border-white/15 hover:text-white/60">
+              <MapPin className="size-3 text-amber-400 sm:size-3.5" />
               {location}
             </div>
 
@@ -210,43 +209,43 @@ export function Footer({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/40 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white/80"
+                    className="flex size-7 sm:size-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/40 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white/80"
                   >
-                    <Icon className="size-3.5" />
+                    <Icon className="size-3 sm:size-3.5" />
                   </Link>
                 ))}
               </div>
             )}
 
             {/* Powered by badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/8 px-3 py-1.5 text-[11px] font-semibold text-indigo-300/70">
-              <Sparkles className="size-3 text-indigo-400" />
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/8 px-2.5 py-1 text-[9px] sm:text-[11px] font-semibold text-indigo-300/70">
+              <Sparkles className="size-2.5 sm:size-3 text-indigo-400" />
               {footerPoweredByText}
             </div>
           </div>
 
           {/* Link columns */}
           {columns.map((col, colIdx) => (
-            <div key={col.heading} className="space-y-4">
+            <div key={col.heading} className={`space-y-3 sm:space-y-4 ${colIdx === 2 ? 'col-span-2 sm:col-span-1' : 'col-span-1'}`}>
               <div className="flex items-center gap-2">
                 <div
-                  className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${colAccents[colIdx].bar}`}
+                  className={`h-0.5 w-3 sm:w-4 rounded-full bg-gradient-to-r ${colAccents[colIdx].bar}`}
                 />
-                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-white/35">
                   {col.heading}
                 </h3>
               </div>
-              <ul className="space-y-3">
+              <ul className="space-y-2 sm:space-y-3">
                 {col.links
                   .filter((l) => l.label)
                   .map((item) => (
                     <li key={item.label}>
                       <Link
                         href={item.href || "#"}
-                        className="group inline-flex items-center gap-1.5 text-sm text-white/50 transition-all hover:text-white"
+                        className="group inline-flex items-center gap-1 text-xs sm:text-sm text-white/50 transition-all hover:text-white"
                       >
                         <ArrowRight
-                          className={`size-3 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 ${colAccents[colIdx].hover}`}
+                          className={`size-2.5 sm:size-3 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 ${colAccents[colIdx].hover}`}
                         />
                         {item.label}
                       </Link>
@@ -258,13 +257,13 @@ export function Footer({
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row">
-          <p className="text-sm text-white/30">
+        <div className="mt-10 sm:mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/8 pt-6 sm:pt-8 sm:flex-row text-center sm:text-left">
+          <p className="text-[11px] sm:text-sm text-white/30">
             © {new Date().getFullYear()} {siteName}. All rights reserved.
           </p>
           <div className="flex items-center gap-2">
-            <div className="h-0.5 w-10 rounded-full bg-gradient-to-r from-amber-400 via-violet-500 to-cyan-400 opacity-60" />
-            <div className="h-0.5 w-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 opacity-30" />
+            <div className="h-0.5 w-8 sm:w-10 rounded-full bg-gradient-to-r from-amber-400 via-violet-500 to-cyan-400 opacity-60" />
+            <div className="h-0.5 w-3 sm:w-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 opacity-30" />
           </div>
         </div>
       </div>

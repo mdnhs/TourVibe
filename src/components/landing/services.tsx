@@ -125,18 +125,18 @@ export function Services({
 
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-indigo-700 animate-in fade-in slide-in-from-left-4 duration-500">
-              <span className="relative flex size-1.5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2 sm:space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-indigo-700 animate-in fade-in slide-in-from-left-4 duration-500">
+              <span className="relative flex size-1 sm:size-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-500 opacity-75" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-indigo-600" />
+                <span className="relative inline-flex size-1 sm:size-1.5 rounded-full bg-indigo-600" />
               </span>
               {badgeText}
             </div>
 
             <h2
-              className="font-heading text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
+              className="font-heading text-2xl font-extrabold tracking-tight text-slate-950 sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
               style={{ animationDelay: "80ms" }}
             >
               {renderTitle(sectionTitle, sectionHighlight)}
@@ -144,7 +144,7 @@ export function Services({
           </div>
 
           <p
-            className="max-w-sm text-sm leading-7 text-slate-500 animate-in fade-in slide-in-from-right-4 duration-500"
+            className="max-w-sm text-xs sm:text-sm leading-relaxed sm:leading-7 text-slate-500 animate-in fade-in slide-in-from-right-4 duration-500"
             style={{ animationDelay: "160ms" }}
           >
             {sectionSubtitle}
@@ -152,7 +152,7 @@ export function Services({
         </div>
 
         {/* Bento grid */}
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
+        <div className="mt-8 sm:mt-12 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3">
 
           {/* Featured card — spans 2 cols */}
           {featured && (() => {
@@ -160,8 +160,8 @@ export function Services({
             return (
               <div
                 className="group animate-in fade-in slide-in-from-bottom-4 duration-500
-                           relative overflow-hidden rounded-[1.5rem] border border-indigo-900/60 bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950
-                           shadow-xl shadow-indigo-950/40 md:col-span-2
+                           relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-indigo-900/60 bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950
+                           shadow-xl shadow-indigo-950/40 col-span-2
                            transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-950/50"
                 style={{ animationDelay: "200ms" }}
               >
@@ -172,31 +172,31 @@ export function Services({
                 <div className={`pointer-events-none absolute -top-16 -right-16 size-56 rounded-full blur-3xl ${featuredAccent.featuredGlow1}`} />
                 <div className={`pointer-events-none absolute -bottom-12 -left-12 size-48 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${featuredAccent.featuredGlow2}`} />
 
-                <div className={`h-1.5 w-full bg-gradient-to-r ${featuredAccent.bar}`} />
+                <div className={`h-1 sm:h-1.5 w-full bg-gradient-to-r ${featuredAccent.bar}`} />
 
-                <div className="space-y-6 p-7">
+                <div className="space-y-4 sm:space-y-6 p-5 sm:p-7">
                   <div className="flex items-start justify-between">
-                    <div className={`flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 ${featuredAccent.iconGradient} ${featuredAccent.iconShadow}`}>
-                      <Icon className="size-6" />
+                    <div className={`flex size-10 sm:size-14 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 ${featuredAccent.iconGradient} ${featuredAccent.iconShadow}`}>
+                      <Icon className="size-5 sm:size-6" />
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/60">
-                      <Sparkles className="size-2.5 text-amber-400" />
+                    <div className="flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/15 bg-white/8 px-2 py-1 sm:px-3 sm:py-1.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-white/60">
+                      <Sparkles className="size-2 sm:size-2.5 text-amber-400" />
                       Most Popular
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <h3 className="font-heading text-2xl font-bold text-white leading-snug">
+                  <div className="space-y-2 sm:space-y-3">
+                    <h3 className="font-heading text-lg sm:text-2xl font-bold text-white leading-snug">
                       {featured.title}
                     </h3>
-                    <p className="text-sm leading-7 text-white/60 max-w-md">
+                    <p className="text-[11px] sm:text-sm leading-relaxed sm:leading-7 text-white/60 max-w-md line-clamp-2 sm:line-clamp-none">
                       {featured.description}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2 pt-1">
-                    <div className={`h-0.5 w-10 rounded-full bg-gradient-to-r ${featuredAccent.bar}`} />
-                    <div className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${featuredAccent.bar} opacity-40`} />
+                    <div className={`h-0.5 w-8 sm:w-10 rounded-full bg-gradient-to-r ${featuredAccent.bar}`} />
+                    <div className={`h-0.5 w-3 sm:w-4 rounded-full bg-gradient-to-r ${featuredAccent.bar} opacity-40`} />
                   </div>
                 </div>
               </div>
@@ -213,31 +213,31 @@ export function Services({
                 key={service.title}
                 style={{ animationDelay: `${280 + i * 70}ms` }}
                 className="group animate-in fade-in slide-in-from-bottom-4 duration-500
-                           relative overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white
+                           relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-slate-200/80 bg-white
                            shadow-lg shadow-slate-200/60
                            transition-all hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-300/50"
               >
-                <div className={`pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
-                <div className={`h-1.5 w-full bg-gradient-to-r ${accent.bar}`} />
+                <div className={`pointer-events-none absolute -top-12 -right-12 size-32 sm:size-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
+                <div className={`h-1 sm:h-1.5 w-full bg-gradient-to-r ${accent.bar}`} />
 
-                <div className="space-y-5 p-6">
+                <div className="space-y-4 p-4 sm:space-y-5 sm:p-6">
                   <div className="flex items-start justify-between">
-                    <div className={`flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110 ${accent.iconGradient} ${accent.iconShadow}`}>
-                      <Icon className="size-5" />
+                    <div className={`flex size-9 sm:size-12 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110 ${accent.iconGradient} ${accent.iconShadow}`}>
+                      <Icon className="size-4 sm:size-5" />
                     </div>
-                    <span className="font-heading text-4xl font-black text-slate-100 select-none leading-none">
+                    <span className="font-heading text-2xl sm:text-4xl font-black text-slate-100 select-none leading-none">
                       {String(i + 2).padStart(2, "0")}
                     </span>
                   </div>
 
-                  <div className="space-y-2">
-                    <h3 className="font-heading text-xl font-bold text-slate-950 leading-snug">{service.title}</h3>
-                    <p className="text-sm leading-7 text-slate-500">{service.description}</p>
+                  <div className="space-y-1 sm:space-y-2">
+                    <h3 className="font-heading text-sm sm:text-xl font-bold text-slate-950 leading-snug line-clamp-1 sm:line-clamp-none">{service.title}</h3>
+                    <p className="text-[11px] sm:text-sm leading-relaxed sm:leading-7 text-slate-500 line-clamp-2 sm:line-clamp-none">{service.description}</p>
                   </div>
 
                   <div className="flex items-center gap-2 pt-1">
-                    <div className={`h-0.5 w-10 rounded-full bg-gradient-to-r ${accent.bar}`} />
-                    <div className={`h-0.5 w-4 rounded-full bg-gradient-to-r ${accent.bar} opacity-40`} />
+                    <div className={`h-0.5 w-8 sm:w-10 rounded-full bg-gradient-to-r ${accent.bar}`} />
+                    <div className={`h-0.5 w-3 sm:w-4 rounded-full bg-gradient-to-r ${accent.bar} opacity-40`} />
                   </div>
                 </div>
               </div>

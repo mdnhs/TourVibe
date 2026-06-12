@@ -1,6 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Car, ShieldCheck, Star, Thermometer, UserCheck, Zap } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface PopularCar {
   id: string;
@@ -98,156 +105,168 @@ export function PopularCars({ cars }: PopularCarsProps) {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
 
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-gradient-to-r from-amber-400/10 to-orange-400/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-300 animate-in fade-in slide-in-from-left-4 duration-500">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-amber-400" />
-              </span>
-              Our Premium Fleet
+        <Carousel opts={{ align: "start" }}>
+          {/* Header */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-gradient-to-r from-amber-400/10 to-orange-400/10 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-amber-300 animate-in fade-in slide-in-from-left-4 duration-500">
+                <span className="relative flex size-1 sm:size-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex size-1 sm:size-1.5 rounded-full bg-amber-400" />
+                </span>
+                Our Premium Fleet
+              </div>
+
+              <h2
+                className="font-heading text-2xl font-extrabold tracking-tight text-white sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
+                style={{ animationDelay: "80ms" }}
+              >
+                Travel in{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10 bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">comfort</span>
+                  <span className="absolute -bottom-0.5 left-0 h-0.5 sm:-bottom-1 sm:h-1 w-full rounded-full bg-gradient-to-r from-amber-400/60 to-orange-400/60" aria-hidden="true" />
+                </span>{" "}
+                &amp; style
+              </h2>
+
+              <p
+                className="max-w-lg text-xs sm:text-sm leading-relaxed sm:leading-7 text-white/50 animate-in fade-in duration-500"
+                style={{ animationDelay: "140ms" }}
+              >
+                Handpicked for comfort, safety and style — professionally maintained.
+              </p>
             </div>
 
-            <h2
-              className="font-heading text-4xl font-extrabold tracking-tight text-white sm:text-5xl animate-in fade-in slide-in-from-left-4 duration-500"
-              style={{ animationDelay: "80ms" }}
-            >
-              Travel in{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">comfort</span>
-                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-amber-400/60 to-orange-400/60" aria-hidden="true" />
-              </span>{" "}
-              &amp; style
-            </h2>
+            <div className="flex items-center justify-between gap-3 sm:gap-4 sm:justify-end animate-in fade-in slide-in-from-right-4 duration-500" style={{ animationDelay: "160ms" }}>
+              <Link
+                href="/tours"
+                className="group inline-flex shrink-0 items-center gap-1.5 sm:gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-sm font-semibold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400/40 hover:bg-indigo-400/15"
+              >
+                Browse tours
+                <ArrowRight className="size-3 sm:size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
 
-            <p
-              className="max-w-lg text-sm leading-7 text-white/50 animate-in fade-in duration-500"
-              style={{ animationDelay: "140ms" }}
-            >
-              Every vehicle in our fleet is handpicked for comfort, safety and style — professionally maintained and driven by our expert team.
-            </p>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <CarouselPrevious className="static h-8 w-8 translate-y-0 border-white/10 bg-white/5 text-white shadow-sm transition-all hover:bg-white/10 hover:text-amber-400 disabled:opacity-20 sm:h-10 sm:w-10" />
+                <CarouselNext className="static h-8 w-8 translate-y-0 border-white/10 bg-white/5 text-white shadow-sm transition-all hover:bg-white/10 hover:text-amber-400 disabled:opacity-20 sm:h-10 sm:w-10" />
+              </div>
+            </div>
           </div>
 
-          <Link
-            href="/tours"
-            className="group inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400/40 hover:bg-indigo-400/15 animate-in fade-in slide-in-from-right-4 duration-500"
-            style={{ animationDelay: "160ms" }}
+          {/* Feature strip */}
+          <div
+            className="mt-8 grid grid-cols-2 gap-2 sm:mt-10 sm:grid-cols-4 sm:gap-3 animate-in fade-in slide-in-from-bottom-3 duration-500"
+            style={{ animationDelay: "200ms" }}
           >
-            Browse tours
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-
-        {/* Feature strip */}
-        <div
-          className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-3 duration-500"
-          style={{ animationDelay: "200ms" }}
-        >
-          {features.map((f) => {
-            const Icon = f.icon;
-            return (
-              <div key={f.label} className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.07] px-4 py-3 backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-white/12">
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/8">
-                  <Icon className={`size-3.5 ${f.color}`} />
+            {features.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div key={f.label} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 py-2 sm:gap-2.5 sm:px-4 sm:py-3 backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-white/12">
+                  <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-white/8 sm:size-7">
+                    <Icon className={`size-3 sm:size-3.5 ${f.color}`} />
+                  </div>
+                  <span className="text-[10px] sm:text-xs font-semibold text-white/70">{f.label}</span>
                 </div>
-                <span className="text-xs font-semibold text-white/70">{f.label}</span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
 
-        {/* Cards */}
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {cars.map((car, i) => {
-            const accent = cardColors[i % cardColors.length];
+          {/* Cards */}
+          <CarouselContent className="mt-8 -ml-5">
+            {cars.map((car, i) => {
+              const accent = cardColors[i % cardColors.length];
 
-            return (
-              <div
-                key={car.id}
-                style={{ animationDelay: `${280 + i * 80}ms` }}
-                className="group animate-in fade-in slide-in-from-bottom-4 duration-500
-                           relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.06]
-                           backdrop-blur-sm transition-all hover:-translate-y-1.5 hover:border-white/20 hover:bg-white/10 hover:shadow-xl hover:shadow-black/40"
-              >
-                {/* Hover glow */}
-                <div className={`pointer-events-none absolute -top-12 -right-12 size-44 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
-
-                {/* Thumbnail */}
-                <div className="relative h-52 w-full overflow-hidden bg-white/5">
-                  {car.thumbnail ? (
-                    <Image
-                      src={car.thumbnail}
-                      alt={`${car.make} ${car.model}`}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-108"
-                    />
-                  ) : (
-                    <div className="flex h-full flex-col items-center justify-center gap-3">
-                      <Car className="size-12 text-white/20" />
-                      <span className="text-xs font-medium text-white/30">No image available</span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent" />
-
-                  {/* Year badge */}
-                  <div className={`absolute left-3 top-3 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm ${accent.yearBg}`}>
-                    {car.year}
-                  </div>
-
-                  {/* Tour count */}
-                  {car.tourCount > 0 && (
-                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/80 backdrop-blur-sm border border-white/15">
-                      <Zap className="size-2.5 text-amber-400" />
-                      {car.tourCount} tour{car.tourCount !== 1 ? "s" : ""}
-                    </div>
-                  )}
-
-                  {/* Name overlay */}
-                  <div className="absolute bottom-3 left-3">
-                    <p className="font-heading text-lg font-extrabold leading-tight text-white drop-shadow">
-                      {car.make} {car.model}
-                    </p>
-                    <p className="text-[11px] font-medium text-white/50">Premium fleet vehicle</p>
-                  </div>
-                </div>
-
-                {/* Top gradient bar */}
-                <div className={`h-1 w-full bg-gradient-to-r ${accent.bar}`} />
-
-                {/* Content */}
-                <div className="flex flex-1 flex-col gap-4 p-5">
-                  {/* Comfort features */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { icon: UserCheck,   label: "Pro driver",  color: "text-amber-400" },
-                      { icon: ShieldCheck, label: "Insured",     color: "text-emerald-400" },
-                      { icon: Thermometer, label: "Air con",     color: "text-cyan-400" },
-                      { icon: Star,        label: "Top rated",   color: "text-violet-400" },
-                    ].map((f) => {
-                      const Icon = f.icon;
-                      return (
-                        <div key={f.label} className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-[11px] font-medium text-white/60 border border-white/5">
-                          <Icon className={`size-3 shrink-0 ${f.color}`} />
-                          {f.label}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* CTA */}
-                  <Link
-                    href={`/tours?vehicle=${car.id}`}
-                    className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-bold backdrop-blur-sm transition-all hover:-translate-y-0.5 ${accent.btnBorder}`}
+              return (
+                <CarouselItem
+                  key={car.id}
+                  className="basis-full pl-5 sm:basis-1/2 lg:basis-1/3"
+                >
+                  <div
+                    style={{ animationDelay: `${280 + i * 80}ms` }}
+                    className="group animate-in fade-in slide-in-from-bottom-4 duration-500
+                               relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.06]
+                               backdrop-blur-sm transition-all hover:-translate-y-1.5 hover:border-white/20 hover:bg-white/10 hover:shadow-xl hover:shadow-black/40"
                   >
-                    Book with this vehicle
-                    <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                    {/* Hover glow */}
+                    <div className={`pointer-events-none absolute -top-12 -right-12 size-44 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
+
+                    {/* Thumbnail */}
+                    <div className="relative h-52 w-full overflow-hidden bg-white/5">
+                      {car.thumbnail ? (
+                        <Image
+                          src={car.thumbnail}
+                          alt={`${car.make} ${car.model}`}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-108"
+                        />
+                      ) : (
+                        <div className="flex h-full flex-col items-center justify-center gap-3">
+                          <Car className="size-12 text-white/20" />
+                          <span className="text-xs font-medium text-white/30">No image available</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent" />
+
+                      {/* Year badge */}
+                      <div className={`absolute left-3 top-3 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm ${accent.yearBg}`}>
+                        {car.year}
+                      </div>
+
+                      {/* Tour count */}
+                      {car.tourCount > 0 && (
+                        <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/80 backdrop-blur-sm border border-white/15">
+                          <Zap className="size-2.5 text-amber-400" />
+                          {car.tourCount} tour{car.tourCount !== 1 ? "s" : ""}
+                        </div>
+                      )}
+
+                      {/* Name overlay */}
+                      <div className="absolute bottom-3 left-3">
+                        <p className="font-heading text-lg font-extrabold leading-tight text-white drop-shadow">
+                          {car.make} {car.model}
+                        </p>
+                        <p className="text-[11px] font-medium text-white/50">Premium fleet vehicle</p>
+                      </div>
+                    </div>
+
+                    {/* Top gradient bar */}
+                    <div className={`h-1 w-full bg-gradient-to-r ${accent.bar}`} />
+
+                    {/* Content */}
+                    <div className="flex flex-1 flex-col gap-4 p-5">
+                      {/* Comfort features */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { icon: UserCheck,   label: "Pro driver",  color: "text-amber-400" },
+                          { icon: ShieldCheck, label: "Insured",     color: "text-emerald-400" },
+                          { icon: Thermometer, label: "Air con",     color: "text-cyan-400" },
+                          { icon: Star,        label: "Top rated",   color: "text-violet-400" },
+                        ].map((f) => {
+                          const Icon = f.icon;
+                          return (
+                            <div key={f.label} className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-[11px] font-medium text-white/60 border border-white/5">
+                              <Icon className={`size-3 shrink-0 ${f.color}`} />
+                              {f.label}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* CTA */}
+                      <Link
+                        href={`/tours?vehicle=${car.id}`}
+                        className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-bold backdrop-blur-sm transition-all hover:-translate-y-0.5 ${accent.btnBorder}`}
+                      >
+                        Book with this vehicle
+                        <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
     </section>
   );
