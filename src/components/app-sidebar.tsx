@@ -51,6 +51,7 @@ export function AppSidebar({
   unreadNotifications = 0,
   unreadMessages = 0,
   allowedMenus = null,
+  siteName = "TourVibe",
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -62,6 +63,7 @@ export function AppSidebar({
   unreadNotifications?: number;
   unreadMessages?: number;
   allowedMenus?: string[] | null;
+  siteName?: string;
 }) {
   const pathname = usePathname();
   const { setOpen, open } = useSidebar();
@@ -283,14 +285,14 @@ export function AppSidebar({
                 size="lg"
                 className="group/brand hover:bg-transparent p-0 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center"
                 render={<Link href="/dashboard" />}
-                tooltip="TourVibe"
+                tooltip={siteName}
               >
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/30">
                   <CarFrontIcon className="size-5 text-white" />
                 </div>
                 <div className="flex flex-col gap-0 leading-none ml-3 group-data-[collapsible=icon]:hidden">
-                  <span className="text-sm font-bold tracking-tight text-white">TourVibe</span>
-                  <span className="text-[10px] font-medium text-white/40">Admin Panel</span>
+                  <span className="text-sm font-bold tracking-tight text-white">{siteName}</span>
+                  <span className="text-[10px] font-medium text-white/40">{user.role} Panel</span>
                 </div>
               </SidebarMenuButton>
             </SidebarMenuItem>

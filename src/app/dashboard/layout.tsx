@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { requireDashboardSession } from "@/lib/dashboard";
 import { prisma } from "@/lib/prisma";
 import { getIntegrations } from "@/lib/integrations";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 import { IntegrationsSetupDialog } from "@/components/integrations-setup-dialog";
 
 export default async function DashboardLayout({
@@ -14,7 +15,7 @@ export default async function DashboardLayout({
 }) {
   const { session, label, allowedMenus, isSuperAdmin } = await requireDashboardSession();
 
-  const [unread, unreadMessages, integrations] = await Promise.all([
+  const [unread, unreadMessages, integrations, site] = await Promise.all([
     prisma.notification.count({
       where: {
         OR: [{ targetUserId: null }, { targetUserId: session.user.id }],
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
       ? prisma.contactMessage.count({ where: { status: "unread" } })
       : Promise.resolve(0),
     isSuperAdmin ? getIntegrations() : Promise.resolve(null),
+    getSiteConfig(),
   ]);
 
   const missingCloudinary = isSuperAdmin && integrations
@@ -49,6 +51,7 @@ export default async function DashboardLayout({
         unreadNotifications={unread}
         unreadMessages={unreadMessages}
         allowedMenus={allowedMenus}
+        siteName={site.siteName}
       />
       <SidebarInset className="overflow-y-auto">{children}</SidebarInset>
 

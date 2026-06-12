@@ -161,7 +161,7 @@ export default async function BlogPostPage({
               <div className="size-8 rounded-full bg-amber-400/20 flex items-center justify-center">
                 <UserIcon className="size-4 text-amber-400" />
               </div>
-              <span className="font-medium text-white/70">{post.authorName || "TourVibe"}</span>
+              <span className="font-medium text-white/70">{post.authorName || s.ogSiteName || s.siteTitle}</span>
             </div>
             <span className="text-white/30">·</span>
             <div className="flex items-center gap-1.5">

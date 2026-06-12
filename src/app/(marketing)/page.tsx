@@ -299,7 +299,7 @@ export default async function Home() {
         sectionSubtitle={od(siteConfig.servicesSectionSubtitle)}
       />
 
-      <LiveTrackingSection initialDrivers={liveDrivers} />
+      <LiveTrackingSection initialDrivers={liveDrivers} siteName={siteConfig.siteName} />
 
       <About
         title={od(siteConfig.aboutTitle)}
@@ -310,7 +310,7 @@ export default async function Home() {
 
       <Reviews reviews={displayReviews} />
 
-      <BlogPreview posts={blogPosts} />
+      <BlogPreview posts={blogPosts} siteName={siteConfig.siteName} />
 
       <Contact
         email={od(siteConfig.contactEmail)}

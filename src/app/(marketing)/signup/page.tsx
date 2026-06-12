@@ -4,6 +4,7 @@ import { ArrowRight, MapPin, Star, Compass } from "lucide-react";
 
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import { getServerSession } from "@/lib/session";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 const perks = [
   {
@@ -33,6 +34,8 @@ export default async function SignupPage() {
     redirect("/dashboard");
   }
 
+  const { siteName } = await getSiteConfig();
+
   return (
     <div className="relative overflow-hidden px-4 py-12 text-slate-900 sm:px-6 dark:text-slate-100">
       {/* ── Background glows ── */}
@@ -56,7 +59,7 @@ export default async function SignupPage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
               <span className="relative inline-flex size-1.5 rounded-full bg-amber-600" />
             </span>
-            Join TourVibe
+            Join {siteName}
           </div>
 
           <div className="space-y-3">
@@ -110,7 +113,7 @@ export default async function SignupPage() {
           className="w-full max-w-lg animate-in fade-in slide-in-from-right-4 duration-500 lg:pt-14"
           style={{ animationDelay: "100ms" }}
         >
-          <SignUpForm />
+          <SignUpForm siteName={siteName} />
           <p className="mt-5 text-center text-sm text-slate-500 dark:text-slate-400">
             Already have an account?{" "}
             <Link

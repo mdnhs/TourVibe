@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 import { BookingsTrendChart, type TrendPoint } from "./bookings-trend-chart";
 import { ChartRangePicker } from "./chart-range-picker";
 
@@ -316,9 +317,11 @@ export async function AdminOverview({
   const totalForRate = paidBookings + pendingBookings + cancelledBookings;
   const conversionRate = totalForRate > 0 ? (paidBookings / totalForRate) * 100 : 0;
 
+  const { siteName } = await getSiteConfig();
+
   return (
     <>
-      <SiteHeader title="Operations Dashboard" subtitle="TourVibe control panel" />
+      <SiteHeader title="Operations Dashboard" subtitle={`${siteName} control panel`} />
       <div className="flex flex-col gap-5 p-4 md:gap-6 md:p-6">
         {/* HERO */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-6 text-white shadow-2xl shadow-indigo-950/40 md:p-8">
@@ -348,7 +351,7 @@ export async function AdminOverview({
                   {greeting}, {firstName} 👋
                 </h2>
                 <p className="mt-1 text-sm text-white/50">
-                  Here&apos;s an overview of your TourVibe operations today.
+                  Here&apos;s an overview of your {siteName} operations today.
                 </p>
               </div>
             </div>

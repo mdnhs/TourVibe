@@ -41,7 +41,7 @@ const cardAccents = [
   },
 ];
 
-export function BlogPreview({ posts }: { posts: BlogPost[] }) {
+export function BlogPreview({ posts, siteName = "TourVibe" }: { posts: BlogPost[]; siteName?: string }) {
 
   return (
     <section id="blog" className="relative overflow-hidden px-4 py-24 sm:px-6">
@@ -79,7 +79,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
               className="max-w-md text-sm leading-7 text-slate-500 animate-in fade-in duration-500"
               style={{ animationDelay: "140ms" }}
             >
-              Travel tips, destination guides and insider stories from the TourVibe team.
+              Travel tips, destination guides and insider stories from the {siteName} team.
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export function BlogPreview({ posts }: { posts: BlogPost[] }) {
                     <div className={`flex items-center gap-3 rounded-xl px-3 py-2 border border-slate-100 ${accent.metaBg}`}>
                       <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
                         <UserIcon className="size-3 text-slate-400" />
-                        <span className="truncate max-w-20">{post.authorName || "TourVibe"}</span>
+                        <span className="truncate max-w-20">{post.authorName || siteName}</span>
                       </div>
                       <div className="h-3 w-px bg-slate-200" />
                       <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">

@@ -32,9 +32,28 @@ const defaults: SeoSettings = {
 };
 
 export async function getSeoSettingsSync(): Promise<SeoSettings> {
-  const row = await prisma.settings.findUnique({ where: { key: "seo" } });
-  if (!row) return defaults;
-  return { ...defaults, ...JSON.parse(row.value) };
+  const [row, siteRow] = await Promise.all([
+    prisma.settings.findUnique({ where: { key: "seo" } }),
+    prisma.settings.findUnique({ where: { key: "site_config" } }),
+  ]);
+
+  // Brand fields default to the Site Config name unless explicitly set in SEO
+  let siteName = "TourVibe";
+  if (siteRow) {
+    try {
+      siteName = JSON.parse(siteRow.value).siteName || siteName;
+    } catch {
+      /* ignore malformed config */
+    }
+  }
+
+  const stored = row ? JSON.parse(row.value) : {};
+  const merged: SeoSettings = { ...defaults, ...stored };
+  if (!stored.siteTitle) merged.siteTitle = siteName;
+  if (!stored.titleTemplate) merged.titleTemplate = `%s | ${siteName}`;
+  if (!stored.ogSiteName) merged.ogSiteName = siteName;
+  if (!stored.orgName) merged.orgName = siteName;
+  return merged;
 }
 
 export function buildMetadata(

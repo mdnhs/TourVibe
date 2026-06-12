@@ -4,14 +4,18 @@ import { Plus, Eye, EyeOff } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 import { BlogTable } from "./blog-table";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = {
-  title: "Blog Management | TourVibe",
-  description: "Manage blog posts",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { siteName } = await getSiteConfig();
+  return {
+    title: `Blog Management | ${siteName}`,
+    description: "Manage blog posts",
+  };
+}
 
 export default async function BlogPage() {
   const { isSuperAdmin, allowedMenus } = await requireDashboardSession();

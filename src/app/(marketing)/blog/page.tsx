@@ -5,6 +5,7 @@ import { ArrowRight, CalendarIcon, ImageIcon, UserIcon } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata } from "@/lib/seo";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSeoSettingsSync();
@@ -52,6 +53,8 @@ export default async function BlogListPage() {
     createdAt: post.createdAt.toISOString(),
   }));
 
+  const { siteName } = await getSiteConfig();
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -66,7 +69,7 @@ export default async function BlogListPage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
               <span className="relative inline-flex size-1.5 rounded-full bg-amber-400" />
             </span>
-            TourVibe Blog
+            {siteName} Blog
           </div>
           <h1 className="font-heading text-5xl font-extrabold tracking-tight sm:text-6xl">
             Stories from the{" "}
@@ -76,7 +79,7 @@ export default async function BlogListPage() {
             </span>
           </h1>
           <p className="mx-auto max-w-lg text-base leading-7 text-white/55">
-            Travel tips, destination guides, and insider stories from TourVibe — your companion for car-based adventures across Ireland.
+            Travel tips, destination guides, and insider stories from {siteName} — your companion for car-based adventures across Ireland.
           </p>
         </div>
       </section>
@@ -164,7 +167,7 @@ export default async function BlogListPage() {
                       <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
                         <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
                           <UserIcon className="size-3 text-slate-400" />
-                          {post.authorName || "TourVibe"}
+                          {post.authorName || siteName}
                         </div>
                         <div className="h-3.5 w-px bg-slate-200" />
                         <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">

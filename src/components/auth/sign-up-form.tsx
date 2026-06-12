@@ -20,9 +20,10 @@ import { authClient } from "@/lib/auth-client";
 interface SignUpFormProps {
   onSuccess?: () => void;
   compact?: boolean;
+  siteName?: string;
 }
 
-export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
+export function SignUpForm({ onSuccess, compact, siteName = "TourVibe" }: SignUpFormProps = {}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -129,7 +130,7 @@ export function SignUpForm({ onSuccess, compact }: SignUpFormProps = {}) {
     <Card className="border-white/60 bg-white/90 shadow-2xl shadow-cyan-950/10 backdrop-blur dark:border-white/10 dark:bg-slate-900/80 dark:shadow-black/40">
       <CardHeader className="space-y-2">
         <CardTitle className="text-2xl text-slate-950 dark:text-white">
-          Create your TourVibe account
+          Create your {siteName} account
         </CardTitle>
         <CardDescription className="text-sm text-slate-600 dark:text-slate-400">
           Public signup creates tourist accounts only. Driver access is provisioned by

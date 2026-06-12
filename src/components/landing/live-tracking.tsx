@@ -6,9 +6,10 @@ import type { DriverLocation } from "@/app/api/drivers/locations/route";
 
 interface LiveTrackingSectionProps {
   initialDrivers: DriverLocation[];
+  siteName?: string;
 }
 
-export function LiveTrackingSection({ initialDrivers }: LiveTrackingSectionProps) {
+export function LiveTrackingSection({ initialDrivers, siteName = "TourVibe" }: LiveTrackingSectionProps) {
   return (
     <section className="py-20 bg-slate-950 text-white overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -24,7 +25,7 @@ export function LiveTrackingSection({ initialDrivers }: LiveTrackingSectionProps
               <span className="block text-emerald-400">your driver is</span>
             </h2>
             <p className="text-lg text-slate-300 leading-relaxed">
-              Every TourVibe driver shares their real-time GPS location during active
+              Every {siteName} driver shares their real-time GPS location during active
               tours. Watch them navigate to tourist spots live — no guessing, no
               waiting.
             </p>

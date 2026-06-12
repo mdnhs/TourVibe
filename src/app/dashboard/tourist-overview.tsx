@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 type DashboardSessionData = Awaited<ReturnType<typeof requireDashboardSession>>;
 
@@ -210,9 +211,11 @@ export async function TouristOverview({
     cancelled: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
   };
 
+  const { siteName } = await getSiteConfig();
+
   return (
     <>
-      <SiteHeader title="My Travel Hub" subtitle="Your TourVibe trips at a glance" />
+      <SiteHeader title="My Travel Hub" subtitle={`Your ${siteName} trips at a glance`} />
       <div className="flex flex-col gap-5 p-4 md:gap-6 md:p-6">
         {/* HERO */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-6 text-white shadow-2xl shadow-indigo-950/40 md:p-8">

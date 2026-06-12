@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 import { db } from "@/lib/db";
 import { getSeoSettings, getSitemapCustomEntries } from "./actions";
 import { SeoForm } from "./seo-form";
@@ -185,6 +186,7 @@ export default async function SeoPage() {
 
   const seoSettings = await getSeoSettings();
   const sitemapCustomEntries = await getSitemapCustomEntries();
+  const { siteName } = await getSiteConfig();
 
   const tourCount = await db.tourPackage.count();
   const vehicleCount = await db.vehicle.count();
@@ -345,7 +347,7 @@ export default async function SeoPage() {
 
   return (
     <>
-      <SiteHeader title="SEO Management" subtitle="TourVibe control panel" />
+      <SiteHeader title="SEO Management" subtitle={`${siteName} control panel`} />
 
       <div className="flex flex-col gap-6 p-4 md:p-6">
         {/* ── HERO BANNER ── */}

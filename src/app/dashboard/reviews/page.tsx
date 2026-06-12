@@ -4,14 +4,18 @@ import Link from "next/link";
 
 import { db } from "@/lib/db";
 import { requireDashboardSession } from "@/lib/dashboard";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 import { ReviewTable } from "./review-table";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = {
-  title: "Review Management | TourVibe",
-  description: "Manage tour package reviews",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { siteName } = await getSiteConfig();
+  return {
+    title: `Review Management | ${siteName}`,
+    description: "Manage tour package reviews",
+  };
+}
 
 export default async function ReviewPage() {
   const { session, isSuperAdmin } = await requireDashboardSession();

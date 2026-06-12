@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrencySymbol } from "@/lib/currency";
+import { getSiteConfig } from "@/app/dashboard/site-config/actions";
 
 interface BookingRow {
   id: string;
@@ -73,9 +74,12 @@ export async function GET(
   const statusLabel = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
   const currencySymbol = getCurrencySymbol(booking.currency);
 
-  const invoiceNumber = booking.id.length > 16 
-    ? booking.id.slice(0, 8).toUpperCase() 
+  const invoiceNumber = booking.id.length > 16
+    ? booking.id.slice(0, 8).toUpperCase()
     : booking.id.toUpperCase();
+
+  const site = await getSiteConfig();
+  const companyName = site.siteName || "TourVibe";
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -280,7 +284,7 @@ export async function GET(
       <div class="brand">
         <div class="brand-icon">🚗</div>
         <div>
-          <div class="brand-name">TourVibe</div>
+          <div class="brand-name">${companyName}</div>
           <div class="brand-tagline">Car Tour Management</div>
         </div>
       </div>
@@ -307,7 +311,7 @@ export async function GET(
         </div>
         <div class="party-box">
           <div class="party-label">From</div>
-          <div class="party-name">TourVibe Inc.</div>
+          <div class="party-name">${companyName}</div>
           <div class="party-email">support@tourvibe.com</div>
         </div>
       </div>
@@ -356,8 +360,8 @@ export async function GET(
     </div>
 
     <div class="footer">
-      <span class="footer-text">Thank you for choosing TourVibe!</span>
-      <span class="footer-brand">TourVibe &copy; ${new Date().getFullYear()}</span>
+      <span class="footer-text">Thank you for choosing ${companyName}!</span>
+      <span class="footer-brand">${companyName} &copy; ${new Date().getFullYear()}</span>
     </div>
   </div>
 
