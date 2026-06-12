@@ -85,6 +85,7 @@ export function buildMetadata(
     title,
     description,
     keywords: s.keywords || undefined,
+    publisher: s.orgName || s.siteTitle,
     metadataBase: s.siteUrl ? new URL(s.siteUrl) : undefined,
     alternates: canonical ? { canonical } : undefined,
     robots: {

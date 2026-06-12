@@ -72,33 +72,41 @@ export async function updateSeoSettings(formData: FormData) {
   const { isSuperAdmin, allowedMenus } = await requireDashboardSession();
   if (!isSuperAdmin && !allowedMenus?.includes("SEO")) return { error: "Unauthorized" };
 
+  // Inactive tabs are unmounted, so their fields are absent from FormData.
+  // Merge with existing settings — only overwrite keys that were submitted.
+  const existing = await getSeoSettings();
+  const str = <K extends keyof SeoSettings>(key: K, fallback: string) =>
+    formData.has(key) ? (formData.get(key) as string) || fallback : (existing[key] as string);
+  const bool = <K extends keyof SeoSettings>(key: K) =>
+    formData.has(key) ? formData.get(key) === "true" : (existing[key] as boolean);
+
   const settings: SeoSettings = {
-    siteTitle: (formData.get("siteTitle") as string) || "",
-    titleTemplate: (formData.get("titleTemplate") as string) || "%s | TourVibe",
-    description: (formData.get("description") as string) || "",
-    keywords: (formData.get("keywords") as string) || "",
-    siteUrl: (formData.get("siteUrl") as string) || "",
-    ogTitle: (formData.get("ogTitle") as string) || "",
-    ogDescription: (formData.get("ogDescription") as string) || "",
-    ogImage: (formData.get("ogImage") as string) || "",
-    ogSiteName: (formData.get("ogSiteName") as string) || "",
-    ogType: (formData.get("ogType") as string) || "website",
-    twitterCard: (formData.get("twitterCard") as string) || "summary_large_image",
-    twitterSite: (formData.get("twitterSite") as string) || "",
-    twitterCreator: (formData.get("twitterCreator") as string) || "",
-    twitterImage: (formData.get("twitterImage") as string) || "",
-    robotsIndex: formData.get("robotsIndex") === "true",
-    robotsFollow: formData.get("robotsFollow") === "true",
-    googleAnalyticsId: (formData.get("googleAnalyticsId") as string) || "",
-    googleTagManagerId: (formData.get("googleTagManagerId") as string) || "",
-    metaPixelId: (formData.get("metaPixelId") as string) || "",
-    googleSiteVerification: (formData.get("googleSiteVerification") as string) || "",
-    bingSiteVerification: (formData.get("bingSiteVerification") as string) || "",
-    yandexVerification: (formData.get("yandexVerification") as string) || "",
-    orgName: (formData.get("orgName") as string) || "",
-    orgLogo: (formData.get("orgLogo") as string) || "",
-    enableJsonLd: formData.get("enableJsonLd") === "true",
-    facebookCatalogUrl: (formData.get("facebookCatalogUrl") as string) || "/api/feeds/facebook",
+    siteTitle: str("siteTitle", ""),
+    titleTemplate: str("titleTemplate", "%s | TourVibe"),
+    description: str("description", ""),
+    keywords: str("keywords", ""),
+    siteUrl: str("siteUrl", ""),
+    ogTitle: str("ogTitle", ""),
+    ogDescription: str("ogDescription", ""),
+    ogImage: str("ogImage", ""),
+    ogSiteName: str("ogSiteName", ""),
+    ogType: str("ogType", "website"),
+    twitterCard: str("twitterCard", "summary_large_image"),
+    twitterSite: str("twitterSite", ""),
+    twitterCreator: str("twitterCreator", ""),
+    twitterImage: str("twitterImage", ""),
+    robotsIndex: bool("robotsIndex"),
+    robotsFollow: bool("robotsFollow"),
+    googleAnalyticsId: str("googleAnalyticsId", ""),
+    googleTagManagerId: str("googleTagManagerId", ""),
+    metaPixelId: str("metaPixelId", ""),
+    googleSiteVerification: str("googleSiteVerification", ""),
+    bingSiteVerification: str("bingSiteVerification", ""),
+    yandexVerification: str("yandexVerification", ""),
+    orgName: str("orgName", ""),
+    orgLogo: str("orgLogo", ""),
+    enableJsonLd: bool("enableJsonLd"),
+    facebookCatalogUrl: str("facebookCatalogUrl", "/api/feeds/facebook"),
   };
 
   await prisma.settings.upsert({
