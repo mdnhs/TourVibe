@@ -337,7 +337,10 @@ export default async function TourDetailsPage({
                 src={tour.promoVideoUrl}
                 poster={tour.thumbnail || undefined}
                 controls
-                preload="metadata"
+                autoPlay
+                muted
+                loop
+                preload="auto"
                 playsInline
                 className="w-full h-auto max-h-[70vh] object-contain bg-black"
               />
