@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { requireDashboardSession } from "@/lib/dashboard";
+import { requireDashboardSession, canAccessMenu } from "@/lib/dashboard";
 import { TourTable, TourPackage } from "./tour-table";
 import { getCurrencyCode } from "@/lib/currency-server";
 
 export default async function ToursPage() {
-  const { isSuperAdmin } = await requireDashboardSession();
+  const sess = await requireDashboardSession();
 
-  if (!isSuperAdmin) {
+  if (!canAccessMenu(sess, "Tours")) {
     redirect("/dashboard");
   }
 

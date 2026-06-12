@@ -3,15 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { requireDashboardSession } from "@/lib/dashboard";
+import { requireDashboardSession, canPerform } from "@/lib/dashboard";
 import { generateOrderId, slugify } from "@/lib/utils";
 
 const MAX_IMAGE_BYTES = 1024 * 1024; // 1MB per gallery image
 const MAX_VIDEO_BYTES = 10 * 1024 * 1024; // 10MB per promo video
 
 export async function createTour(formData: FormData) {
-  const { isSuperAdmin } = await requireDashboardSession();
-  if (!isSuperAdmin) throw new Error("Unauthorized");
+  const sess = await requireDashboardSession();
+  if (!canPerform(sess, "tour", "create", "Tours")) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
@@ -85,8 +85,8 @@ export async function createTour(formData: FormData) {
 }
 
 export async function updateTour(id: string, formData: FormData) {
-  const { isSuperAdmin } = await requireDashboardSession();
-  if (!isSuperAdmin) throw new Error("Unauthorized");
+  const sess = await requireDashboardSession();
+  if (!canPerform(sess, "tour", "update", "Tours")) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
   const slug = slugify(name);
@@ -161,8 +161,8 @@ export async function updateTour(id: string, formData: FormData) {
 }
 
 export async function deleteTour(id: string) {
-  const { isSuperAdmin } = await requireDashboardSession();
-  if (!isSuperAdmin) throw new Error("Unauthorized");
+  const sess = await requireDashboardSession();
+  if (!canPerform(sess, "tour", "delete", "Tours")) throw new Error("Unauthorized");
 
   try {
     await prisma.tourPackage.delete({ where: { id } });
@@ -175,8 +175,8 @@ export async function deleteTour(id: string) {
 }
 
 export async function deleteTours(ids: string[]) {
-  const { isSuperAdmin } = await requireDashboardSession();
-  if (!isSuperAdmin) throw new Error("Unauthorized");
+  const sess = await requireDashboardSession();
+  if (!canPerform(sess, "tour", "delete", "Tours")) throw new Error("Unauthorized");
 
   if (ids.length === 0) return { error: "No IDs provided" };
 

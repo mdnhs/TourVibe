@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireDashboardSession } from "@/lib/dashboard";
+import { requireDashboardSession, canPerform } from "@/lib/dashboard";
 import { CreateTourForm } from "../tour-forms";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,9 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default async function NewTourPage() {
-  const { isSuperAdmin } = await requireDashboardSession();
+  const sess = await requireDashboardSession();
 
-  if (!isSuperAdmin) {
+  if (!canPerform(sess, "tour", "create", "Tours")) {
     redirect("/dashboard");
   }
 
