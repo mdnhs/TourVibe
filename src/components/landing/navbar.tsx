@@ -19,9 +19,10 @@ interface NavbarProps {
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Tours", href: "/tours" },
+  { label: "Services", href: "/services" },
   { label: "Blog", href: "/blog" },
-  { label: "About", href: "/#about" },
-  { label: "Contact", href: "/#contact" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar({
@@ -81,7 +82,10 @@ export function Navbar({
     if (href === "/")
       return pathname === "/" && (activeHash === "" || activeHash === "#");
     if (href === "/tours") return pathname.startsWith("/tours");
+    if (href === "/services") return pathname.startsWith("/services");
     if (href === "/blog") return pathname.startsWith("/blog");
+    if (href === "/about") return pathname.startsWith("/about");
+    if (href === "/contact") return pathname.startsWith("/contact");
     if (href.includes("#")) {
       const [, hash] = href.split("#");
       return pathname === "/" && activeHash === `#${hash}`;
@@ -105,7 +109,7 @@ export function Navbar({
           <Link href="/" className="group flex items-center gap-2.5">
             <div className="relative flex size-9 items-center justify-center transition-transform duration-300 group-hover:scale-105">
               {!logoUrl && (
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500" />
+                <div className="absolute inset-0 bg-linear-to-br from-amber-400 to-orange-500" />
               )}
               {logoUrl ? (
                 <Image
@@ -116,7 +120,7 @@ export function Navbar({
                   className="relative object-cover"
                 />
               ) : (
-                <CarFront className="relative size-[17px] text-white" />
+                <CarFront className="relative size-4.25 text-white" />
               )}
             </div>
             <div className="hidden sm:block">
@@ -140,7 +144,7 @@ export function Navbar({
                   className={cn(
                     "group relative rounded-full px-3.5 py-2 text-[13px] font-medium transition-all duration-200",
                     active
-                      ? "bg-gradient-to-br from-indigo-50 to-violet-50 text-indigo-700"
+                      ? "bg-linear-to-br from-indigo-50 to-violet-50 text-indigo-700"
                       : "text-slate-500 hover:bg-slate-100/70 hover:text-slate-900",
                   )}
                 >
@@ -149,8 +153,8 @@ export function Navbar({
                     className={cn(
                       "absolute bottom-1.5 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all duration-200",
                       active
-                        ? "w-4 bg-gradient-to-r from-indigo-500 to-violet-500"
-                        : "w-0 bg-gradient-to-r from-indigo-400 to-violet-400 group-hover:w-1",
+                        ? "w-4 bg-linear-to-r from-indigo-500 to-violet-500"
+                        : "w-0 bg-linear-to-r from-indigo-400 to-violet-400 group-hover:w-1",
                     )}
                   />
                 </Link>
@@ -164,7 +168,7 @@ export function Navbar({
               <>
                 <Link
                   href="/dashboard"
-                  className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
+                  className="group inline-flex items-center gap-1.5 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500"
                 >
                   Dashboard
                   <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -187,7 +191,7 @@ export function Navbar({
                 </Link>
                 <Link
                   href="/signup"
-                  className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:from-indigo-500 hover:to-violet-500"
+                  className="group inline-flex items-center gap-1.5 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[13px] font-bold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:from-indigo-500 hover:to-violet-500"
                 >
                   <Sparkles className="size-3 opacity-80" />
                   Get Started
@@ -226,13 +230,13 @@ export function Navbar({
                     className={cn(
                       "flex items-center justify-between rounded-2xl px-4 py-2.5 text-sm font-medium transition-all",
                       active
-                        ? "bg-gradient-to-r from-indigo-50 to-violet-50 text-indigo-700"
+                        ? "bg-linear-to-r from-indigo-50 to-violet-50 text-indigo-700"
                         : "text-slate-500 hover:bg-slate-50/80 hover:text-slate-900",
                     )}
                   >
                     {link.label}
                     {active && (
-                      <span className="size-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" />
+                      <span className="size-1.5 rounded-full bg-linear-to-r from-indigo-500 to-violet-500" />
                     )}
                   </Link>
                 );
@@ -243,7 +247,7 @@ export function Navbar({
               {session ? (
                 <>
                   <Link href="/dashboard" className="flex-1" onClick={() => setMobileOpen(false)}>
-                    <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
+                    <button className="w-full rounded-full bg-linear-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                       Dashboard
                     </button>
                   </Link>
@@ -263,7 +267,7 @@ export function Navbar({
                     </button>
                   </Link>
                   <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
-                    <button className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
+                    <button className="w-full rounded-full bg-linear-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-violet-500">
                       Get Started
                     </button>
                   </Link>
