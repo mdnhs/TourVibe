@@ -165,11 +165,13 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
               {/* Mobile Filter Trigger */}
               <div className="md:hidden">
                 <Sheet>
-                  <SheetTrigger asChild>
-                    <button className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all">
-                      <SlidersHorizontal className="size-3.5" />
-                      Filters
-                    </button>
+                  <SheetTrigger
+                    render={
+                      <button className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all" />
+                    }
+                  >
+                    <SlidersHorizontal className="size-3.5" />
+                    Filters
                   </SheetTrigger>
                   <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
                     <SheetHeader className="border-b p-6 pb-4">
