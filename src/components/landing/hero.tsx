@@ -289,7 +289,7 @@ export function Hero({
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-5">
-        <div className="grid gap-8 pt-10 sm:gap-12 sm:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:pt-20">
+        <div className="grid gap-8 pt-10 sm:gap-12 sm:pt-16 lg:grid-cols-[1.25fr_0.75fr] lg:items-start lg:pt-20">
           {/* ── LEFT: Text + search + stats ── */}
           <div className="min-w-0 space-y-5 sm:space-y-8">
             {/* Pill badge */}
@@ -461,7 +461,7 @@ export function Hero({
 
           {/* ── RIGHT: Map card ── */}
           <div
-            className="relative mt-2 sm:mt-8 lg:mt-0 animate-in fade-in slide-in-from-right-6 duration-700"
+            className="relative mt-8 sm:mt-16 lg:mt-32 animate-in fade-in slide-in-from-right-6 duration-700"
             style={{ animationDelay: "150ms" }}
           >
             {/* Glow orbs */}
@@ -491,7 +491,7 @@ export function Hero({
               </div>
 
               {/* Map itself */}
-              <div className="relative h-80 w-full overflow-hidden rounded-[1.5rem] border border-white/10 sm:h-115">
+              <div className="relative h-56 w-full overflow-hidden rounded-[1.5rem] border border-white/10 sm:h-72">
                 <DriverTrackerMap
                   initialDrivers={initialDrivers}
                   className="h-full"

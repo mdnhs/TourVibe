@@ -302,6 +302,17 @@ export function SiteConfigForm({ config }: { config: SiteConfig }) {
           <Field label="Email" name="contactEmail" defaultValue={config.contactEmail} type="email" />
           <Field label="Phone" name="contactPhone" defaultValue={config.contactPhone} />
           <Field label="Location" name="contactLocation" defaultValue={config.contactLocation} />
+          <div className="pt-4 border-t">
+            <h4 className="text-sm font-semibold mb-2">Google Review</h4>
+            <ImageUploadField
+              name="googleReviewQrUrl"
+              label="Review QR Code"
+              defaultValue={config.googleReviewQrUrl}
+              hint="Upload a QR code image that links to your Google Review page. This will be displayed on the landing page."
+              folder="tourvibe/site-config/qr"
+              aspectRatio="square"
+            />
+          </div>
         </TabsContent>
 
         {/* ── Footer ── */}

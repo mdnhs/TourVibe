@@ -309,6 +309,31 @@ export default async function Home() {
         stats={aboutStats.length ? aboutStats : undefined}
       />
 
+      {siteConfig.googleReviewQrUrl && (
+        <section className="py-16 sm:py-24 bg-slate-50 flex flex-col items-center justify-center px-4 border-y border-slate-200">
+          <div className="max-w-xl w-full text-center space-y-6">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                Enjoyed your journey?
+              </h2>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-md mx-auto">
+                Scan the QR code below to leave us a review on Google. We truly appreciate your feedback and support!
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 inline-flex flex-col items-center gap-3 mx-auto transition-transform hover:-translate-y-1">
+              <img 
+                src={siteConfig.googleReviewQrUrl} 
+                alt="Google Review QR Code" 
+                className="w-48 h-48 sm:w-56 sm:h-56 object-contain" 
+              />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                Scan with your phone
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
       <Reviews reviews={displayReviews} />
 
       <BlogPreview posts={blogPosts} siteName={siteConfig.siteName} />

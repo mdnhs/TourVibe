@@ -164,21 +164,27 @@ export function DriverTrackerMap({
     return () => clearInterval(id);
   }, [fetchLocations, pollInterval]);
 
-  // Fit map to all driver markers whenever the driver list changes (and no active route)
+  // Fit map to active driver markers whenever the driver list changes (and no active route)
   React.useEffect(() => {
     if (activeRoute) return; // let route effect handle the bounds
     const map = mapRef.current;
-    if (!map || drivers.length === 0) return;
+    if (!map) return;
+
+    const activeDrivers = drivers.filter((d) => isOnline(d.locationUpdatedAt));
 
     const fit = () => {
-      if (drivers.length === 1) {
-        map.flyTo({ center: [drivers[0].lng, drivers[0].lat], zoom: 12, duration: 800 });
+      if (activeDrivers.length === 0) {
+        map.flyTo({ center: [-8.2948, 51.8513], zoom: 12, duration: 800 });
         return;
       }
-      const minLng = Math.min(...drivers.map((d) => d.lng));
-      const maxLng = Math.max(...drivers.map((d) => d.lng));
-      const minLat = Math.min(...drivers.map((d) => d.lat));
-      const maxLat = Math.max(...drivers.map((d) => d.lat));
+      if (activeDrivers.length === 1) {
+        map.flyTo({ center: [activeDrivers[0].lng, activeDrivers[0].lat], zoom: 12, duration: 800 });
+        return;
+      }
+      const minLng = Math.min(...activeDrivers.map((d) => d.lng));
+      const maxLng = Math.max(...activeDrivers.map((d) => d.lng));
+      const minLat = Math.min(...activeDrivers.map((d) => d.lat));
+      const maxLat = Math.max(...activeDrivers.map((d) => d.lat));
       map.fitBounds(
         [[minLng, minLat], [maxLng, maxLat]],
         { padding: 80, maxZoom: 13, duration: 800 },
@@ -210,15 +216,16 @@ export function DriverTrackerMap({
     else map.once("styledata", fit);
   }, [activeRoute, destination, drivers]);
 
+  const activeDrivers = drivers.filter(d => isOnline(d.locationUpdatedAt));
   const defaultCenter: [number, number] =
-    drivers.length > 0 ? [drivers[0].lng, drivers[0].lat] : [-8.2948, 51.8513];
+    activeDrivers.length > 0 ? [activeDrivers[0].lng, activeDrivers[0].lat] : [-8.2948, 51.8513];
 
   return (
     <div className={cn("relative", className)}>
       <Map
         ref={mapRef}
         center={defaultCenter}
-        zoom={drivers.length > 0 ? 10 : 6}
+        zoom={activeDrivers.length > 0 ? 10 : 12}
         pitch={show3DToggle ? 60 : 0}
         bearing={show3DToggle ? -20 : 0}
         styles={{

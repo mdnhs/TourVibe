@@ -40,6 +40,7 @@ export async function updateSiteConfig(formData: FormData) {
     contactEmail: g("contactEmail"),
     contactPhone: g("contactPhone"),
     contactLocation: g("contactLocation"),
+    googleReviewQrUrl: g("googleReviewQrUrl"),
     footerTagline: g("footerTagline"),
     aboutTitle: g("aboutTitle") || siteConfigDefaults.aboutTitle,
     aboutTitleHighlight: g("aboutTitleHighlight"),

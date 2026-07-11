@@ -19,6 +19,7 @@ export interface SiteConfig {
   contactEmail: string;
   contactPhone: string;
   contactLocation: string;
+  googleReviewQrUrl: string;
   footerTagline: string;
   aboutTitle: string;
   aboutTitleHighlight: string;
@@ -29,7 +30,6 @@ export interface SiteConfig {
   aboutStat2Label: string;
   aboutStat3Value: string;
   aboutStat3Label: string;
-  // Services section
   servicesBadgeText: string;
   servicesSectionTitle: string;
   servicesSectionHighlight: string;
@@ -49,7 +49,6 @@ export interface SiteConfig {
   service5Title: string;
   service5Description: string;
   service5Icon: string;
-  // Footer columns
   footerCol1Heading: string;
   footerCol1Link1Label: string;
   footerCol1Link1Url: string;
@@ -77,7 +76,6 @@ export interface SiteConfig {
   footerCol3Link3Url: string;
   footerCol3Link4Label: string;
   footerCol3Link4Url: string;
-  // Footer social & misc
   footerFacebookUrl: string;
   footerInstagramUrl: string;
   footerTwitterUrl: string;
@@ -107,6 +105,7 @@ export const siteConfigDefaults: SiteConfig = {
   contactEmail: "hello@tourvibe.ie",
   contactPhone: "+353 1 800 0000",
   contactLocation: "Cobh, Ireland",
+  googleReviewQrUrl: "",
   footerTagline:
     "Premium car tour management for modern travelers. Experience the island like never before.",
   aboutTitle: "Born from a passion for unforgettable Irish roads.",
@@ -144,7 +143,6 @@ export const siteConfigDefaults: SiteConfig = {
   service5Description:
     "Our team is always on call — whether you need a route change, local recommendation or emergency assistance.",
   service5Icon: "Headset",
-  // Footer columns
   footerCol1Heading: "Services",
   footerCol1Link1Label: "City Tours",
   footerCol1Link1Url: "#",
@@ -172,7 +170,6 @@ export const siteConfigDefaults: SiteConfig = {
   footerCol3Link3Url: "#",
   footerCol3Link4Label: "Safety",
   footerCol3Link4Url: "#",
-  // Footer social & misc
   footerFacebookUrl: "",
   footerInstagramUrl: "",
   footerTwitterUrl: "",
