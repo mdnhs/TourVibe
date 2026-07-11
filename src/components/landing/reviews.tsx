@@ -263,10 +263,10 @@ export function Reviews({ reviews }: ReviewsProps) {
           </div>
           <p className="text-lg font-bold text-white">Ready to create your own story?</p>
           <Link
-            href="/tours"
+            href="/custom-tours"
             className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-amber-400/30 transition-all hover:-translate-y-0.5 hover:shadow-amber-400/40"
           >
-            Start your adventure
+            Custom your tour
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>

@@ -16,10 +16,7 @@ import {
   X,
   Tag,
   ArrowDownUp,
-  Car,
 } from "lucide-react";
-
-type VehicleOption = { id: string; label: string };
 
 function FieldLabel({
   icon: Icon,
@@ -36,22 +33,19 @@ function FieldLabel({
   );
 }
 
-export function ToursFilter({ vehicles = [] }: { vehicles?: VehicleOption[] }) {
+export function ToursFilter() {
   const [params, setParams] = useQueryStates(toursSearchParams, {
     shallow: false,
   });
 
   const clearFilters = () =>
-    setParams({ q: "", minPrice: null, maxPrice: null, sort: "newest", vehicle: "", page: null });
-
-  const vehicleLabel = vehicles.find((v) => v.id === params.vehicle)?.label;
+    setParams({ q: "", minPrice: null, maxPrice: null, sort: "newest", page: null });
 
   const hasFilters =
     params.q ||
     params.minPrice !== null ||
     params.maxPrice !== null ||
-    params.sort !== "newest" ||
-    !!params.vehicle;
+    params.sort !== "newest";
 
   return (
     <div className="space-y-5">
@@ -88,29 +82,6 @@ export function ToursFilter({ vehicles = [] }: { vehicles?: VehicleOption[] }) {
             onChange={(e) => setParams({ q: e.target.value || null, page: null })}
           />
         </div>
-      </div>
-
-      {/* Vehicle */}
-      <div className="space-y-2">
-        <FieldLabel icon={Car}>Vehicle</FieldLabel>
-        <Select
-          value={params.vehicle || "all"}
-          onValueChange={(val) => setParams({ vehicle: val === "all" ? "" : val, page: null })}
-        >
-          <SelectTrigger className="w-full rounded-xl border-slate-200 text-sm focus:border-amber-400 focus:ring-amber-400/20">
-            <SelectValue placeholder="Any vehicle">
-              {params.vehicle ? vehicleLabel ?? "Selected vehicle" : "Any vehicle"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="all">Any vehicle</SelectItem>
-            {vehicles.map((v) => (
-              <SelectItem key={v.id} value={v.id}>
-                {v.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Price range */}
@@ -166,15 +137,6 @@ export function ToursFilter({ vehicles = [] }: { vehicles?: VehicleOption[] }) {
             Active filters
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {params.vehicle && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
-                <Car className="size-2.5" />
-                {vehicleLabel ?? "Selected vehicle"}
-                <button onClick={() => setParams({ vehicle: "" })} className="hover:text-indigo-900">
-                  <X className="size-2.5" />
-                </button>
-              </span>
-            )}
             {params.q && (
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                 &ldquo;{params.q}&rdquo;

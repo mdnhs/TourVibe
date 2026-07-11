@@ -45,7 +45,7 @@ interface ToursPageProps {
 }
 
 export default async function ToursPage({ searchParams }: ToursPageProps) {
-  const { q, minPrice, maxPrice, sort, vehicle, page } = await toursSearchParamsCache.parse(searchParams);
+  const { q, minPrice, maxPrice, sort, page } = await toursSearchParamsCache.parse(searchParams);
   const PAGE_SIZE = 9;
 
   const where: any = {};
@@ -60,16 +60,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     if (minPrice !== null) where.price.gte = minPrice;
     if (maxPrice !== null) where.price.lte = maxPrice;
   }
-  if (vehicle) {
-    where.vehicles = { some: { vehicleId: vehicle } };
-  }
 
-  const vehicleOptions = (
-    await db.vehicle.findMany({
-      select: { id: true, make: true, model: true },
-      orderBy: [{ make: "asc" }, { model: "asc" }],
-    })
-  ).map((v) => ({ id: v.id, label: `${v.make} ${v.model}` }));
 
   const orderBy: any = {};
   if (sort === "price-asc") orderBy.price = "asc";
@@ -178,7 +169,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
                       <SheetTitle className="text-left">Adjust Filters</SheetTitle>
                     </SheetHeader>
                     <div className="flex-1 overflow-y-auto p-6">
-                      <ToursFilter vehicles={vehicleOptions} />
+                      <ToursFilter />
                     </div>
                   </SheetContent>
                 </Sheet>
@@ -196,7 +187,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
             <div className="sticky top-24 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50">
               <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-cyan-500" />
               <div className="p-6">
-                <ToursFilter vehicles={vehicleOptions} />
+                <ToursFilter />
               </div>
             </div>
           </aside>

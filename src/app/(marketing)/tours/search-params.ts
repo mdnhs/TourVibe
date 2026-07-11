@@ -9,7 +9,6 @@ export const toursSearchParams = {
   minPrice: parseAsInteger,
   maxPrice: parseAsInteger,
   sort: parseAsString.withDefault("newest"),
-  vehicle: parseAsString.withDefault(""),
   page: parseAsInteger.withDefault(1),
 };
 

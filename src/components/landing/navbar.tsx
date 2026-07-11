@@ -19,6 +19,7 @@ interface NavbarProps {
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Tours", href: "/tours" },
+  { label: "Custom Tours", href: "/custom-tours" },
   { label: "Services", href: "/services" },
   { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
@@ -82,6 +83,7 @@ export function Navbar({
     if (href === "/")
       return pathname === "/" && (activeHash === "" || activeHash === "#");
     if (href === "/tours") return pathname.startsWith("/tours");
+    if (href === "/custom-tours") return pathname.startsWith("/custom-tours");
     if (href === "/services") return pathname.startsWith("/services");
     if (href === "/blog") return pathname.startsWith("/blog");
     if (href === "/about") return pathname.startsWith("/about");
