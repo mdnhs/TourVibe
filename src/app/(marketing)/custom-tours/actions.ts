@@ -50,7 +50,7 @@ ${parsed.notes || "None provided."}
     return { success: true };
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      return { error: err.errors[0].message };
+      return { error: (err as any).errors[0]?.message || "Validation failed" };
     }
     return { error: "Failed to submit request. Please try again." };
   }
