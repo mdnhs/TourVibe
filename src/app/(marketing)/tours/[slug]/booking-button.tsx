@@ -9,22 +9,35 @@ import { BookingDialog } from "@/components/booking/booking-dialog";
 import { GuestBookingDialog } from "@/components/booking/guest-booking-dialog";
 import type { PickerVehicle } from "@/components/booking/schedule-vehicle-picker";
 
+interface TourPricingInfo {
+  price: number;
+  hourlyRate: number;
+  durationHours: number;
+  maxPersons: number;
+  price2?: number | null;
+  hourlyRate2?: number | null;
+  baseHours2?: number | null;
+  maxPersons2?: number | null;
+}
+
 interface BookingButtonProps {
   tourId: string;
-  hourlyRate: number;
+  tour?: TourPricingInfo;
+  hourlyRate?: number;
   currency?: string;
-  minHours: number;
-  maxPersons: number;
+  minHours?: number;
+  maxPersons?: number;
   vehicles: PickerVehicle[];
   className?: string;
 }
 
 export function BookingButton({
   tourId,
-  hourlyRate,
+  tour,
+  hourlyRate = 0,
   currency,
-  minHours,
-  maxPersons,
+  minHours = 1,
+  maxPersons = 4,
   vehicles,
   className,
 }: BookingButtonProps) {
@@ -88,6 +101,7 @@ export function BookingButton({
       <BookingDialog
         open={bookingOpen}
         onOpenChange={setBookingOpen}
+        tour={tour}
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={minHours}
@@ -100,6 +114,7 @@ export function BookingButton({
         open={guestOpen}
         onOpenChange={setGuestOpen}
         tourId={tourId}
+        tour={tour}
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={minHours}

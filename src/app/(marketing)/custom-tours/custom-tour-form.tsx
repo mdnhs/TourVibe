@@ -38,7 +38,11 @@ const TOURIST_PLACES = [
   "The Burren",
 ];
 
-export function CustomTourForm() {
+interface CustomTourFormProps {
+  className?: string;
+}
+
+export function CustomTourForm({ className }: CustomTourFormProps = {}) {
   const [pending, startTransition] = useTransition();
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -72,8 +76,13 @@ export function CustomTourForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 rounded-3xl bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 sm:p-10">
-      
+    <form
+      onSubmit={handleSubmit}
+      className={cn(
+        "space-y-8 rounded-3xl bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 sm:p-10",
+        className
+      )}
+    >
       {/* Contact Info */}
       <div className="space-y-4">
         <h3 className="text-xl font-bold text-slate-900">Your Details</h3>

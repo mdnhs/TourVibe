@@ -116,11 +116,15 @@ model TourPackage {
   name            String
   slug            String   @unique
   description     String?
-  price           Float
-  hourlyRate      Float    @default(0)
-  durationHours   Int      @default(1)
+  price           Float    // Base Price V1
+  hourlyRate      Float    @default(0) // Extra Hourly Rate V1
+  durationHours   Int      @default(1) // Base Hours V1
   duration        String
-  maxPersons      Int      @default(1)
+  maxPersons      Int      @default(1) // Max Persons V1
+  price2          Float?   // Base Price V2
+  hourlyRate2     Float?   // Extra Hourly Rate V2
+  baseHours2      Int?     // Base Hours V2
+  maxPersons2     Int?     // Max Persons V2
   thumbnail       String   @default("")
   gallery         String?
   promoVideoUrl   String?

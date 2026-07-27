@@ -159,15 +159,15 @@ export async function POST(req: NextRequest) {
     }
     const endTime = new Date(startTime.getTime() + bookedHours * 60 * 60 * 1000);
 
-    const maxPersons = tour.maxPersons || 1;
+    const effectiveMaxPersons = (tour.maxPersons2 && tour.maxPersons2 > tour.maxPersons) ? tour.maxPersons2 : tour.maxPersons || 1;
     let bookedPersons = Number(personsRaw);
     if (!Number.isFinite(bookedPersons) || bookedPersons <= 0) {
       bookedPersons = 1;
     }
     bookedPersons = Math.round(bookedPersons);
-    if (bookedPersons > maxPersons) {
+    if (bookedPersons > effectiveMaxPersons) {
       return NextResponse.json(
-        { error: `Maximum ${maxPersons} ${maxPersons === 1 ? "person" : "persons"} for this tour.` },
+        { error: `Maximum ${effectiveMaxPersons} ${effectiveMaxPersons === 1 ? "person" : "persons"} for this tour.` },
         { status: 400 },
       );
     }
@@ -185,8 +185,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const hourlyRate = tour.hourlyRate || (minHours > 0 ? tour.price / minHours : tour.price);
-    const totalAmount = Math.round(hourlyRate * bookedHours * 100) / 100;
+    // Calculate total price: Base Price + (extra hours * extra hourly rate)
+    const isVariant2 = tour.price2 != null && tour.maxPersons2 != null && bookedPersons > (tour.maxPersons || 1);
+    const basePrice = isVariant2 ? tour.price2! : tour.price;
+    const baseHours = isVariant2 ? (tour.baseHours2 || tour.durationHours || 1) : (tour.durationHours || 1);
+    const extraHourlyRate = isVariant2 ? (tour.hourlyRate2 ?? 0) : (tour.hourlyRate ?? 0);
+
+    const extraHours = Math.max(0, bookedHours - baseHours);
+    const totalAmount = Math.round((basePrice + extraHours * extraHourlyRate) * 100) / 100;
     const chargeAmount =
       paymentType === "ADVANCE"
         ? Math.round(totalAmount * 0.2 * 100) / 100

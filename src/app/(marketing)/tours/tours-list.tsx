@@ -10,8 +10,10 @@ interface Tour {
   slug: string;
   description: string;
   price: number;
+  price2?: number | null;
   duration: string;
   maxPersons: number;
+  maxPersons2?: number | null;
   thumbnail: string;
   reviewCount: number;
   avgRating: number | null;
@@ -52,73 +54,59 @@ export function ToursList({ tours, currency }: ToursListProps) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {tours.map((tour, i) => {
         const accent = cardColors[i % cardColors.length];
-        const rating = tour.avgRating ? tour.avgRating.toFixed(1) : null;
 
         return (
           <Link
             key={tour.id}
             href={`/tours/${tour.slug}`}
-            style={{ animationDelay: `${i * 60}ms` }}
-            className="group animate-in fade-in slide-in-from-bottom-3 duration-500
-                       relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white
-                       shadow-lg shadow-slate-200/60
-                       transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80"
+            className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-300/60"
           >
-            {/* Hover glow */}
-            <div className={`pointer-events-none absolute -top-12 -right-12 size-40 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${accent.glow}`} />
+            {/* Top gradient bar */}
+            <div className={`h-1.5 w-full bg-linear-to-r ${accent.bar}`} />
 
             {/* Thumbnail */}
-            <div className="relative h-52 w-full overflow-hidden bg-slate-100">
+            <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
               {tour.thumbnail ? (
                 <Image
                   src={tour.thumbnail}
                   alt={tour.name}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-108"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-100 to-slate-200">
-                  <MapPin className="size-10 text-slate-300" />
+                <div className="flex h-full items-center justify-center text-slate-300">
+                  <Sparkles className="size-10" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
 
-              {/* Rating / New badge — top right */}
-              {rating ? (
-                <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 shadow-lg backdrop-blur-sm">
-                  <Star className="size-3 fill-amber-400 text-amber-400" />
-                  <span className="text-xs font-bold text-slate-950">{rating}</span>
+              {/* Rating badge */}
+              {tour.avgRating !== null && (
+                <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-white/40 bg-slate-950/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-md">
+                  <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                  <span>{tour.avgRating.toFixed(1)}</span>
                   {tour.reviewCount > 0 && (
-                    <span className="text-[10px] text-slate-400">({tour.reviewCount})</span>
+                    <span className="text-[10px] font-normal text-slate-300">({tour.reviewCount})</span>
                   )}
                 </div>
-              ) : (
-                <div className={`absolute right-3 top-3 flex items-center gap-1 rounded-full bg-linear-to-r px-2.5 py-1 shadow-lg ring-1 ring-white/30 ${accent.bar}`}>
-                  <Sparkles className="size-3 text-white" />
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-white">New</span>
-                </div>
               )}
-
-              {/* Title overlay */}
-              <h3 className="absolute inset-x-4 bottom-3 font-heading text-lg font-extrabold leading-tight text-white drop-shadow line-clamp-2">
-                {tour.name}
-              </h3>
             </div>
 
-            {/* Top gradient bar */}
-            <div className={`h-1 w-full bg-linear-to-r ${accent.bar}`} />
+            {/* Card Content */}
+            <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
+              <div>
+                <h3 className="font-heading text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-amber-600">
+                  {tour.name}
+                </h3>
 
-            {/* Content */}
-            <div className="flex flex-1 flex-col gap-4 p-5">
-              {tour.description && (
-                <p className="text-xs leading-6 text-slate-500 line-clamp-2">
-                  {stripHtml(tour.description)}
-                </p>
-              )}
+                {tour.description && (
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                    {stripHtml(tour.description)}
+                  </p>
+                )}
+              </div>
 
               {/* Meta pills */}
               <div className="flex flex-wrap gap-2">
@@ -128,7 +116,7 @@ export function ToursList({ tours, currency }: ToursListProps) {
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
                   <Users className="size-3" />
-                  Up to {tour.maxPersons}
+                  Up to {tour.maxPersons} {tour.maxPersons2 ? `(or ${tour.maxPersons2})` : ""}
                 </span>
                 {tour.vehicleCount > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
@@ -140,11 +128,15 @@ export function ToursList({ tours, currency }: ToursListProps) {
 
               {/* Bottom — price + CTA */}
               <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-                <div className="leading-none">
+                <div className="leading-tight">
                   <span className="font-heading text-xl font-extrabold text-slate-950">
                     {formatPrice(tour.price, currency)}
                   </span>
-                  <span className="text-[11px] font-medium text-slate-400"> / hour</span>
+                  {tour.price2 != null && (
+                    <span className="text-[11px] font-semibold text-amber-600 block">
+                      Up to {tour.maxPersons2}: {formatPrice(tour.price2, currency)}
+                    </span>
+                  )}
                 </div>
                 <span className={`inline-flex items-center gap-1.5 rounded-xl bg-linear-to-r ${accent.bar} px-3.5 py-2 text-xs font-bold text-white shadow-md transition-transform group-hover:translate-x-0.5`}>
                   View details

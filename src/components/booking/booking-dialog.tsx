@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/currency";
 import {
   ScheduleVehiclePicker,
@@ -20,13 +21,26 @@ import {
   type ScheduleVehicleValue,
 } from "./schedule-vehicle-picker";
 
+interface TourPricingInfo {
+  price: number;
+  hourlyRate: number;
+  durationHours: number;
+  maxPersons: number;
+  price2?: number | null;
+  hourlyRate2?: number | null;
+  baseHours2?: number | null;
+  maxPersons2?: number | null;
+}
+
 interface BookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  hourlyRate: number;
+  tour?: TourPricingInfo;
+  // Fallbacks for legacy props
+  hourlyRate?: number;
   currency?: string;
-  minHours: number;
-  maxPersons: number;
+  minHours?: number;
+  maxPersons?: number;
   vehicles: PickerVehicle[];
   loading?: boolean;
   onConfirm: (payload: {
@@ -41,33 +55,88 @@ interface BookingDialogProps {
 export function BookingDialog({
   open,
   onOpenChange,
-  hourlyRate,
+  tour,
+  hourlyRate = 0,
   currency,
-  minHours,
-  maxPersons,
+  minHours = 1,
+  maxPersons = 4,
   vehicles,
   loading,
   onConfirm,
 }: BookingDialogProps) {
+  // Construct a normalized tour pricing object
+  const tourData: TourPricingInfo = useMemo(() => {
+    if (tour) return tour;
+    return {
+      price: hourlyRate * minHours,
+      hourlyRate,
+      durationHours: minHours,
+      maxPersons,
+    };
+  }, [tour, hourlyRate, minHours, maxPersons]);
+
+  const effectiveMaxPersons = useMemo(() => {
+    return tourData.maxPersons2 && tourData.maxPersons2 > tourData.maxPersons
+      ? tourData.maxPersons2
+      : tourData.maxPersons;
+  }, [tourData]);
+
+  const effectiveMinHours = tourData.durationHours || minHours || 1;
+
   const [schedule, setSchedule] = useState<ScheduleVehicleValue>({
     date: "",
     time: "",
     vehicleId: "",
-    hours: Math.max(minHours, 6),
-    persons: Math.min(maxPersons, 4),
+    hours: Math.max(effectiveMinHours, 4),
+    persons: Math.min(effectiveMaxPersons, 4),
   });
   const [available, setAvailable] = useState(false);
   const [paymentType, setPaymentType] = useState<"ADVANCE" | "FULL">("FULL");
 
-  const total = useMemo(
-    () => Math.round(hourlyRate * (schedule.hours || minHours) * 100) / 100,
-    [hourlyRate, schedule.hours, minHours],
-  );
+  // Determine active variant based on selected persons
+  const activeVariant = useMemo(() => {
+    const isV2 =
+      tourData.price2 != null &&
+      tourData.maxPersons2 != null &&
+      schedule.persons > (tourData.maxPersons || 1);
+
+    if (isV2) {
+      return {
+        isV2: true,
+        basePrice: tourData.price2!,
+        baseHours: tourData.baseHours2 || tourData.durationHours || 1,
+        extraHourlyRate: tourData.hourlyRate2 ?? 0,
+        maxPersons: tourData.maxPersons2!,
+      };
+    }
+    return {
+      isV2: false,
+      basePrice: tourData.price,
+      baseHours: tourData.durationHours || 1,
+      extraHourlyRate: tourData.hourlyRate || 0,
+      maxPersons: tourData.maxPersons || 1,
+    };
+  }, [tourData, schedule.persons]);
+
+  const pricingBreakdown = useMemo(() => {
+    const hours = Math.max(1, schedule.hours || activeVariant.baseHours);
+    const extraHours = Math.max(0, hours - activeVariant.baseHours);
+    const extraPrice = Math.round(extraHours * activeVariant.extraHourlyRate * 100) / 100;
+    const totalPrice = Math.round((activeVariant.basePrice + extraPrice) * 100) / 100;
+
+    return {
+      hours,
+      extraHours,
+      extraPrice,
+      totalPrice,
+    };
+  }, [activeVariant, schedule.hours]);
+
+  const total = pricingBreakdown.totalPrice;
   const advance = Math.round(total * 0.2 * 100) / 100;
   const balance = Math.round((total - advance) * 100) / 100;
 
-  const ready =
-    !!schedule.date && !!schedule.time && !!schedule.vehicleId && available;
+  const ready = !!schedule.date && !!schedule.time;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +144,7 @@ export function BookingDialog({
     const startTime = new Date(`${schedule.date}T${schedule.time}:00`).toISOString();
     onConfirm({
       paymentType,
-      vehicleId: schedule.vehicleId,
+      vehicleId: schedule.vehicleId || (vehicles[0]?.id ?? ""),
       startTime,
       hours: schedule.hours,
       persons: schedule.persons,
@@ -96,7 +165,7 @@ export function BookingDialog({
             <div className="space-y-0.5">
               <DialogTitle className="text-lg">Book this tour</DialogTitle>
               <DialogDescription className="text-xs">
-                {formatPrice(hourlyRate, currency)} / hour · secure checkout
+                From {formatPrice(activeVariant.basePrice, currency)} base · secure checkout
               </DialogDescription>
             </div>
           </div>
@@ -109,10 +178,61 @@ export function BookingDialog({
               <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 <Clock className="size-3.5" /> Trip details
               </div>
+
+              {tourData.price2 != null ? (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700">Select Pricing Variant</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSchedule((prev) => ({
+                          ...prev,
+                          persons: Math.min(prev.persons, tourData.maxPersons || 1),
+                        }))
+                      }
+                      className={cn(
+                        "flex flex-col items-start rounded-xl border p-2.5 text-left transition-all cursor-pointer",
+                        !activeVariant.isV2
+                          ? "border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600/20 shadow-xs"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      )}
+                    >
+                      <span className="text-xs font-bold text-slate-900">Up to {tourData.maxPersons} guests</span>
+                      <span className="text-[11px] font-semibold text-emerald-600">{formatPrice(tourData.price, currency)} base</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSchedule((prev) => ({
+                          ...prev,
+                          persons: Math.max(prev.persons, (tourData.maxPersons || 1) + 1),
+                        }))
+                      }
+                      className={cn(
+                        "flex flex-col items-start rounded-xl border p-2.5 text-left transition-all cursor-pointer",
+                        activeVariant.isV2
+                          ? "border-amber-600 bg-amber-50/70 ring-2 ring-amber-600/20 shadow-xs"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      )}
+                    >
+                      <span className="text-xs font-bold text-slate-900">Up to {tourData.maxPersons2} guests</span>
+                      <span className="text-[11px] font-semibold text-amber-600">{formatPrice(tourData.price2, currency)} base</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between rounded-xl border bg-slate-50/80 px-3.5 py-2 text-xs">
+                  <span className="font-semibold text-slate-600">Group Capacity</span>
+                  <span className="font-bold text-slate-900">Up to {tourData.maxPersons} guests</span>
+                </div>
+              )}
+
               <ScheduleVehiclePicker
                 vehicles={vehicles}
-                minHours={minHours}
-                maxPersons={maxPersons}
+                minHours={effectiveMinHours}
+                maxPersons={effectiveMaxPersons}
                 value={schedule}
                 onChange={setSchedule}
                 onAvailabilityChange={setAvailable}
@@ -125,22 +245,24 @@ export function BookingDialog({
                 <ShieldCheck className="size-3.5" /> Order summary
               </div>
 
-              <div className="rounded-xl border bg-slate-50/80 p-4">
+              <div className="rounded-xl border bg-slate-50/80 p-4 space-y-2.5">
                 <dl className="space-y-2 text-sm">
                   <div className="flex items-center justify-between text-slate-600">
-                    <dt className="flex items-center gap-1.5">
-                      <Clock className="size-3.5 text-slate-400" />
-                      {schedule.hours} {schedule.hours === 1 ? "hour" : "hours"} × {formatPrice(hourlyRate, currency)}
+                    <dt className="flex items-center gap-1.5 text-xs">
+                      Up to {activeVariant.maxPersons} guests ({activeVariant.baseHours}h included)
                     </dt>
-                    <dd>{formatPrice(total, currency)}</dd>
+                    <dd className="font-semibold text-slate-900">{formatPrice(activeVariant.basePrice, currency)}</dd>
                   </div>
-                  <div className="flex items-center justify-between text-slate-600">
-                    <dt className="flex items-center gap-1.5">
-                      <Users className="size-3.5 text-slate-400" />
-                      {schedule.persons} {schedule.persons === 1 ? "guest" : "guests"}
-                    </dt>
-                    <dd className="text-slate-400">included</dd>
-                  </div>
+
+                  {pricingBreakdown.extraHours > 0 && (
+                    <div className="flex items-center justify-between text-slate-600 text-xs">
+                      <dt className="flex items-center gap-1">
+                        + {pricingBreakdown.extraHours} extra hr ({formatPrice(activeVariant.extraHourlyRate, currency)}/h)
+                      </dt>
+                      <dd className="font-semibold text-slate-900">{formatPrice(pricingBreakdown.extraPrice, currency)}</dd>
+                    </div>
+                  )}
+
                   <div className="my-1 border-t border-dashed" />
                   <div className="flex items-end justify-between">
                     <dt className="font-semibold text-slate-900">Total</dt>

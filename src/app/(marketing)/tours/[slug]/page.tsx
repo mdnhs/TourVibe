@@ -15,17 +15,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookingBar } from "./booking-bar";
 import { BookingButton } from "./booking-button";
-import { GalleryLightbox } from "./gallery-lightbox";
-import { cloudinaryImage } from "@/lib/cloudinary";
-import Script from "next/script";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
 import { formatPrice } from "@/lib/currency";
 import { getCurrencyCode } from "@/lib/currency-server";
-import { ReviewForm } from "@/components/reviews/review-form";
+import { cloudinaryImage } from "@/lib/cloudinary";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import Script from "next/script";
 
 interface TourVehicle {
   id: string;
@@ -36,19 +33,25 @@ interface TourVehicle {
   thumbnail: string;
   gallery?: string | null;
 }
+
 interface Tour {
   id: string;
   name: string;
+  slug: string;
   description: string;
+  highlights: string | null;
   price: number;
   hourlyRate: number;
-  duration: string;
   durationHours: number;
+  duration: string;
   maxPersons: number;
+  price2?: number | null;
+  hourlyRate2?: number | null;
+  baseHours2?: number | null;
+  maxPersons2?: number | null;
   thumbnail: string;
   gallery: string | null;
   promoVideoUrl: string | null;
-  highlights: string | null;
   reviewCount: number;
   avgRating: number | null;
   vehicles: TourVehicle[];
@@ -63,6 +66,7 @@ interface Tour {
     createdAt: Date;
   }>;
 }
+
 export async function generateMetadata({
   params,
 }: {
@@ -127,14 +131,12 @@ export default async function TourDetailsPage({
     },
   };
 
-  // Try fetching by slug first, then fallback to id
   let tourRaw = await db.tourPackage.findFirst({
     where: { slug },
     include: tourInclude,
   });
 
   if (!tourRaw) {
-    // Fallback for old ID links
     tourRaw = await db.tourPackage.findUnique({
       where: { id: slug },
       include: tourInclude,
@@ -145,7 +147,6 @@ export default async function TourDetailsPage({
     notFound();
   }
 
-  // Calculate stats and convert Decimals
   const reviewCount = tourRaw.reviews.length;
   const avgRating =
     reviewCount > 0
@@ -164,6 +165,12 @@ export default async function TourDetailsPage({
           ? Number(tourRaw.price) / tourRaw.durationHours
           : Number(tourRaw.price),
     durationHours: tourRaw.durationHours,
+    duration: tourRaw.duration,
+    maxPersons: tourRaw.maxPersons,
+    price2: tourRaw.price2 ? Number(tourRaw.price2) : null,
+    hourlyRate2: tourRaw.hourlyRate2 ? Number(tourRaw.hourlyRate2) : null,
+    baseHours2: tourRaw.baseHours2 ?? null,
+    maxPersons2: tourRaw.maxPersons2 ?? null,
     reviewCount,
     avgRating,
     vehicles: tourRaw.vehicles.map((tv) => ({
@@ -178,18 +185,17 @@ export default async function TourDetailsPage({
     reviews: tourRaw.reviews.map((r) => {
       const isAdmin = r.user.role === "super_admin" || r.user.role === "admin";
       return {
-      id: r.id,
-      userId: r.userId,
-      // For admin-authored reviews, never expose the admin's account name/photo.
-      userName: isAdmin ? (r.reviewerName || "Happy Traveler") : (r.reviewerName || r.user.name),
-      userImage: isAdmin ? r.reviewerImage : (r.reviewerImage || r.user.image),
-      rating: r.rating,
-      comment: r.comment,
-      photos: (r.photos ?? "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      createdAt: r.createdAt,
+        id: r.id,
+        userId: r.userId,
+        userName: isAdmin ? (r.reviewerName || "Happy Traveler") : (r.reviewerName || r.user.name),
+        userImage: isAdmin ? r.reviewerImage : (r.reviewerImage || r.user.image),
+        rating: r.rating,
+        comment: r.comment,
+        photos: (r.photos ?? "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        createdAt: r.createdAt,
       };
     }),
   };
@@ -197,32 +203,6 @@ export default async function TourDetailsPage({
   const s = await getSeoSettingsSync();
   const currency = await getCurrencyCode();
   const jsonLdSchema = buildTourSchema(s, tour as any, currency);
-
-  const session = await auth.api.getSession({ headers: await headers() });
-  let canReview = false;
-  let myReview: { id: string; rating: number; comment: string | null; photos: string[] } | null = null;
-  if (session?.user) {
-    const eligibleBooking = await db.booking.findFirst({
-      where: {
-        userId: session.user.id,
-        tourPackageId: tour.id,
-        paymentStage: { in: ["ADVANCE_PAID", "FULLY_PAID"] },
-      },
-      select: { id: true },
-    });
-    canReview = !!eligibleBooking;
-    if (canReview) {
-      const own = tour.reviews.find((r) => r.userId === session.user.id);
-      if (own) {
-        myReview = {
-          id: own.id,
-          rating: own.rating,
-          comment: own.comment,
-          photos: own.photos,
-        };
-      }
-    }
-  }
 
   return (
     <div className="relative pb-28 mx-auto max-w-6xl pt-2 sm:pt-4 px-4 sm:px-0">
@@ -238,438 +218,150 @@ export default async function TourDetailsPage({
       {/* ── Cinematic Hero ── */}
       <div>
         <div className="relative h-[50vh] sm:h-[70vh] min-h-100 sm:min-h-130 overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] shadow-2xl">
-          {/* Background image */}
           <Image
             src={cloudinaryImage(tour.thumbnail, 1600)}
             alt={tour.name}
             fill
-            className="object-cover"
             priority
+            sizes="100vw"
+            className="object-cover"
           />
-          {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-slate-900/10" />
-          <div className="absolute inset-0 bg-linear-to-r from-slate-950/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
 
-          {/* Back link */}
-          <div className="absolute left-4 top-4 sm:left-5 sm:top-6">
+          {/* Top floating bar */}
+          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4 sm:p-8">
             <Link
               href="/tours"
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+              className="group flex size-10 sm:size-12 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md transition-all hover:bg-white hover:text-slate-950"
             >
-              <ArrowLeft className="size-3.5 sm:size-4" />
-              All Tours
+              <ArrowLeft className="size-5 transition-transform group-hover:-translate-x-0.5" />
             </Link>
           </div>
 
-          {/* Gallery count badge */}
-          {tour.gallery && (
-            <div className="absolute right-4 top-4 sm:right-5 sm:top-6">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-white backdrop-blur-md">
-                <Camera className="size-3 sm:size-3.5" />
-                {tour.gallery
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean).length + 1}{" "}
-                Photos
+          {/* Hero Bottom info */}
+          <div className="absolute inset-x-0 bottom-0 p-6 sm:p-12 space-y-3 sm:space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/20">
+                <Clock className="size-3.5 text-amber-400" />
+                {tour.duration}
               </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/20">
+                <Users className="size-3.5 text-amber-400" />
+                Up to {tour.maxPersons} persons {tour.maxPersons2 ? `(v2: ${tour.maxPersons2})` : ""}
+              </span>
+              {tour.avgRating !== null && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/90 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-lg">
+                  <Star className="size-3.5 fill-slate-950 text-slate-950" />
+                  {tour.avgRating.toFixed(1)} ({tour.reviewCount})
+                </span>
+              )}
+            </div>
+
+            <h1 className="font-heading text-3xl sm:text-5xl font-black text-white leading-tight max-w-3xl">
+              {tour.name}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Layout */}
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Left Column — Details */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Highlights */}
+          {tour.highlights && (
+            <div className="rounded-[2rem] border border-slate-200/80 bg-linear-to-br from-amber-500/5 via-slate-50/50 to-white p-6 sm:p-8 space-y-4">
+              <h2 className="font-heading text-xl font-bold text-slate-950">Tour Highlights</h2>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {tour.highlights.split("\n").filter(Boolean).map((hl, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm font-medium text-slate-700">
+                    <span className="mt-1 flex size-2 shrink-0 rounded-full bg-amber-500" />
+                    <span>{hl}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
-          {/* Bottom content */}
-          <div className="absolute inset-x-0 bottom-0 px-4 pb-6 sm:px-6 sm:pb-8">
-            <div className="flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="space-y-3 sm:space-y-4 max-w-3xl">
-                {/* Badges */}
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                  <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-amber-400/20 border border-amber-400/30 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold text-amber-300 backdrop-blur-sm">
-                    <Star className="size-2.5 sm:size-3 fill-amber-400 text-amber-400" />
-                    {tour.avgRating ? tour.avgRating.toFixed(1) : "New"} ·{" "}
-                    {tour.reviewCount}{" "}
-                    {tour.reviewCount === 1 ? "review" : "reviews"}
-                  </span>
-                  <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-white/10 border border-white/20 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-white/80 backdrop-blur-sm">
-                    <Clock className="size-2.5 sm:size-3" />
-                    {tour.duration}
-                  </span>
-                  <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-white/10 border border-white/20 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-white/80 backdrop-blur-sm">
-                    <Users className="size-2.5 sm:size-3" />
-                    Up to {tour.maxPersons}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h1 className="font-heading text-2xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white drop-shadow-sm">
-                  {tour.name}
-                </h1>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Gallery + content ── */}
-      <div className="lg:pr-[22rem]">
-        {/* ── Promo video ── */}
-        {tour.promoVideoUrl && (
-          <section className="mt-6 sm:mt-8">
-            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-primary" />
-              <h2 className="font-heading text-lg sm:text-2xl font-bold text-slate-950">
-                Tour preview
-              </h2>
-            </div>
-            <div className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 bg-slate-950 shadow-xl">
-              <video
-                src={tour.promoVideoUrl}
-                poster={tour.thumbnail || undefined}
-                controls
-                autoPlay
-                muted
-                loop
-                preload="auto"
-                playsInline
-                className="w-full h-auto max-h-[70vh] object-contain bg-black"
-              />
-            </div>
-          </section>
-        )}
-
-        {/* ── Gallery strip ── */}
-        {tour.gallery &&
-          (() => {
-            const imgs = tour.gallery!
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-              .map((u) => cloudinaryImage(u, 1600));
-            return imgs.length > 0 ? (
-              <div className="mt-2 sm:mt-0">
-                <GalleryLightbox images={imgs} tourName={tour.name} />
-              </div>
-            ) : null;
-          })()}
-
-        <div className="pt-6 sm:pt-8">
-          {/* ── Main content ── */}
-          <div className="space-y-10 sm:space-y-16">
-            {/* Description */}
-            <section className="space-y-4 sm:space-y-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-primary" />
-                <h2 className="font-heading text-xl sm:text-3xl font-bold text-slate-950">
-                  Experience Description
-                </h2>
-              </div>
-              <article 
-                className="prose prose-slate prose-base sm:prose-lg max-w-none text-slate-600 leading-relaxed
-                           prose-headings:font-heading prose-headings:font-bold 
-                           prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                           prose-img:rounded-2xl prose-img:shadow-lg"
+          {/* Description */}
+          {tour.description && (
+            <div className="space-y-4">
+              <h2 className="font-heading text-2xl font-bold text-slate-950">About This Tour</h2>
+              <div
+                className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-sm sm:text-base"
                 dangerouslySetInnerHTML={{ __html: tour.description }}
               />
-            </section>
+            </div>
+          )}
 
-            {/* Highlights */}
-            {tour.highlights && tour.highlights.split("\n").filter(Boolean).length > 0 && (
-              <section className="rounded-[1.5rem] sm:rounded-[2.5rem] bg-slate-50 p-6 sm:p-12 border border-slate-100">
-                <h3 className="mb-6 sm:mb-8 font-heading text-lg sm:text-2xl font-bold text-slate-950">
-                  Tour Highlights
-                </h3>
-                <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                  {tour.highlights.split("\n").filter(Boolean).map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 sm:gap-4">
-                      <div className="mt-1 flex size-4 sm:size-5 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-                        <svg className="size-2.5 sm:size-3 fill-current" viewBox="0 0 20 20">
-                          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
-                        </svg>
+          {/* Assigned Vehicles */}
+          {tour.vehicles.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="font-heading text-2xl font-bold text-slate-950">Vehicles Available</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {tour.vehicles.map((v) => (
+                  <div
+                    key={v.id}
+                    className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs"
+                  >
+                    {v.thumbnail ? (
+                      <img src={v.thumbnail} alt="" className="size-16 rounded-xl object-cover border" />
+                    ) : (
+                      <div className="flex size-16 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                        <Car className="size-6" />
                       </div>
-                      <span className="text-sm sm:text-lg font-medium text-slate-700">
-                        {item}
-                      </span>
+                    )}
+                    <div>
+                      <h4 className="font-bold text-slate-900">{v.make} {v.model}</h4>
+                      <p className="text-xs text-slate-500 font-mono mt-0.5">{v.licensePlate}</p>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Vehicles */}
-            {tour.vehicles.length > 0 && (
-              <section className="space-y-6 sm:space-y-8">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-indigo-500" />
-                  <h2 className="font-heading text-xl sm:text-3xl font-bold text-slate-950">
-                    Vehicles for this tour
-                  </h2>
-                </div>
-                <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
-                  {tour.vehicles.map((v) => {
-                    const photos = [
-                      v.thumbnail,
-                      ...((v.gallery ?? "").split(",").map((s) => s.trim()).filter(Boolean)),
-                    ].filter(Boolean);
-                    return (
-                      <div
-                        key={v.id}
-                        className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-xl hover:shadow-slate-200/50"
-                      >
-                        <div className="relative aspect-video bg-slate-100">
-                          {photos[0] && (
-                            <Image
-                              src={cloudinaryImage(photos[0], 800)}
-                              alt={`${v.make} ${v.model}`}
-                              fill
-                              sizes="(max-width: 640px) 100vw, 50vw"
-                              className="object-cover"
-                            />
-                          )}
-                        </div>
-                        <div className="space-y-2 sm:space-y-3 p-4 sm:p-5">
-                          <div className="flex items-center gap-2">
-                            <Car className="size-4 sm:size-5 text-indigo-500" />
-                            <p className="font-heading text-base sm:text-lg font-bold text-slate-950">
-                              {v.make} {v.model}
-                            </p>
-                            <span className="ml-auto text-xs sm:text-sm font-medium text-slate-400">
-                              {v.year}
-                            </span>
-                          </div>
-                          {photos.length > 1 && (
-                            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-                              {photos.slice(1, 5).map((url) => (
-                                <a
-                                  key={url}
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
-                                >
-                                  <Image
-                                    src={cloudinaryImage(url, 300)}
-                                    alt={`${v.make} ${v.model}`}
-                                    fill
-                                    sizes="120px"
-                                    className="object-cover transition-transform hover:scale-105"
-                                  />
-                                </a>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* Reviews */}
-            <section className="space-y-6 sm:space-y-10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-amber-400" />
-                  <h2 className="font-heading text-xl sm:text-3xl font-bold text-slate-950">
-                    Traveler Reviews
-                  </h2>
-                </div>
-                <div className="hidden sm:block">
-                  <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200">
-                    <Star className="size-4 fill-amber-400 text-amber-400" />
-                    <span className="font-bold text-slate-900">
-                      {tour.avgRating?.toFixed(1) || "0.0"}
-                    </span>
-                    <span className="text-slate-400">/ 5.0</span>
                   </div>
-                </div>
-              </div>
-
-              {canReview && (
-                <div className="mb-6">
-                  <ReviewForm tourPackageId={tour.id} existing={myReview} />
-                </div>
-              )}
-
-              {tour.reviews.length > 0 ? (
-                <div className="grid gap-4 sm:gap-6">
-                  {tour.reviews.map((rev) => (
-                    <div
-                      key={rev.id}
-                      className="group relative rounded-[1.25rem] sm:rounded-[2rem] bg-white p-5 sm:p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 ring-1 ring-slate-100"
-                    >
-                      <Quote className="hidden sm:block absolute right-8 top-8 size-12 text-slate-50 transition-colors group-hover:text-indigo-50" />
-                      <div className="relative flex flex-col gap-4 sm:gap-6">
-                        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                          <div className="relative size-10 sm:size-14 overflow-hidden rounded-xl sm:rounded-2xl ring-2 ring-white shadow-md shrink-0">
-                            {rev.userImage ? (
-                              <Image
-                                src={rev.userImage}
-                                alt={rev.userName}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-                                <Users className="size-5 sm:size-6" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm sm:text-base font-bold text-slate-950 truncate">
-                              {rev.userName}
-                            </p>
-                            <div className="mt-0.5 flex gap-0.5">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={cn(
-                                    "size-2.5 sm:size-3",
-                                    i < rev.rating
-                                      ? "fill-amber-400 text-amber-400"
-                                      : "text-slate-200",
-                                  )}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <span className="ml-auto text-[9px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400">
-                            {new Date(rev.createdAt).toLocaleDateString(
-                              "en-US",
-                              { month: "short", year: "numeric" },
-                            )}
-                          </span>
-                        </div>
-                        {rev.comment && (
-                          <p className="text-sm sm:text-lg leading-relaxed text-slate-600">
-                            {rev.comment}
-                          </p>
-                        )}
-                        {rev.photos.length > 0 && (
-                          <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
-                            {rev.photos.map((url) => (
-                              <a
-                                key={url}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
-                              >
-                                <Image
-                                  src={cloudinaryImage(url, 600)}
-                                  alt=""
-                                  fill
-                                  sizes="(max-width: 640px) 33vw, 20vw"
-                                  className="object-cover transition-transform hover:scale-105"
-                                />
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 py-12 sm:py-20 text-center">
-                  <div className="mx-auto mb-3 sm:mb-4 flex size-14 sm:size-16 items-center justify-center rounded-2xl sm:rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
-                    <Star className="size-6 sm:size-8 text-slate-200" />
-                  </div>
-                  <h3 className="text-base sm:text-xl font-bold text-slate-950">
-                    No reviews yet
-                  </h3>
-                  <p className="text-slate-500 px-4 text-xs sm:text-base">
-                    Be the first traveler to share your experience!
-                  </p>
-                </div>
-              )}
-            </section>
-          </div>
-        </div>
-      </div>
-
-      {/* Sidebar — absolute on desktop: overlays hero at 40% from top */}
-      <aside className="mt-8 space-y-6 sm:space-y-8 lg:absolute lg:right-5 lg:top-[45vh] lg:mt-0 lg:w-80 lg:z-10">
-        <div
-          className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] bg-[#05020f] p-6 sm:p-8 text-white shadow-md shadow-black/30"
-          style={{
-            backgroundImage:
-              "linear-gradient(135deg, #0a0520 0%, #0d0a2e 40%, #130826 70%, #0a0318 100%)",
-          }}
-        >
-          {/* Gradient orbs */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -right-20 -top-20 size-80 rounded-full bg-violet-700/20 blur-3xl" />
-            <div className="absolute -bottom-16 -left-12 size-72 rounded-full bg-indigo-800/15 blur-3xl" />
-            <div className="absolute left-1/2 top-1/2 size-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-700/8 blur-2xl" />
-            <div className="absolute right-1/4 bottom-0 size-40 rounded-full bg-pink-700/10 blur-2xl" />
-          </div>
-          {/* Dot-grid overlay */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.035]"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-              backgroundSize: "28px 28px",
-            }}
-          />
-          {/* Top shimmer line */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/60 to-transparent" />
-
-          <div className="relative">
-            <h3 className="mb-4 sm:mb-6 font-heading text-xl sm:text-2xl font-bold">
-              Booking Details
-            </h3>
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
-                <span className="text-sm sm:text-base text-white/50">Price per hour</span>
-                <span className="text-xl sm:text-2xl font-black">
-                  {formatPrice(tour.price, currency)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
-                <span className="text-sm sm:text-base text-white/50">Total Duration</span>
-                <span className="text-sm sm:text-base font-bold">{tour.duration}</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
-                <span className="text-sm sm:text-base text-white/50">Group Size</span>
-                <span className="text-sm sm:text-base font-bold">Max {tour.maxPersons}</span>
-              </div>
-              <div className="space-y-3 sm:space-y-4 pt-2 sm:pt-4">
-                <BookingButton
-                  tourId={tour.id}
-                  hourlyRate={tour.hourlyRate}
-                  currency={currency}
-                  minHours={tour.durationHours}
-                  maxPersons={tour.maxPersons}
-                  vehicles={tour.vehicles}
-                  className="w-full h-12 sm:h-14 text-base sm:text-lg"
-                />
-                <p className="text-center text-[10px] sm:text-xs font-medium text-white/30">
-                  Secure payment via Stripe &middot; Instant confirmation
-                </p>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="rounded-[1.5rem] sm:rounded-[2.5rem] bg-indigo-50 p-6 sm:p-8 ring-1 ring-indigo-100">
-          <h4 className="mb-3 sm:mb-4 font-bold text-indigo-900">Need Help?</h4>
-          <p className="mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed text-indigo-700/80">
-            Have questions about this tour or need a custom itinerary? Our
-            experts are available 24/7.
-          </p>
-          <div className="flex flex-col gap-2.5 sm:gap-3">
-            <button className="flex h-11 sm:h-12 items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-white text-sm sm:text-base font-bold text-indigo-900 shadow-sm transition-transform active:scale-95">
-              <MapPin className="size-3.5 sm:size-4" />
-              View Route Map
-            </button>
-            <Link
-              href="/#contact"
-              className="flex h-11 sm:h-12 items-center justify-center rounded-xl sm:rounded-2xl bg-indigo-600 text-sm sm:text-base font-bold text-white shadow-lg shadow-indigo-200 transition-transform active:scale-95"
-            >
-              Contact Support
-            </Link>
+        {/* Right Column — Booking Sidebar */}
+        <aside className="space-y-6">
+          <div className="rounded-[2rem] border border-slate-200 bg-slate-950 p-6 sm:p-8 text-white shadow-xl space-y-6">
+            <h3 className="font-heading text-xl font-bold">Booking Details</h3>
+
+            <div className="space-y-4 text-sm border-y border-white/10 py-4">
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Up to {tour.maxPersons} people</span>
+                <span className="font-bold text-lg">{formatPrice(tour.price, currency)}</span>
+              </div>
+              {tour.price2 != null && (
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60">Up to {tour.maxPersons2} people</span>
+                  <span className="font-bold text-lg text-amber-400">{formatPrice(tour.price2, currency)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Base Hours</span>
+                <span className="font-semibold">{tour.durationHours} hrs</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Extra Hour Rate</span>
+                <span className="font-semibold">{formatPrice(tour.hourlyRate, currency)}/hr</span>
+              </div>
+            </div>
+
+            <BookingButton
+              tourId={tour.id}
+              tour={tour}
+              hourlyRate={tour.hourlyRate}
+              currency={currency}
+              minHours={tour.durationHours}
+              maxPersons={tour.maxPersons2 && tour.maxPersons2 > tour.maxPersons ? tour.maxPersons2 : tour.maxPersons}
+              vehicles={tour.vehicles}
+              className="w-full h-12 text-base font-bold"
+            />
           </div>
-        </div>
-      </aside>
+        </aside>
+      </div>
+
       <BookingBar
         tourId={tour.id}
         name={tour.name}
@@ -681,11 +373,8 @@ export default async function TourDetailsPage({
         maxPersons={tour.maxPersons}
         rating={tour.avgRating ? tour.avgRating.toFixed(1) : null}
         currency={currency}
+        tour={tour}
       />
     </div>
   );
-}
-
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
 }

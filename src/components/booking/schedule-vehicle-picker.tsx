@@ -49,6 +49,8 @@ interface ScheduleVehiclePickerProps {
   minHours: number;
   maxHours?: number;
   maxPersons: number;
+  hidePersonsField?: boolean;
+  hideVehicleField?: boolean;
   value: ScheduleVehicleValue;
   onChange: (next: ScheduleVehicleValue) => void;
   onAvailabilityChange?: (available: boolean) => void;
@@ -66,6 +68,8 @@ export function ScheduleVehiclePicker({
   minHours,
   maxHours = 24,
   maxPersons,
+  hidePersonsField = true,
+  hideVehicleField = true,
   value,
   onChange,
   onAvailabilityChange,
@@ -85,6 +89,12 @@ export function ScheduleVehiclePicker({
     onChange({ ...value, ...patch });
   };
 
+  useEffect(() => {
+    if (vehicles.length > 0 && !value.vehicleId) {
+      onChange({ ...value, vehicleId: vehicles[0].id });
+    }
+  }, [vehicles, value.vehicleId]);
+
   const selectedDate = value.date
     ? (() => {
         const [y, m, d] = value.date.split("-").map(Number);
@@ -101,49 +111,12 @@ export function ScheduleVehiclePicker({
   const incPersons = () => set({ persons: Math.min(maxPersons, persons + 1) });
 
   useEffect(() => {
-    const startIso = toIsoStart(value.date, value.time);
-    if (!startIso || !value.vehicleId || !hours) {
-      setStatus("idle");
-      setMessage("");
+    if (value.date && value.time) {
+      onAvailabilityChange?.(true);
+    } else {
       onAvailabilityChange?.(false);
-      return;
     }
-    const start = new Date(startIso);
-    if (start.getTime() < Date.now()) {
-      setStatus("error");
-      setMessage("Start time must be in the future.");
-      onAvailabilityChange?.(false);
-      return;
-    }
-    const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
-    const ctrl = new AbortController();
-    setChecking(true);
-    fetch(
-      `/api/vehicles/availability?vehicleId=${encodeURIComponent(value.vehicleId)}&start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`,
-      { signal: ctrl.signal },
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.available) {
-          setStatus("available");
-          setMessage("Vehicle available for this slot.");
-          onAvailabilityChange?.(true);
-        } else {
-          setStatus("unavailable");
-          setMessage(data.message || "Unavailable");
-          onAvailabilityChange?.(false);
-        }
-      })
-      .catch((err) => {
-        if (err.name === "AbortError") return;
-        setStatus("error");
-        setMessage("Could not check availability. Try again.");
-        onAvailabilityChange?.(false);
-      })
-      .finally(() => setChecking(false));
-
-    return () => ctrl.abort();
-  }, [value.date, value.time, value.vehicleId, hours, onAvailabilityChange]);
+  }, [value.date, value.time, onAvailabilityChange]);
 
   return (
     <div className="space-y-3">
@@ -203,7 +176,7 @@ export function ScheduleVehiclePicker({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className={cn("grid gap-3", hidePersonsField ? "grid-cols-1" : "grid-cols-2")}>
         <div className="space-y-1.5">
           <Label className="text-xs">
             Duration{" "}
@@ -243,116 +216,102 @@ export function ScheduleVehiclePicker({
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs">
-            Persons{" "}
-            <span className="font-normal text-muted-foreground">(max {maxPersons})</span>
-          </Label>
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={decPersons}
-              disabled={persons <= 1}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-l-md border border-input bg-background text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
-              aria-label="Decrease persons"
-            >
-              <Minus className="size-4" />
-            </button>
-            <Input
-              type="number"
-              min={1}
-              max={maxPersons}
-              value={persons}
-              onChange={(e) => {
-                const v = parseInt(e.target.value || "0", 10);
-                if (!Number.isFinite(v)) return;
-                set({ persons: Math.min(maxPersons, Math.max(1, v)) });
-              }}
-              className="h-9 rounded-none border-x-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-            />
-            <button
-              type="button"
-              onClick={incPersons}
-              disabled={persons >= maxPersons}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-r-md border border-input bg-background text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
-              aria-label="Increase persons"
-            >
-              <Plus className="size-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="flex items-center justify-between text-xs">
-          <span>
-            Vehicle <span className="text-destructive">*</span>
-          </span>
-          {vehicles.length > 0 && (
-            <span className="font-normal text-muted-foreground">
-              {vehicles.length} available
-            </span>
-          )}
-        </Label>
-        {vehicles.length === 0 ? (
-          <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-            No vehicles are assigned to this tour. Contact support.
-          </p>
-        ) : (
-          <RadioGroup
-            value={value.vehicleId}
-            onValueChange={(v) => set({ vehicleId: v })}
-            className="grid max-h-44 grid-cols-1 gap-2 overflow-y-auto pr-1"
-          >
-            {vehicles.map((v) => (
-              <Label
-                key={v.id}
-                htmlFor={`veh-${v.id}`}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border p-2 hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+        {!hidePersonsField && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">
+              Persons{" "}
+              <span className="font-normal text-muted-foreground">(max {maxPersons})</span>
+            </Label>
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={decPersons}
+                disabled={persons <= 1}
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-l-md border border-input bg-background text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Decrease persons"
               >
-                <RadioGroupItem id={`veh-${v.id}`} value={v.id} className="shrink-0" />
-                {v.thumbnail ? (
-                  <img
-                    src={v.thumbnail}
-                    alt=""
-                    className="size-9 shrink-0 rounded object-cover border"
-                  />
-                ) : null}
-                <div className="min-w-0 flex-1 text-xs">
-                  <div className="truncate font-semibold">
-                    {v.make} {v.model}
-                  </div>
-                  <div className="truncate text-[11px] text-muted-foreground font-mono">
-                    {v.licensePlate}
-                  </div>
-                </div>
-              </Label>
-            ))}
-          </RadioGroup>
+                <Minus className="size-4" />
+              </button>
+              <Input
+                type="number"
+                min={1}
+                max={maxPersons}
+                value={persons}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value || "0", 10);
+                  if (!Number.isFinite(v)) return;
+                  set({ persons: Math.min(maxPersons, Math.max(1, v)) });
+                }}
+                className="h-9 rounded-none border-x-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                type="button"
+                onClick={incPersons}
+                disabled={persons >= maxPersons}
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-r-md border border-input bg-background text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Increase persons"
+              >
+                <Plus className="size-4" />
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
-      {value.date && value.time && value.vehicleId && (
-        <div
-          className={
-            "flex items-start gap-2 rounded-md p-3 text-xs " +
-            (status === "available"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
-              : status === "unavailable" || status === "error"
-                ? "border border-red-200 bg-red-50 text-red-800"
-                : "border border-slate-200 bg-slate-50 text-slate-600")
-          }
-        >
-          {checking ? (
-            <Loader2 className="size-4 animate-spin shrink-0" />
-          ) : status === "available" ? (
-            <CheckCircle2 className="size-4 shrink-0" />
+      {!hideVehicleField ? (
+        <div className="space-y-1.5">
+          <Label className="flex items-center justify-between text-xs">
+            <span>
+              Vehicle <span className="text-destructive">*</span>
+            </span>
+            {vehicles.length > 0 && (
+              <span className="font-normal text-muted-foreground">
+                {vehicles.length} available
+              </span>
+            )}
+          </Label>
+          {vehicles.length === 0 ? (
+            <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+              No vehicles are assigned to this tour. Contact support.
+            </p>
           ) : (
-            <AlertTriangle className="size-4 shrink-0" />
+            <RadioGroup
+              value={value.vehicleId}
+              onValueChange={(v) => set({ vehicleId: v })}
+              className="grid max-h-44 grid-cols-1 gap-2 overflow-y-auto pr-1"
+            >
+              {vehicles.map((v) => (
+                <Label
+                  key={v.id}
+                  htmlFor={`veh-${v.id}`}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border p-2 hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                >
+                  <RadioGroupItem id={`veh-${v.id}`} value={v.id} className="shrink-0" />
+                  {v.thumbnail ? (
+                    <img
+                      src={v.thumbnail}
+                      alt=""
+                      className="size-9 shrink-0 rounded object-cover border"
+                    />
+                  ) : null}
+                  <div className="min-w-0 flex-1 text-xs">
+                    <div className="truncate font-semibold">
+                      {v.make} {v.model}
+                    </div>
+                    <div className="truncate text-[11px] text-muted-foreground font-mono">
+                      {v.licensePlate}
+                    </div>
+                  </div>
+                </Label>
+              ))}
+            </RadioGroup>
           )}
-          <span>{checking ? "Checking availability…" : message}</span>
         </div>
-      )}
+      ) : vehicles.length === 0 ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+          No vehicles are assigned to this tour. Contact support.
+        </p>
+      ) : null}
     </div>
   );
 }

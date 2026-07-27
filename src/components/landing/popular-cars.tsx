@@ -232,14 +232,7 @@ export function PopularCars({ cars }: PopularCarsProps) {
                         )}
                       </div>
 
-                      {/* CTA */}
-                      <Link
-                        href={`/tours?vehicle=${car.id}`}
-                        className={`group/btn mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-bold backdrop-blur-sm transition-all hover:-translate-y-0.5 ${accent.btnBorder}`}
-                      >
-                        Book with this vehicle
-                        <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />
-                      </Link>
+
                     </div>
                   </div>
                 </CarouselItem>

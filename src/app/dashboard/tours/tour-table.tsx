@@ -44,6 +44,10 @@ export type TourPackage = {
   durationHours: number;
   duration: string;
   maxPersons: number;
+  price2?: number | null;
+  maxPersons2?: number | null;
+  hourlyRate2?: number | null;
+  baseHours2?: number | null;
   thumbnail: string;
   gallery: string | null;
   promoVideoUrl: string | null;
@@ -133,8 +137,13 @@ export function TourTable({ tours, vehicles, currency }: TourTableProps) {
         <DataTableColumnHeader column={column} title="Price" />
       ),
       cell: ({ row }) => (
-        <div className="font-semibold text-emerald-600">
-          {formatPrice(row.original.price, currency, { decimals: 2 })}
+        <div className="font-semibold text-emerald-600 leading-tight">
+          <div>{formatPrice(row.original.price, currency, { decimals: 2 })}</div>
+          {row.original.price2 != null && (
+            <div className="text-[11px] text-muted-foreground font-normal">
+              v2: {formatPrice(row.original.price2, currency, { decimals: 2 })}
+            </div>
+          )}
         </div>
       ),
     },
@@ -159,6 +168,7 @@ export function TourTable({ tours, vehicles, currency }: TourTableProps) {
         <div className="flex items-center gap-1.5 text-xs font-medium">
           <Users className="size-3.5 text-muted-foreground" />
           Up to {row.original.maxPersons}
+          {row.original.maxPersons2 ? ` / ${row.original.maxPersons2}` : ""}
         </div>
       ),
     },
@@ -292,10 +302,19 @@ export function TourTable({ tours, vehicles, currency }: TourTableProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <DollarSign className="size-4" />
-                    <span className="text-sm">Price</span>
+                    <span className="text-sm">Up to {activeTour.maxPersons} people</span>
                   </div>
                   <span className="font-bold text-emerald-600">{formatPrice(activeTour.price, currency, { decimals: 2 })}</span>
                 </div>
+                {activeTour.price2 != null && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <DollarSign className="size-4" />
+                      <span className="text-sm">Up to {activeTour.maxPersons2} people</span>
+                    </div>
+                    <span className="font-bold text-emerald-600">{formatPrice(activeTour.price2, currency, { decimals: 2 })}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="size-4" />
@@ -308,7 +327,9 @@ export function TourTable({ tours, vehicles, currency }: TourTableProps) {
                     <Users className="size-4" />
                     <span className="text-sm">Capacity</span>
                   </div>
-                  <span className="font-medium text-sm">Up to {activeTour.maxPersons} persons</span>
+                  <span className="font-medium text-sm">
+                    Up to {activeTour.maxPersons} persons {activeTour.maxPersons2 ? `(v2: max ${activeTour.maxPersons2})` : ""}
+                  </span>
                 </div>
               </CardContent>
             </Card>

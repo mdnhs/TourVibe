@@ -15,7 +15,8 @@ export async function createTour(formData: FormData) {
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
-  const hourlyRate = parseFloat(formData.get("hourlyRate") as string);
+  const rawPrice = parseFloat(formData.get("price") as string);
+  const hourlyRate = parseFloat(formData.get("hourlyRate") as string) || 0;
   const durationHours = parseInt(formData.get("durationHours") as string);
   const maxPersons = parseInt(formData.get("maxPersons") as string);
   const vehicleIds = formData.getAll("vehicleIds") as string[];
@@ -24,15 +25,50 @@ export async function createTour(formData: FormData) {
   const metaTitle = (formData.get("metaTitle") as string) || "";
   const metaDescription = (formData.get("metaDescription") as string) || "";
 
+  // Base price for Variant 1
+  const price = !isNaN(rawPrice) && rawPrice >= 0
+    ? rawPrice
+    : Math.round((hourlyRate || 0) * (durationHours || 1) * 100) / 100;
+
+  // Variant 2 parsing
+  const enableVariant2 = formData.get("enableVariant2") === "true" || formData.get("enableVariant2") === "on";
+  let maxPersons2: number | null = null;
+  let hourlyRate2: number | null = null;
+  let baseHours2: number | null = null;
+  let price2: number | null = null;
+
+  if (enableVariant2) {
+    const rawMax2 = parseInt(formData.get("maxPersons2") as string);
+    const rawRate2 = parseFloat(formData.get("hourlyRate2") as string);
+    const rawPrice2 = parseFloat(formData.get("price2") as string);
+    const rawBaseHours2 = parseInt(formData.get("baseHours2") as string);
+
+    if (!isNaN(rawMax2) && rawMax2 > 0) {
+      maxPersons2 = rawMax2;
+    }
+    if (!isNaN(rawBaseHours2) && rawBaseHours2 > 0) {
+      baseHours2 = rawBaseHours2;
+    } else {
+      baseHours2 = durationHours;
+    }
+    if (!isNaN(rawRate2) && rawRate2 >= 0) {
+      hourlyRate2 = rawRate2;
+    }
+    if (!isNaN(rawPrice2) && rawPrice2 >= 0) {
+      price2 = rawPrice2;
+    } else if (hourlyRate2 !== null) {
+      price2 = Math.round((hourlyRate2 * (baseHours2 || durationHours)) * 100) / 100;
+    }
+  }
+
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
   const promoVideoFile = formData.get("promoVideo") as File | null;
 
-  if (!name || isNaN(hourlyRate) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons) || !thumbnailFile || thumbnailFile.size === 0) {
-    return { error: "Missing required fields (Name, Hourly Rate, Duration Hours, Persons, Thumbnail)" };
+  if (!name || isNaN(price) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons) || !thumbnailFile || thumbnailFile.size === 0) {
+    return { error: "Missing required fields (Name, Base Price, Duration Hours, Persons, Thumbnail)" };
   }
 
-  const price = Math.round(hourlyRate * durationHours * 100) / 100;
   const duration = `${durationHours} ${durationHours === 1 ? "Hour" : "Hours"}`;
   const id = generateOrderId();
   const slug = slugify(name);
@@ -69,6 +105,10 @@ export async function createTour(formData: FormData) {
         durationHours,
         duration,
         maxPersons,
+        price2,
+        maxPersons2,
+        hourlyRate2,
+        baseHours2,
         thumbnail: thumbnailUrl,
         gallery: galleryUrls.join(","),
         promoVideoUrl,
@@ -95,7 +135,8 @@ export async function updateTour(id: string, formData: FormData) {
   const name = formData.get("name") as string;
   const slug = slugify(name);
   const description = formData.get("description") as string;
-  const hourlyRate = parseFloat(formData.get("hourlyRate") as string);
+  const rawPrice = parseFloat(formData.get("price") as string);
+  const hourlyRate = parseFloat(formData.get("hourlyRate") as string) || 0;
   const durationHours = parseInt(formData.get("durationHours") as string);
   const maxPersons = parseInt(formData.get("maxPersons") as string);
   const vehicleIds = formData.getAll("vehicleIds") as string[];
@@ -103,6 +144,42 @@ export async function updateTour(id: string, formData: FormData) {
   const highlights = highlightsRaw.filter(Boolean).join("\n") || null;
   const metaTitle = (formData.get("metaTitle") as string) || "";
   const metaDescription = (formData.get("metaDescription") as string) || "";
+
+  // Base price for Variant 1
+  const price = !isNaN(rawPrice) && rawPrice >= 0
+    ? rawPrice
+    : Math.round((hourlyRate || 0) * (durationHours || 1) * 100) / 100;
+
+  // Variant 2 parsing
+  const enableVariant2 = formData.get("enableVariant2") === "true" || formData.get("enableVariant2") === "on";
+  let maxPersons2: number | null = null;
+  let hourlyRate2: number | null = null;
+  let baseHours2: number | null = null;
+  let price2: number | null = null;
+
+  if (enableVariant2) {
+    const rawMax2 = parseInt(formData.get("maxPersons2") as string);
+    const rawRate2 = parseFloat(formData.get("hourlyRate2") as string);
+    const rawPrice2 = parseFloat(formData.get("price2") as string);
+    const rawBaseHours2 = parseInt(formData.get("baseHours2") as string);
+
+    if (!isNaN(rawMax2) && rawMax2 > 0) {
+      maxPersons2 = rawMax2;
+    }
+    if (!isNaN(rawBaseHours2) && rawBaseHours2 > 0) {
+      baseHours2 = rawBaseHours2;
+    } else {
+      baseHours2 = durationHours;
+    }
+    if (!isNaN(rawRate2) && rawRate2 >= 0) {
+      hourlyRate2 = rawRate2;
+    }
+    if (!isNaN(rawPrice2) && rawPrice2 >= 0) {
+      price2 = rawPrice2;
+    } else if (hourlyRate2 !== null) {
+      price2 = Math.round((hourlyRate2 * (baseHours2 || durationHours)) * 100) / 100;
+    }
+  }
 
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -112,11 +189,10 @@ export async function updateTour(id: string, formData: FormData) {
   const existingGallery = formData.get("existingGallery") as string;
   const existingPromoVideoUrl = formData.get("existingPromoVideoUrl") as string;
 
-  if (!name || isNaN(hourlyRate) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons)) {
+  if (!name || isNaN(price) || isNaN(durationHours) || durationHours < 1 || isNaN(maxPersons)) {
     return { error: "Missing required fields" };
   }
 
-  const price = Math.round(hourlyRate * durationHours * 100) / 100;
   const duration = `${durationHours} ${durationHours === 1 ? "Hour" : "Hours"}`;
 
   try {
@@ -151,12 +227,40 @@ export async function updateTour(id: string, formData: FormData) {
     await prisma.$transaction([
       prisma.tourPackage.update({
         where: { id },
-        data: { name, slug, description, price, hourlyRate, durationHours, duration, maxPersons, thumbnail: thumbnailUrl, gallery: finalGallery, promoVideoUrl, highlights, metaTitle, metaDescription },
+        data: {
+          name,
+          slug,
+          description,
+          price,
+          hourlyRate,
+          durationHours,
+          duration,
+          maxPersons,
+          price2,
+          maxPersons2,
+          hourlyRate2,
+          baseHours2,
+          thumbnail: thumbnailUrl,
+          gallery: finalGallery,
+          promoVideoUrl,
+          highlights,
+          metaTitle,
+          metaDescription,
+        },
       }),
-      prisma.tourPackageVehicle.deleteMany({ where: { tourPackageId: id } }),
-      prisma.tourPackageVehicle.createMany({
-        data: vehicleIds.map((vehicleId) => ({ tourPackageId: id, vehicleId })),
+      prisma.tourPackageVehicle.deleteMany({
+        where: { tourPackageId: id },
       }),
+      ...(vehicleIds.length > 0
+        ? [
+            prisma.tourPackageVehicle.createMany({
+              data: vehicleIds.map((vehicleId) => ({
+                tourPackageId: id,
+                vehicleId,
+              })),
+            }),
+          ]
+        : []),
     ]);
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Unknown error" };
@@ -183,8 +287,6 @@ export async function deleteTour(id: string) {
 export async function deleteTours(ids: string[]) {
   const sess = await requireDashboardSession();
   if (!canPerform(sess, "tour", "delete", "Tours")) throw new Error("Unauthorized");
-
-  if (ids.length === 0) return { error: "No IDs provided" };
 
   try {
     await prisma.tourPackage.deleteMany({ where: { id: { in: ids } } });

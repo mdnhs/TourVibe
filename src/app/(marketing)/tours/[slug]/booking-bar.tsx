@@ -10,6 +10,17 @@ import { BookingDialog } from "@/components/booking/booking-dialog";
 import { GuestBookingDialog } from "@/components/booking/guest-booking-dialog";
 import type { PickerVehicle } from "@/components/booking/schedule-vehicle-picker";
 
+interface TourPricingInfo {
+  price: number;
+  hourlyRate: number;
+  durationHours: number;
+  maxPersons: number;
+  price2?: number | null;
+  hourlyRate2?: number | null;
+  baseHours2?: number | null;
+  maxPersons2?: number | null;
+}
+
 interface BookingBarProps {
   tourId: string;
   name: string;
@@ -21,14 +32,38 @@ interface BookingBarProps {
   maxPersons: number;
   rating: string | null;
   currency?: string;
+  tour?: TourPricingInfo;
 }
 
-export function BookingBar({ tourId, name, price, hourlyRate, duration, durationHours, vehicles, maxPersons, rating, currency }: BookingBarProps) {
+export function BookingBar({
+  tourId,
+  name,
+  price,
+  hourlyRate,
+  duration,
+  durationHours,
+  vehicles,
+  maxPersons,
+  rating,
+  currency,
+  tour,
+}: BookingBarProps) {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [whatsappOpen, setWhatsappOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
+
+  const tourPricing: TourPricingInfo = tour || {
+    price,
+    hourlyRate,
+    durationHours,
+    maxPersons,
+  };
+
+  const effectiveMax = tourPricing.maxPersons2 && tourPricing.maxPersons2 > maxPersons
+    ? tourPricing.maxPersons2
+    : maxPersons;
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 320);
@@ -91,10 +126,11 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
       <BookingDialog
         open={bookingOpen}
         onOpenChange={setBookingOpen}
+        tour={tourPricing}
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={durationHours}
-        maxPersons={maxPersons}
+        maxPersons={effectiveMax}
         vehicles={vehicles}
         loading={loading}
         onConfirm={submitCheckout}
@@ -103,10 +139,11 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
         open={guestOpen}
         onOpenChange={setGuestOpen}
         tourId={tourId}
+        tour={tourPricing}
         hourlyRate={hourlyRate}
         currency={currency}
         minHours={durationHours}
-        maxPersons={maxPersons}
+        maxPersons={effectiveMax}
         vehicles={vehicles}
       />
       <div
@@ -125,10 +162,11 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-slate-950 leading-none">{name}</p>
                   <p className="mt-0.5 text-[11px] text-slate-400">
+                    From{" "}
                     <span className="font-heading font-extrabold text-slate-950">
                       {formatPrice(price, currency)}
                     </span>
-                    {" "}· total · all inclusive
+                    {" "}· base package price
                   </p>
                 </div>
               </div>
@@ -139,7 +177,7 @@ export function BookingBar({ tourId, name, price, hourlyRate, duration, duration
                   <Clock className="size-3" />{duration}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
-                  <Users className="size-3" />Up to {maxPersons}
+                  <Users className="size-3" />Up to {effectiveMax}
                 </span>
                 {rating && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700">

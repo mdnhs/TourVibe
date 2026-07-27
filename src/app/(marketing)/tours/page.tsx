@@ -7,6 +7,7 @@ import { getCurrencyCode } from "@/lib/currency-server";
 import { ToursList } from "./tours-list";
 import { ToursFilter } from "./tours-filter";
 import { ToursPagination } from "./tours-pagination";
+import { CustomTourForm } from "../custom-tours/custom-tour-form";
 import { SearchParams } from "nuqs/server";
 import { SlidersHorizontal } from "lucide-react";
 import {
@@ -60,7 +61,6 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     if (minPrice !== null) where.price.gte = minPrice;
     if (maxPrice !== null) where.price.lte = maxPrice;
   }
-
 
   const orderBy: any = {};
   if (sort === "price-asc") orderBy.price = "asc";
@@ -117,7 +117,7 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
       </div>
 
       {/* ── Page header ── */}
-      <div className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-12">
+      <div className="mx-auto max-w-7xl px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-12">
         <div className="space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700
                           animate-in fade-in slide-in-from-left-4 duration-500">
@@ -164,12 +164,22 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
                     <SlidersHorizontal className="size-3.5" />
                     Filters
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
+                  <SheetContent side="right" className="w-[320px] sm:w-[380px] p-0">
                     <SheetHeader className="border-b p-6 pb-4">
-                      <SheetTitle className="text-left">Adjust Filters</SheetTitle>
+                      <SheetTitle className="text-left">Filters &amp; Custom Tour</SheetTitle>
                     </SheetHeader>
-                    <div className="flex-1 overflow-y-auto p-6">
+                    <div className="flex-1 overflow-y-auto p-6 space-y-8">
                       <ToursFilter />
+                      <div className="h-px bg-slate-100" />
+                      <div>
+                        <div className="mb-4 space-y-1">
+                          <span className="inline-block rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                            Custom Itinerary
+                          </span>
+                          <h3 className="text-base font-bold text-slate-900">Organise Your Own Tour</h3>
+                        </div>
+                        <CustomTourForm className="p-0 shadow-none border-0 sm:p-0 rounded-none bg-transparent space-y-5" />
+                      </div>
                     </div>
                   </SheetContent>
                 </Sheet>
@@ -180,14 +190,29 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
       </div>
 
       {/* ── Content ── */}
-      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
         <div className="flex flex-col gap-8 md:flex-row">
-          {/* Desktop Sidebar */}
-          <aside className="hidden w-64 shrink-0 md:block">
-            <div className="sticky top-24 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50">
-              <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-cyan-500" />
-              <div className="p-6">
-                <ToursFilter />
+          {/* Desktop Sidebar (Filters + Custom Tour Form) */}
+          <aside className="hidden w-72 shrink-0 md:block lg:w-80">
+            <div className="sticky top-24 space-y-6">
+              {/* Filter Section */}
+              <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50">
+                <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-cyan-500" />
+                <div className="p-6">
+                  <ToursFilter />
+                </div>
+              </div>
+
+              {/* Organise Your Own Tour Form (After filter section) */}
+              <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-lg shadow-slate-200/50">
+                <div className="mb-6 space-y-1">
+                  <span className="inline-block rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                    Custom Itinerary
+                  </span>
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900">Organise Your Own Tour</h3>
+                  <p className="text-xs text-slate-500">Design your own custom tour itinerary with us.</p>
+                </div>
+                <CustomTourForm className="p-0 shadow-none border-0 sm:p-0 rounded-none bg-transparent space-y-6" />
               </div>
             </div>
           </aside>

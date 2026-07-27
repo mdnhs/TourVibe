@@ -34,11 +34,9 @@ import { cn } from "@/lib/utils";
 
 type Vehicle = { id: string; make: string; model: string; licensePlate: string };
 
-// Max 1MB per gallery image, 10MB per promo video
 const MAX_IMAGE_BYTES = 1024 * 1024;
 const MAX_VIDEO_BYTES = 10 * 1024 * 1024;
 
-// Validate a single video file against the size limit; clears the input on reject
 function validateVideo(e: React.ChangeEvent<HTMLInputElement>): boolean {
   const file = e.target.files?.[0];
   if (file && file.size > MAX_VIDEO_BYTES) {
@@ -49,7 +47,6 @@ function validateVideo(e: React.ChangeEvent<HTMLInputElement>): boolean {
   return true;
 }
 
-// Filter a FileList to valid images under the size limit, toasting on rejects
 function collectValidImages(list: FileList | null): File[] {
   const incoming = Array.from(list ?? []);
   const valid: File[] = [];
@@ -59,44 +56,38 @@ function collectValidImages(list: FileList | null): File[] {
     else valid.push(f);
   }
   if (tooBig.length) {
-    toast.error(
-      `Skipped (over 1MB): ${tooBig.join(", ")}`,
-    );
+    toast.error(`Skipped (over 1MB): ${tooBig.join(", ")}`);
   }
   return valid;
 }
 
-// ── Section wrapper ─────────────────────────────────────────────────────────
 function Section({
-  icon: Icon,
   title,
   description,
+  icon: Icon,
   children,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
   title: string;
-  description?: string;
+  description: string;
+  icon: React.ElementType;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border bg-card shadow-sm">
-      <div className="flex items-start gap-3 border-b px-5 py-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="size-4.5" />
+    <div className="rounded-xl border bg-card p-5 shadow-sm">
+      <div className="mb-5 flex items-start gap-3">
+        <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-5" />
         </div>
-        <div className="space-y-0.5">
-          <h3 className="text-sm font-semibold leading-none">{title}</h3>
-          {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
-          )}
+        <div>
+          <h2 className="font-semibold text-foreground">{title}</h2>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
-      <div className="space-y-4 p-5">{children}</div>
-    </section>
+      {children}
+    </div>
   );
 }
 
-// ── Highlights editor ─────────────────────────────────────────────────────────
 function HighlightsEditor({ initial = [] }: { initial?: string[] }) {
   const [items, setItems] = useState<string[]>(initial.length > 0 ? initial : [""]);
 
@@ -140,7 +131,6 @@ function HighlightsEditor({ initial = [] }: { initial?: string[] }) {
   );
 }
 
-// ── Pricing + basics ─────────────────────────────────────────────────────────
 function BasicsFields({
   disabled,
   defaults,
@@ -149,21 +139,47 @@ function BasicsFields({
   defaults?: {
     name?: string;
     description?: string;
+    price?: number | string;
     hourlyRate?: number | string;
     durationHours?: number | string;
     maxPersons?: number | string;
+    price2?: number | string | null;
+    maxPersons2?: number | string | null;
+    hourlyRate2?: number | string | null;
+    baseHours2?: number | string | null;
   };
 }) {
-  const [rate, setRate] = useState(defaults?.hourlyRate?.toString() ?? "");
-  const [hours, setHours] = useState(defaults?.durationHours?.toString() ?? "");
   const [description, setDescription] = useState(defaults?.description ?? "");
 
-  const rateNum = parseFloat(rate);
-  const hoursNum = parseInt(hours);
-  const total =
-    !isNaN(rateNum) && !isNaN(hoursNum) && hoursNum > 0
-      ? Math.round(rateNum * hoursNum * 100) / 100
-      : null;
+  // Variant 1 state
+  const [basePrice1, setBasePrice1] = useState(
+    defaults?.price?.toString() ??
+    (defaults?.hourlyRate && defaults?.durationHours
+      ? (Number(defaults.hourlyRate) * Number(defaults.durationHours)).toString()
+      : "")
+  );
+  const [baseHours1, setBaseHours1] = useState(defaults?.durationHours?.toString() ?? "4");
+  const [extraRate1, setExtraRate1] = useState(defaults?.hourlyRate?.toString() ?? "40");
+  const [maxPersons1, setMaxPersons1] = useState(defaults?.maxPersons?.toString() ?? "4");
+
+  // Variant 2 state
+  const [enableVariant2, setEnableVariant2] = useState<boolean>(
+    Boolean(defaults?.maxPersons2 || defaults?.price2 || defaults?.hourlyRate2)
+  );
+  const [basePrice2, setBasePrice2] = useState(defaults?.price2?.toString() ?? "");
+  const [baseHours2, setBaseHours2] = useState(
+    defaults?.baseHours2?.toString() ?? defaults?.durationHours?.toString() ?? "4"
+  );
+  const [extraRate2, setExtraRate2] = useState(defaults?.hourlyRate2?.toString() ?? "");
+  const [maxPersons2, setMaxPersons2] = useState(defaults?.maxPersons2?.toString() ?? "6");
+
+  const price1Num = parseFloat(basePrice1) || 0;
+  const hours1Num = parseInt(baseHours1) || 1;
+  const extraRate1Num = parseFloat(extraRate1) || 0;
+
+  const price2Num = parseFloat(basePrice2) || 0;
+  const hours2Num = parseInt(baseHours2) || hours1Num;
+  const extraRate2Num = parseFloat(extraRate2) || 0;
 
   return (
     <>
@@ -193,87 +209,244 @@ function BasicsFields({
       <Section
         icon={Tag}
         title="Pricing & Capacity"
-        description="Total price is calculated automatically from rate × duration."
+        description="Set base price and base hours for up to 2 variants. If travelers increase hours, the extra hourly rate is added."
       >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="hourlyRate" className="flex items-center gap-1.5">
-              <Euro className="size-3.5 text-muted-foreground" />
-              Hourly Rate (€)
-            </Label>
-            <Input
-              id="hourlyRate"
-              name="hourlyRate"
-              type="number"
-              step="0.01"
-              min="0"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              placeholder="70"
-              required
-              disabled={disabled}
-            />
+        {/* Variant 1 Section */}
+        <div className="space-y-4 rounded-xl border bg-card p-4">
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+              Variant 1 (Primary)
+            </span>
+            <span className="text-xs text-muted-foreground">Standard group capacity &amp; base rate</span>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="durationHours" className="flex items-center gap-1.5">
-              <Clock className="size-3.5 text-muted-foreground" />
-              Duration (hours)
-            </Label>
-            <Input
-              id="durationHours"
-              name="durationHours"
-              type="number"
-              min="1"
-              step="1"
-              value={hours}
-              onChange={(e) => setHours(e.target.value)}
-              placeholder="4"
-              required
-              disabled={disabled}
-            />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="price" className="flex items-center gap-1 text-xs">
+                <Euro className="size-3.5 text-muted-foreground" />
+                Base Price (€)
+              </Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={basePrice1}
+                onChange={(e) => setBasePrice1(e.target.value)}
+                placeholder="200"
+                required
+                disabled={disabled}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="durationHours" className="flex items-center gap-1 text-xs">
+                <Clock className="size-3.5 text-muted-foreground" />
+                Base Hours
+              </Label>
+              <Input
+                id="durationHours"
+                name="durationHours"
+                type="number"
+                min="1"
+                step="1"
+                value={baseHours1}
+                onChange={(e) => setBaseHours1(e.target.value)}
+                placeholder="4"
+                required
+                disabled={disabled}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="hourlyRate" className="flex items-center gap-1 text-xs">
+                <Euro className="size-3.5 text-muted-foreground" />
+                Extra Rate (€/hr)
+              </Label>
+              <Input
+                id="hourlyRate"
+                name="hourlyRate"
+                type="number"
+                step="0.01"
+                min="0"
+                value={extraRate1}
+                onChange={(e) => setExtraRate1(e.target.value)}
+                placeholder="40"
+                required
+                disabled={disabled}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="maxPersons" className="flex items-center gap-1 text-xs">
+                <Users className="size-3.5 text-muted-foreground" />
+                Max Persons (V1)
+              </Label>
+              <Input
+                id="maxPersons"
+                name="maxPersons"
+                type="number"
+                min="1"
+                value={maxPersons1}
+                onChange={(e) => setMaxPersons1(e.target.value)}
+                placeholder="4"
+                required
+                disabled={disabled}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="maxPersons" className="flex items-center gap-1.5">
-              <Users className="size-3.5 text-muted-foreground" />
-              Max Persons
-            </Label>
-            <Input
-              id="maxPersons"
-              name="maxPersons"
-              type="number"
-              min="1"
-              defaultValue={defaults?.maxPersons}
-              placeholder="6"
-              required
-              disabled={disabled}
-            />
+
+          <div className="rounded-lg border border-dashed bg-muted/40 p-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">
+              Variant 1 Summary: Base price <span className="font-bold text-emerald-600">€{price1Num.toFixed(2)}</span> includes <span className="font-bold">{hours1Num} hours</span> for up to <span className="font-bold">{maxPersons1} persons</span>.
+            </p>
+            <p className="mt-0.5 text-[11px]">
+              If traveler books beyond {hours1Num} hours: +€{extraRate1Num.toFixed(2)} per additional hour.
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg border border-dashed bg-muted/40 px-4 py-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Euro className="size-4" />
-            Total package price
+        {/* Variant 2 Section */}
+        {!enableVariant2 ? (
+          <div className="border-t pt-4">
+            <input type="hidden" name="enableVariant2" value="false" />
+            <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 p-5 text-center transition-all hover:border-amber-500/40 hover:bg-amber-500/5">
+              <div className="mx-auto flex max-w-md flex-col items-center justify-center space-y-2">
+                <div className="flex size-9 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                  <Plus className="size-4" />
+                </div>
+                <h4 className="text-sm font-bold text-foreground">Add 2nd Pricing Variant</h4>
+                <p className="text-xs text-muted-foreground">
+                  Customize base price, base hours, and extra rates for larger group sizes (e.g. up to 6 or 8 persons).
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEnableVariant2(true)}
+                  disabled={disabled}
+                  className="mt-2 border-amber-500/30 bg-amber-500/10 font-bold text-amber-600 hover:bg-amber-500/20 hover:text-amber-700 dark:text-amber-400"
+                >
+                  <Plus className="mr-1.5 size-4" />
+                  Add Variant 2
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="text-right">
-            {total !== null ? (
-              <p className="text-lg font-bold tabular-nums">€{total.toFixed(2)}</p>
-            ) : (
-              <p className="text-sm text-muted-foreground">Enter rate & duration</p>
-            )}
-            {total !== null && (
-              <p className="text-[11px] text-muted-foreground">
-                €{rateNum.toFixed(2)} × {hoursNum}h
-              </p>
-            )}
+        ) : (
+          <div className="border-t pt-4 space-y-4">
+            <input type="hidden" name="enableVariant2" value="true" />
+            <div className="space-y-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-600 border border-amber-500/20">
+                    Variant 2
+                  </span>
+                  <span className="text-xs text-muted-foreground">Secondary capacity &amp; base pricing</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEnableVariant2(false)}
+                  disabled={disabled}
+                  className="h-8 px-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="mr-1.5 size-3.5" />
+                  Remove Variant
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="price2" className="flex items-center gap-1 text-xs">
+                    <Euro className="size-3.5 text-muted-foreground" />
+                    Base Price 2 (€)
+                  </Label>
+                  <Input
+                    id="price2"
+                    name="price2"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={basePrice2}
+                    onChange={(e) => setBasePrice2(e.target.value)}
+                    placeholder="250"
+                    disabled={disabled}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="baseHours2" className="flex items-center gap-1 text-xs">
+                    <Clock className="size-3.5 text-muted-foreground" />
+                    Base Hours 2
+                  </Label>
+                  <Input
+                    id="baseHours2"
+                    name="baseHours2"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={baseHours2}
+                    onChange={(e) => setBaseHours2(e.target.value)}
+                    placeholder="4"
+                    disabled={disabled}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="hourlyRate2" className="flex items-center gap-1 text-xs">
+                    <Euro className="size-3.5 text-muted-foreground" />
+                    Extra Rate 2 (€/hr)
+                  </Label>
+                  <Input
+                    id="hourlyRate2"
+                    name="hourlyRate2"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={extraRate2}
+                    onChange={(e) => setExtraRate2(e.target.value)}
+                    placeholder="50"
+                    disabled={disabled}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="maxPersons2" className="flex items-center gap-1 text-xs">
+                    <Users className="size-3.5 text-muted-foreground" />
+                    Max Persons (V2)
+                  </Label>
+                  <Input
+                    id="maxPersons2"
+                    name="maxPersons2"
+                    type="number"
+                    min="1"
+                    value={maxPersons2}
+                    onChange={(e) => setMaxPersons2(e.target.value)}
+                    placeholder="6"
+                    disabled={disabled}
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-dashed bg-muted/40 p-3 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">
+                  Variant 2 Summary: Base price <span className="font-bold text-amber-600">€{price2Num.toFixed(2)}</span> includes <span className="font-bold">{hours2Num} hours</span> for up to <span className="font-bold">{maxPersons2} persons</span>.
+                </p>
+                <p className="mt-0.5 text-[11px]">
+                  If traveler books beyond {hours2Num} hours: +€{extraRate2Num.toFixed(2)} per additional hour.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </Section>
     </>
   );
 }
 
-// ── SEO fields ────────────────────────────────────────────────────────────────
 function SeoFields({
   disabled,
   defaults,
@@ -331,7 +504,6 @@ function SeoFields({
   );
 }
 
-// ── Vehicle picker ─────────────────────────────────────────────────────────
 function VehiclePicker({
   vehicles,
   selected,
@@ -342,7 +514,7 @@ function VehiclePicker({
   vehicles: Vehicle[];
   selected: string[];
   onToggle: (id: string) => void;
-  disabled?: boolean;
+  disabled: boolean;
   idPrefix: string;
 }) {
   return (
@@ -436,7 +608,7 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const added = collectValidImages(e.target.files);
-    e.target.value = ""; // allow re-selecting the same file later
+    e.target.value = "";
     if (added.length) setGalleryFiles((prev) => [...prev, ...added]);
   };
 
@@ -448,7 +620,6 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
       prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
     );
 
-  // Build/revoke object URLs whenever the accumulated files change
   React.useEffect(() => {
     const urls = galleryFiles.map((f) => URL.createObjectURL(f));
     setGalleryPreviews(urls);
@@ -466,7 +637,6 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
     const formData = new FormData(e.currentTarget);
     formData.delete("vehicleIds");
     selectedVehicles.forEach((id) => formData.append("vehicleIds", id));
-    // Submit the accumulated gallery files (input only holds the last pick)
     formData.delete("gallery");
     galleryFiles.forEach((f) => formData.append("gallery", f));
 
@@ -513,80 +683,80 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
             title="Media"
             description="A thumbnail is required. Add 8–10 gallery photos for a complete listing."
           >
-        {/* Thumbnail */}
-        <div className="space-y-2">
-          <Label htmlFor="thumbnail">
-            Thumbnail <span className="text-destructive">*</span>
-          </Label>
-          {thumbnailPreview && (
-            <div className="relative mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumbnailPreview} className="size-full object-cover" alt="Thumbnail preview" />
-            </div>
-          )}
-          <Input
-            id="thumbnail"
-            name="thumbnail"
-            type="file"
-            accept="image/*"
-            required
-            disabled={isPending}
-            onChange={handleThumbnailChange}
-          />
-        </div>
-
-        {/* Gallery */}
-        <div className="space-y-2">
-          <Label htmlFor="gallery">Gallery Photos</Label>
-          {galleryPreviews.length > 0 && (
-            <div className="mb-2 grid grid-cols-4 gap-2">
-              {galleryPreviews.map((url, i) => (
-                <div key={i} className="group relative aspect-square overflow-hidden rounded border bg-muted">
+            {/* Thumbnail */}
+            <div className="space-y-2">
+              <Label htmlFor="thumbnail">
+                Thumbnail <span className="text-destructive">*</span>
+              </Label>
+              {thumbnailPreview && (
+                <div className="relative mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
-                  <button
-                    type="button"
-                    onClick={() => removeGalleryAt(i)}
-                    disabled={isPending}
-                    className="absolute right-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
-                    aria-label="Remove photo"
-                  >
-                    <X className="size-3" />
-                  </button>
+                  <img src={thumbnailPreview} className="size-full object-cover" alt="Thumbnail preview" />
                 </div>
-              ))}
+              )}
+              <Input
+                id="thumbnail"
+                name="thumbnail"
+                type="file"
+                accept="image/*"
+                required
+                disabled={isPending}
+                onChange={handleThumbnailChange}
+              />
             </div>
-          )}
-          <Input
-            id="gallery"
-            name="gallery"
-            type="file"
-            accept="image/*"
-            multiple
-            disabled={isPending}
-            onChange={handleGalleryChange}
-          />
-          <p className="text-xs text-muted-foreground">
-            Max 1MB per image. Selecting more photos adds to the list.
-          </p>
-          {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
-            <p className="text-xs text-amber-600">
-              Add at least 8 photos for a complete listing ({galleryPreviews.length} selected).
-            </p>
-          )}
-        </div>
 
-        {/* Promo video */}
-        <div className="space-y-2">
-          <Label htmlFor="promoVideo" className="flex items-center gap-1.5">
-            <Video className="size-3.5 text-muted-foreground" />
-            Promotional Video (optional)
-          </Label>
-          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} onChange={validateVideo} />
-          <p className="text-xs text-muted-foreground">
-            Max 10MB. Short clip (under ~90s) describing location, attractions, and visitor experience.
-          </p>
-        </div>
+            {/* Gallery */}
+            <div className="space-y-2">
+              <Label htmlFor="gallery">Gallery Photos</Label>
+              {galleryPreviews.length > 0 && (
+                <div className="mb-2 grid grid-cols-4 gap-2">
+                  {galleryPreviews.map((url, i) => (
+                    <div key={i} className="group relative aspect-square overflow-hidden rounded border bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryAt(i)}
+                        disabled={isPending}
+                        className="absolute right-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
+                        aria-label="Remove photo"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Input
+                id="gallery"
+                name="gallery"
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={isPending}
+                onChange={handleGalleryChange}
+              />
+              <p className="text-xs text-muted-foreground">
+                Max 1MB per image. Selecting more photos adds to the list.
+              </p>
+              {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
+                <p className="text-xs text-amber-600">
+                  Add at least 8 photos for a complete listing ({galleryPreviews.length} selected).
+                </p>
+              )}
+            </div>
+
+            {/* Promo video */}
+            <div className="space-y-2">
+              <Label htmlFor="promoVideo" className="flex items-center gap-1.5">
+                <Video className="size-3.5 text-muted-foreground" />
+                Promotional Video (optional)
+              </Label>
+              <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} onChange={validateVideo} />
+              <p className="text-xs text-muted-foreground">
+                Max 10MB. Short clip (under ~90s) describing location, attractions, and visitor experience.
+              </p>
+            </div>
           </Section>
         </div>
       </div>
@@ -699,9 +869,14 @@ export function EditTourForm({
             defaults={{
               name: tour.name,
               description: tour.description || "",
+              price: tour.price,
               hourlyRate: tour.hourlyRate ?? 0,
               durationHours: tour.durationHours ?? 1,
               maxPersons: tour.maxPersons,
+              price2: tour.price2,
+              maxPersons2: tour.maxPersons2,
+              hourlyRate2: tour.hourlyRate2,
+              baseHours2: tour.baseHours2,
             }}
           />
 
@@ -736,134 +911,134 @@ export function EditTourForm({
             title="Media"
             description="Manage thumbnail, gallery photos, and promotional video."
           >
-        {/* Thumbnail */}
-        <div className="space-y-2">
-          <Label htmlFor="thumbnail">Thumbnail</Label>
-          {thumbnailPreview ? (
-            <div className="relative mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumbnailPreview} className="size-full object-cover" alt="New preview" />
-              <span className="absolute left-2 top-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
-                New
-              </span>
-            </div>
-          ) : tour.thumbnail ? (
-            <div className="mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={tour.thumbnail} className="size-full object-cover" alt="Current thumbnail" />
-            </div>
-          ) : null}
-          <Input
-            id="thumbnail"
-            name="thumbnail"
-            type="file"
-            accept="image/*"
-            disabled={isPending}
-            onChange={handleThumbnailChange}
-          />
-          <p className="text-xs text-muted-foreground">
-            Leave empty to keep the current thumbnail.
-          </p>
-          <input type="hidden" name="existingThumbnail" value={tour.thumbnail} />
-        </div>
-
-        {/* Existing gallery — removable */}
-        {keptGallery.length > 0 && (
-          <div className="space-y-2">
-            <Label>Current Gallery</Label>
-            <div className="grid grid-cols-4 gap-2">
-              {keptGallery.map((url) => (
-                <div
-                  key={url}
-                  className="group relative aspect-square overflow-hidden rounded border bg-muted"
-                >
+            {/* Thumbnail */}
+            <div className="space-y-2">
+              <Label htmlFor="thumbnail">Thumbnail</Label>
+              {thumbnailPreview ? (
+                <div className="relative mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} className="size-full object-cover" alt="Gallery image" />
-                  <button
-                    type="button"
-                    onClick={() => removeExisting(url)}
-                    disabled={isPending}
-                    aria-label="Remove image"
-                    className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Add gallery */}
-        <div className="space-y-2">
-          <Label htmlFor="gallery">Add Photos</Label>
-          {galleryPreviews.length > 0 && (
-            <div className="mb-2 grid grid-cols-4 gap-2">
-              {galleryPreviews.map((url, i) => (
-                <div key={i} className="group relative aspect-square overflow-hidden rounded border bg-muted">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
-                  <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                  <img src={thumbnailPreview} className="size-full object-cover" alt="New preview" />
+                  <span className="absolute left-2 top-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
                     New
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => removeGalleryAt(i)}
-                    disabled={isPending}
-                    aria-label="Remove photo"
-                    className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
-                  >
-                    <X className="size-3.5" />
-                  </button>
                 </div>
-              ))}
+              ) : tour.thumbnail ? (
+                <div className="mb-2 aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={tour.thumbnail} className="size-full object-cover" alt="Current thumbnail" />
+                </div>
+              ) : null}
+              <Input
+                id="thumbnail"
+                name="thumbnail"
+                type="file"
+                accept="image/*"
+                disabled={isPending}
+                onChange={handleThumbnailChange}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty to keep the current thumbnail.
+              </p>
+              <input type="hidden" name="existingThumbnail" value={tour.thumbnail} />
             </div>
-          )}
-          <Input
-            id="gallery"
-            name="gallery"
-            type="file"
-            accept="image/*"
-            multiple
-            disabled={isPending}
-            onChange={handleGalleryChange}
-          />
-          <p className="text-xs text-muted-foreground">
-            Max 1MB per image. Selecting more photos adds to the list (existing photos are kept).
-          </p>
-          {totalPhotos < 8 ? (
-            <p className="text-xs text-amber-600">
-              {totalPhotos} photo{totalPhotos === 1 ? "" : "s"} total. Add at least{" "}
-              {8 - totalPhotos} more to reach 8.
-            </p>
-          ) : (
-            <p className="flex items-center gap-1 text-xs text-emerald-600">
-              <CheckCircle2 className="size-3.5" />
-              {totalPhotos} photos total — meets minimum.
-            </p>
-          )}
-          <input type="hidden" name="existingGallery" value={keptGallery.join(",")} />
-        </div>
 
-        {/* Promo video */}
-        <div className="space-y-2">
-          <Label htmlFor="promoVideo" className="flex items-center gap-1.5">
-            <Video className="size-3.5 text-muted-foreground" />
-            Promotional Video (optional)
-          </Label>
-          {tour.promoVideoUrl ? (
-            <div className="mb-2 w-full max-w-sm overflow-hidden rounded-lg border bg-muted">
-              <video src={tour.promoVideoUrl} controls preload="metadata" className="w-full" />
+            {/* Existing gallery — removable */}
+            {keptGallery.length > 0 && (
+              <div className="space-y-2">
+                <Label>Current Gallery</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {keptGallery.map((url) => (
+                    <div
+                      key={url}
+                      className="group relative aspect-square overflow-hidden rounded border bg-muted"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} className="size-full object-cover" alt="Gallery image" />
+                      <button
+                        type="button"
+                        onClick={() => removeExisting(url)}
+                        disabled={isPending}
+                        aria-label="Remove image"
+                        className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add gallery */}
+            <div className="space-y-2">
+              <Label htmlFor="gallery">Add Photos</Label>
+              {galleryPreviews.length > 0 && (
+                <div className="mb-2 grid grid-cols-4 gap-2">
+                  {galleryPreviews.map((url, i) => (
+                    <div key={i} className="group relative aspect-square overflow-hidden rounded border bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} className="size-full object-cover" alt={`Preview ${i}`} />
+                      <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                        New
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryAt(i)}
+                        disabled={isPending}
+                        aria-label="Remove photo"
+                        className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Input
+                id="gallery"
+                name="gallery"
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={isPending}
+                onChange={handleGalleryChange}
+              />
+              <p className="text-xs text-muted-foreground">
+                Max 1MB per image. Selecting more photos adds to the list (existing photos are kept).
+              </p>
+              {totalPhotos < 8 ? (
+                <p className="text-xs text-amber-600">
+                  {totalPhotos} photo{totalPhotos === 1 ? "" : "s"} total. Add at least{" "}
+                  {8 - totalPhotos} more to reach 8.
+                </p>
+              ) : (
+                <p className="flex items-center gap-1 text-xs text-emerald-600">
+                  <CheckCircle2 className="size-3.5" />
+                  {totalPhotos} photos total — meets minimum.
+                </p>
+              )}
+              <input type="hidden" name="existingGallery" value={keptGallery.join(",")} />
             </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">No promotional video uploaded yet.</p>
-          )}
-          <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} onChange={validateVideo} />
-          <p className="text-xs text-muted-foreground">
-            Max 10MB. Uploading a new file replaces the current promotional video.
-          </p>
-          <input type="hidden" name="existingPromoVideoUrl" value={tour.promoVideoUrl || ""} />
-        </div>
+
+            {/* Promo video */}
+            <div className="space-y-2">
+              <Label htmlFor="promoVideo" className="flex items-center gap-1.5">
+                <Video className="size-3.5 text-muted-foreground" />
+                Promotional Video (optional)
+              </Label>
+              {tour.promoVideoUrl ? (
+                <div className="mb-2 w-full max-w-sm overflow-hidden rounded-lg border bg-muted">
+                  <video src={tour.promoVideoUrl} controls preload="metadata" className="w-full" />
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No promotional video uploaded yet.</p>
+              )}
+              <Input id="promoVideo" name="promoVideo" type="file" accept="video/*" disabled={isPending} onChange={validateVideo} />
+              <p className="text-xs text-muted-foreground">
+                Max 10MB. Uploading a new file replaces the current promotional video.
+              </p>
+              <input type="hidden" name="existingPromoVideoUrl" value={tour.promoVideoUrl || ""} />
+            </div>
           </Section>
         </div>
       </div>
