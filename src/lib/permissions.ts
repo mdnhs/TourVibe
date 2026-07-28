@@ -78,6 +78,7 @@ export const RESOURCE_ACTIONS = {
   user:         { label: "Users",         actions: ["read", "update", "ban"] },
   notification: { label: "Notifications", actions: ["create", "read"] },
   report:       { label: "Reports",       actions: ["read", "export"] },
+  gallery:      { label: "Gallery",       actions: ["create", "read", "update", "delete"] },
 } as const;
 
 export type ResourceKey = keyof typeof RESOURCE_ACTIONS;
@@ -95,6 +96,7 @@ export const MENU_ITEMS = [
   { label: "Roles & Permissions",adminOnly: true  },
   { label: "Live Tracking",      adminOnly: false },
   { label: "Notifications",      adminOnly: false },
+  { label: "Gallery",            adminOnly: true  },
   { label: "Blog",               adminOnly: true  },
   { label: "Appearance",         adminOnly: true  },
   { label: "SEO",                adminOnly: true  },

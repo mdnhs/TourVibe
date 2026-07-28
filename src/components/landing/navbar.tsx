@@ -21,6 +21,7 @@ const navLinks = [
   { label: "Tours", href: "/tours" },
   { label: "Custom Tours", href: "/custom-tours" },
   { label: "Services", href: "/services" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },

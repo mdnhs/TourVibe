@@ -22,6 +22,7 @@ import {
   SearchIcon,
   SlidersHorizontalIcon,
   InboxIcon,
+  ImageIcon,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -130,6 +131,7 @@ export function AppSidebar({
       items: [
         { label: "Messages", href: "/dashboard/messages", icon: InboxIcon, adminOnly: true },
         { label: "Notifications", href: "/dashboard/notifications", icon: BellIcon },
+        { label: "Gallery", href: "/dashboard/gallery", icon: ImageIcon, adminOnly: true },
         { label: "Blog", href: "/dashboard/blog", icon: BookOpenIcon, adminOnly: true },
       ]
     },
