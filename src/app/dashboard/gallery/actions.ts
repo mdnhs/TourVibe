@@ -6,7 +6,7 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession, canPerform } from "@/lib/dashboard";
 import { generateOrderId } from "@/lib/utils";
 
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
+const MAX_IMAGE_BYTES = 50 * 1024 * 1024; // 50MB
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
 
 export async function createGalleryItem(formData: FormData) {
@@ -31,7 +31,7 @@ export async function createGalleryItem(formData: FormData) {
       return { error: "Video file must be 50MB or smaller." };
     }
     if (type === "IMAGE" && mediaFile.size > MAX_IMAGE_BYTES) {
-      return { error: "Image file must be 10MB or smaller." };
+      return { error: "Image file must be 50MB or smaller." };
     }
 
     const folder = type === "VIDEO" ? "tourvibe/gallery/videos" : "tourvibe/gallery/images";

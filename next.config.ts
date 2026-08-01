@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    // Allow larger uploads through Server Actions (10MB video + gallery + form fields)
+    // Allow larger uploads through Server Actions (50MB video/photo + gallery + form fields)
     serverActions: {
-      bodySizeLimit: "12mb",
+      bodySizeLimit: "60mb",
     },
   },
   images: {

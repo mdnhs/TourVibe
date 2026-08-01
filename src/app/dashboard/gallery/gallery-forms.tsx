@@ -130,7 +130,7 @@ export function AddGalleryItemDialog({ categories = ["Destinations", "Tours", "V
           {uploadMode === "FILE" ? (
             <div className="space-y-2">
               <Label htmlFor="mediaFile" className="text-xs">
-                Upload {type === "VIDEO" ? "Video (MP4/MOV up to 50MB)" : "Photo (JPEG/PNG up to 10MB)"} <span className="text-destructive">*</span>
+                Upload {type === "VIDEO" ? "Video (MP4/MOV up to 50MB)" : "Photo (JPEG/PNG/WEBP up to 50MB)"} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="mediaFile"

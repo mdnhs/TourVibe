@@ -6,7 +6,7 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession, canPerform } from "@/lib/dashboard";
 import { generateOrderId, slugify } from "@/lib/utils";
 
-const MAX_IMAGE_BYTES = 1024 * 1024; // 1MB per gallery image
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB per gallery image
 const MAX_VIDEO_BYTES = 10 * 1024 * 1024; // 10MB per promo video
 
 export async function createTour(formData: FormData) {
@@ -77,7 +77,7 @@ export async function createTour(formData: FormData) {
     const thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/tours", "image");
 
     if (galleryFiles.some((f) => f.size > MAX_IMAGE_BYTES)) {
-      return { error: "Each gallery image must be 1MB or smaller." };
+      return { error: "Each gallery image must be 10MB or smaller." };
     }
     const galleryUrls: string[] = [];
     for (const file of galleryFiles) {
@@ -202,7 +202,7 @@ export async function updateTour(id: string, formData: FormData) {
     }
 
     if (galleryFiles.some((f) => f.size > MAX_IMAGE_BYTES)) {
-      return { error: "Each gallery image must be 1MB or smaller." };
+      return { error: "Each gallery image must be 10MB or smaller." };
     }
     const newGalleryUrls: string[] = [];
     for (const file of galleryFiles) {

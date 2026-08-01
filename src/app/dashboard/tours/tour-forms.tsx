@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 
 type Vehicle = { id: string; make: string; model: string; licensePlate: string };
 
-const MAX_IMAGE_BYTES = 1024 * 1024;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 10 * 1024 * 1024;
 
 function validateVideo(e: React.ChangeEvent<HTMLInputElement>): boolean {
@@ -56,7 +56,7 @@ function collectValidImages(list: FileList | null): File[] {
     else valid.push(f);
   }
   if (tooBig.length) {
-    toast.error(`Skipped (over 1MB): ${tooBig.join(", ")}`);
+    toast.error(`Skipped (over 10MB): ${tooBig.join(", ")}`);
   }
   return valid;
 }
@@ -598,7 +598,7 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.size > MAX_IMAGE_BYTES) {
-      toast.error(`"${file.name}" is over 1MB. Please choose a smaller image.`);
+      toast.error(`"${file.name}" is over 10MB. Please choose a smaller image.`);
       e.target.value = "";
       setThumbnailPreview(null);
       return;
@@ -737,7 +737,7 @@ export function CreateTourForm({ vehicles }: { vehicles: Vehicle[] }) {
                 onChange={handleGalleryChange}
               />
               <p className="text-xs text-muted-foreground">
-                Max 1MB per image. Selecting more photos adds to the list.
+                Max 10MB per image. Selecting more photos adds to the list.
               </p>
               {galleryPreviews.length > 0 && galleryPreviews.length < 8 && (
                 <p className="text-xs text-amber-600">
@@ -800,7 +800,7 @@ export function EditTourForm({
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.size > MAX_IMAGE_BYTES) {
-      toast.error(`"${file.name}" is over 1MB. Please choose a smaller image.`);
+      toast.error(`"${file.name}" is over 10MB. Please choose a smaller image.`);
       e.target.value = "";
       setThumbnailPreview(null);
       return;
@@ -1004,7 +1004,7 @@ export function EditTourForm({
                 onChange={handleGalleryChange}
               />
               <p className="text-xs text-muted-foreground">
-                Max 1MB per image. Selecting more photos adds to the list (existing photos are kept).
+                Max 10MB per image. Selecting more photos adds to the list (existing photos are kept).
               </p>
               {totalPhotos < 8 ? (
                 <p className="text-xs text-amber-600">
