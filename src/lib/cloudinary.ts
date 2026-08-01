@@ -28,7 +28,12 @@ export async function uploadToCloudinary(
       .upload_stream({ folder, resource_type: resourceType }, (err, result) => {
         if (err || !result) {
           console.error("Cloudinary upload error:", err);
-          return reject(err instanceof Error ? err : new Error(err?.message || "Upload failed"));
+          const rawMessage = err?.message || (typeof err === "string" ? err : "Upload failed");
+          let cleanMessage = rawMessage;
+          if (rawMessage.includes("File size too large") || (err && (err as { http_code?: number }).http_code === 400)) {
+            cleanMessage = `File size too large for upload. Cloudinary maximum is 10 MB for images. Please compress the file or choose a smaller image.`;
+          }
+          return reject(new Error(cleanMessage));
         }
         resolve(result.secure_url);
       })

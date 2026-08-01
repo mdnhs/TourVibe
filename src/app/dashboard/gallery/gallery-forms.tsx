@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { compressImageIfNeeded } from "@/lib/image-compression";
 import { createGalleryItem, updateGalleryItem, deleteGalleryItem, toggleFeaturedGalleryItem } from "./actions";
 
 interface AddGalleryItemDialogProps {
@@ -37,13 +38,27 @@ export function AddGalleryItemDialog({ categories = ["Destinations", "Tours", "V
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("type", type);
-    formData.set("featured", featured ? "true" : "false");
-    formData.set("category", customCategory.trim() || category);
+    const formEl = e.currentTarget;
+    const rawFormData = new FormData(formEl);
+    rawFormData.set("type", type);
+    rawFormData.set("featured", featured ? "true" : "false");
+    rawFormData.set("category", customCategory.trim() || category);
 
     startTransition(async () => {
-      const res = await createGalleryItem(formData);
+      // Compress image files if needed
+      const mediaFile = rawFormData.get("mediaFile") as File | null;
+      if (mediaFile && mediaFile.size > 0 && type === "IMAGE") {
+        const compressedMedia = await compressImageIfNeeded(mediaFile);
+        rawFormData.set("mediaFile", compressedMedia);
+      }
+
+      const thumbnailFile = rawFormData.get("thumbnailFile") as File | null;
+      if (thumbnailFile && thumbnailFile.size > 0) {
+        const compressedThumb = await compressImageIfNeeded(thumbnailFile);
+        rawFormData.set("thumbnailFile", compressedThumb);
+      }
+
+      const res = await createGalleryItem(rawFormData);
       if (res?.error) {
         toast.error(res.error);
       } else {
@@ -130,7 +145,7 @@ export function AddGalleryItemDialog({ categories = ["Destinations", "Tours", "V
           {uploadMode === "FILE" ? (
             <div className="space-y-2">
               <Label htmlFor="mediaFile" className="text-xs">
-                Upload {type === "VIDEO" ? "Video (MP4/MOV up to 50MB)" : "Photo (JPEG/PNG/WEBP up to 50MB)"} <span className="text-destructive">*</span>
+                Upload {type === "VIDEO" ? "Video (MP4/MOV up to 10MB)" : "Photo (JPEG/PNG/WEBP up to 10MB)"} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="mediaFile"

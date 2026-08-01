@@ -6,6 +6,7 @@ import { ImageIcon, Loader2, UploadCloudIcon, XCircleIcon, CheckCircle2Icon } fr
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { compressImageIfNeeded } from "@/lib/image-compression";
 
 interface ImageUploadFieldProps {
   name: string;
@@ -38,8 +39,9 @@ export function ImageUploadField({
     setUploading(true);
     setError(null);
     try {
+      const fileToUpload = await compressImageIfNeeded(file);
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", fileToUpload);
       fd.append("folder", folder);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();

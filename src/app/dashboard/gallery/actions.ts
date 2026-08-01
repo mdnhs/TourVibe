@@ -6,8 +6,8 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireDashboardSession, canPerform } from "@/lib/dashboard";
 import { generateOrderId } from "@/lib/utils";
 
-const MAX_IMAGE_BYTES = 50 * 1024 * 1024; // 50MB
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
+const MAX_VIDEO_BYTES = 10 * 1024 * 1024; // 10MB
 
 export async function createGalleryItem(formData: FormData) {
   const sess = await requireDashboardSession();
@@ -29,15 +29,19 @@ export async function createGalleryItem(formData: FormData) {
 
   if (mediaFile && mediaFile.size > 0) {
     if (type === "VIDEO" && mediaFile.size > MAX_VIDEO_BYTES) {
-      return { error: "Video file must be 50MB or smaller." };
+      return { error: "Video file must be 10MB or smaller." };
     }
     if (type === "IMAGE" && mediaFile.size > MAX_IMAGE_BYTES) {
-      return { error: "Image file must be 50MB or smaller." };
+      return { error: "Image file must be 10MB or smaller." };
     }
 
     const folder = type === "VIDEO" ? "tourvibe/gallery/videos" : "tourvibe/gallery/images";
     const mediaType = type === "VIDEO" ? "video" : "image";
-    url = await uploadToCloudinary(mediaFile, folder, mediaType);
+    try {
+      url = await uploadToCloudinary(mediaFile, folder, mediaType);
+    } catch (err: unknown) {
+      return { error: err instanceof Error ? err.message : "Failed to upload media file" };
+    }
   }
 
   if (!url) {
@@ -45,7 +49,14 @@ export async function createGalleryItem(formData: FormData) {
   }
 
   if (thumbnailFile && thumbnailFile.size > 0) {
-    thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/gallery/thumbnails", "image");
+    if (thumbnailFile.size > MAX_IMAGE_BYTES) {
+      return { error: "Thumbnail image file must be 10MB or smaller." };
+    }
+    try {
+      thumbnailUrl = await uploadToCloudinary(thumbnailFile, "tourvibe/gallery/thumbnails", "image");
+    } catch (err: unknown) {
+      return { error: err instanceof Error ? err.message : "Failed to upload thumbnail image" };
+    }
   }
 
   const id = generateOrderId();
