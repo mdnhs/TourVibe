@@ -15,6 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookingBar } from "./booking-bar";
 import { BookingButton } from "./booking-button";
+import { GalleryLightbox } from "./gallery-lightbox";
 import { db } from "@/lib/db";
 import { getSeoSettingsSync, buildMetadata, buildTourSchema } from "@/lib/seo";
 import { formatPrice } from "@/lib/currency";
@@ -204,6 +205,15 @@ export default async function TourDetailsPage({
   const currency = await getCurrencyCode();
   const jsonLdSchema = buildTourSchema(s, tour as any, currency);
 
+  const rawGallery = (tour.gallery || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const galleryImages = Array.from(
+    new Set([tour.thumbnail, ...rawGallery].filter(Boolean))
+  );
+
   return (
     <div className="relative pb-28 mx-auto max-w-6xl pt-2 sm:pt-4 px-4 sm:px-0">
       {jsonLdSchema && (
@@ -236,6 +246,12 @@ export default async function TourDetailsPage({
             >
               <ArrowLeft className="size-5 transition-transform group-hover:-translate-x-0.5" />
             </Link>
+            {galleryImages.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-950/60 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/20">
+                <Camera className="size-4 text-amber-400" />
+                {galleryImages.length} {galleryImages.length === 1 ? "Photo" : "Photos"}
+              </span>
+            )}
           </div>
 
           {/* Hero Bottom info */}
@@ -268,6 +284,34 @@ export default async function TourDetailsPage({
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Left Column — Details */}
         <div className="lg:col-span-2 space-y-8">
+          {/* Photo Gallery */}
+          {galleryImages.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-heading text-2xl font-bold text-slate-950">Photo Gallery</h2>
+                <span className="text-xs font-semibold text-slate-500">
+                  {galleryImages.length} {galleryImages.length === 1 ? "photo" : "photos"}
+                </span>
+              </div>
+              <GalleryLightbox images={galleryImages} tourName={tour.name} />
+            </div>
+          )}
+
+          {/* Promo Video */}
+          {tour.promoVideoUrl && (
+            <div className="space-y-4">
+              <h2 className="font-heading text-2xl font-bold text-slate-950">Tour Video Preview</h2>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 aspect-video shadow-md">
+                <video
+                  src={tour.promoVideoUrl}
+                  controls
+                  className="h-full w-full object-cover"
+                  poster={tour.thumbnail}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Highlights */}
           {tour.highlights && (
             <div className="rounded-[2rem] border border-slate-200/80 bg-linear-to-br from-amber-500/5 via-slate-50/50 to-white p-6 sm:p-8 space-y-4">

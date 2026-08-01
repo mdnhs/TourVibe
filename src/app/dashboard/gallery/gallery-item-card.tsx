@@ -17,6 +17,7 @@ interface GalleryItem {
   url: string;
   thumbnailUrl: string | null;
   category: string;
+  location?: string | null;
   featured: boolean;
   createdAt: Date;
 }

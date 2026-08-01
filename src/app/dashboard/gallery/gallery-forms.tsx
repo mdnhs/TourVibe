@@ -180,6 +180,11 @@ export function AddGalleryItemDialog({ categories = ["Destinations", "Tours", "V
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="location" className="text-xs">Location Name (Optional)</Label>
+            <Input id="location" name="location" placeholder="e.g. Ring of Kerry, Killarney, Dublin" disabled={isPending} />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="caption" className="text-xs">Description / Subtitle</Label>
             <Textarea id="caption" name="caption" rows={2} placeholder="Optional detailed caption..." disabled={isPending} />
           </div>
@@ -246,7 +251,7 @@ export function EditGalleryItemDialog({
   open,
   onOpenChange,
 }: {
-  item: { id: string; title?: string | null; caption?: string | null; category?: string; featured?: boolean };
+  item: { id: string; title?: string | null; caption?: string | null; category?: string; location?: string | null; featured?: boolean };
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -281,6 +286,11 @@ export function EditGalleryItemDialog({
           <div className="space-y-2">
             <Label htmlFor="title" className="text-xs">Title</Label>
             <Input id="title" name="title" defaultValue={item.title ?? ""} disabled={isPending} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="location" className="text-xs">Location Name</Label>
+            <Input id="location" name="location" defaultValue={item.location ?? ""} placeholder="e.g. Ring of Kerry" disabled={isPending} />
           </div>
 
           <div className="space-y-2">

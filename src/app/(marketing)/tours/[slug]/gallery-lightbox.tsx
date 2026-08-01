@@ -14,29 +14,57 @@ import {
 
 interface GalleryLightboxProps {
   images: string[];
-  tourName: string;
+  tourName?: string;
+  initialIndex?: number;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideCarousel?: boolean;
 }
 
 const NOISE_BG =
   "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
-export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
-  const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState(0);
+export function GalleryLightbox({
+  images,
+  tourName = "Gallery",
+  initialIndex = 0,
+  open: controlledOpen,
+  onOpenChange,
+  hideCarousel = false,
+}: GalleryLightboxProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+
+  const setOpen = useCallback(
+    (val: boolean) => {
+      if (!isControlled) setInternalOpen(val);
+      onOpenChange?.(val);
+    },
+    [isControlled, onOpenChange]
+  );
+
+  const [current, setCurrent] = useState(initialIndex);
   const [fading, setFading] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
   const autoplay = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
 
+  useEffect(() => {
+    if (isOpen && initialIndex !== undefined) {
+      setCurrent(initialIndex);
+    }
+  }, [isOpen, initialIndex]);
+
   const go = useCallback(
     (idx: number) => {
-      if (idx === current) return;
+      if (idx === current || idx < 0 || idx >= images.length) return;
       setFading(true);
       setTimeout(() => {
         setCurrent(idx);
         setFading(false);
       }, 180);
     },
-    [current]
+    [current, images.length]
   );
 
   const prev = useCallback(
@@ -47,10 +75,10 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
     () => go((current + 1) % images.length),
     [go, current, images.length]
   );
-  const close = useCallback(() => setOpen(false), []);
+  const close = useCallback(() => setOpen(false), [setOpen]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
       if (e.key === "ArrowLeft") prev();
@@ -62,21 +90,23 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [open, prev, next, close]);
+  }, [isOpen, prev, next, close]);
 
   useEffect(() => {
-    if (!open || !thumbsRef.current) return;
+    if (!isOpen || !thumbsRef.current) return;
     const active = thumbsRef.current.children[current] as HTMLElement;
     if (active) active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [current, open]);
+  }, [current, isOpen]);
 
   const padded = String(current + 1).padStart(2, "0");
   const total = String(images.length).padStart(2, "0");
 
+  if (images.length === 0) return null;
+
   return (
     <>
-      {/* Thumbnail strip with Shadcn Carousel */}
-      <div className="mt-5 mb-1">
+      {!hideCarousel && (
+        <div className="mt-5 mb-1">
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
             <Images className="size-4 text-slate-400" />
@@ -140,9 +170,10 @@ export function GalleryLightbox({ images, tourName }: GalleryLightboxProps) {
           </div>
         </Carousel>
       </div>
+      )}
 
       {/* Lightbox */}
-      {open && (
+      {isOpen && (
         <div
           className="fixed inset-0 z-50 flex flex-col"
           style={{ background: "rgba(4,4,12,0.97)" }}

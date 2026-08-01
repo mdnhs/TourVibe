@@ -16,6 +16,7 @@ export async function createGalleryItem(formData: FormData) {
   const title = (formData.get("title") as string) || "";
   const caption = (formData.get("caption") as string) || "";
   const category = (formData.get("category") as string) || "General";
+  const location = (formData.get("location") as string) || null;
   const featured = formData.get("featured") === "true" || formData.get("featured") === "on";
   const type = (formData.get("type") as string) || "IMAGE";
   const directUrl = (formData.get("url") as string) || "";
@@ -59,6 +60,7 @@ export async function createGalleryItem(formData: FormData) {
         url,
         thumbnailUrl,
         category,
+        location,
         featured,
       },
     });
@@ -78,6 +80,7 @@ export async function updateGalleryItem(id: string, formData: FormData) {
   const title = (formData.get("title") as string) || "";
   const caption = (formData.get("caption") as string) || "";
   const category = (formData.get("category") as string) || "General";
+  const location = (formData.get("location") as string) || null;
   const featured = formData.get("featured") === "true" || formData.get("featured") === "on";
 
   try {
@@ -87,6 +90,7 @@ export async function updateGalleryItem(id: string, formData: FormData) {
         title,
         caption,
         category,
+        location,
         featured,
       },
     });
