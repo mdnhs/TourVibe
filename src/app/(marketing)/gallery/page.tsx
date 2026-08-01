@@ -16,7 +16,7 @@ export default async function PublicGalleryPage() {
 
   return (
     <div className="relative overflow-hidden">
-      {/* ── Background glows (identical to /tours) ── */}
+      {/* ── Background glows ── */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-32 left-1/4 size-96 rounded-full bg-amber-300/10 blur-3xl" />
         <div className="absolute top-0 right-1/4 size-80 rounded-full bg-cyan-300/8 blur-3xl" />
@@ -49,7 +49,7 @@ export default async function PublicGalleryPage() {
             </h1>
 
             <div
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 shadow-sm animate-in fade-in slide-in-from-right-4 duration-500"
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 sm:px-4 sm:py-2 shadow-xs animate-in fade-in slide-in-from-right-4 duration-500"
               style={{ animationDelay: "120ms" }}
             >
               <span className="font-heading text-base font-extrabold text-slate-950 sm:text-lg">{items.length}</span>

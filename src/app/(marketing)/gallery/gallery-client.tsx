@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { Sparkles, Video, Image as PhotoIcon, Play, X, Star, Maximize2, Layers, MapPin } from "lucide-react";
+import { Sparkles, Video, Image as PhotoIcon, Play, X, Star, Maximize2, Layers, MapPin, Search, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GalleryLightbox } from "../tours/[slug]/gallery-lightbox";
 
@@ -23,6 +23,7 @@ export function GalleryClient({ items }: { items: GalleryItem[] }) {
   const [filterType, setFilterType] = useState<"ALL" | "IMAGE" | "VIDEO">("ALL");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedLocation, setSelectedLocation] = useState<string>("ALL");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -52,9 +53,19 @@ export function GalleryClient({ items }: { items: GalleryItem[] }) {
       if (filterType !== "ALL" && item.type !== filterType) return false;
       if (selectedCategory !== "ALL" && item.category !== selectedCategory) return false;
       if (selectedLocation !== "ALL" && item.location !== selectedLocation) return false;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const titleMatch = item.title?.toLowerCase().includes(q);
+        const captionMatch = item.caption?.toLowerCase().includes(q);
+        const categoryMatch = item.category?.toLowerCase().includes(q);
+        const locationMatch = item.location?.toLowerCase().includes(q);
+        if (!titleMatch && !captionMatch && !categoryMatch && !locationMatch) return false;
+      }
+
       return true;
     });
-  }, [items, filterType, selectedCategory, selectedLocation]);
+  }, [items, filterType, selectedCategory, selectedLocation, searchQuery]);
 
   const photoItems = useMemo(() => {
     return filteredItems.filter((i) => i.type === "IMAGE");
@@ -74,114 +85,171 @@ export function GalleryClient({ items }: { items: GalleryItem[] }) {
     }
   };
 
+  const hasActiveFilters =
+    filterType !== "ALL" || selectedCategory !== "ALL" || selectedLocation !== "ALL" || searchQuery.trim().length > 0;
+
+  const resetFilters = () => {
+    setFilterType("ALL");
+    setSelectedCategory("ALL");
+    setSelectedLocation("ALL");
+    setSearchQuery("");
+  };
+
   return (
     <div className="space-y-8">
-      {/* Category, Location & Type Filter Controls */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Type Tabs */}
-          <div className="inline-flex rounded-xl bg-white p-1.5 border border-slate-200 shadow-xs">
-            <button
-              type="button"
-              onClick={() => setFilterType("ALL")}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer",
-                filterType === "ALL"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <Layers className="size-3.5" />
-              All ({items.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterType("IMAGE")}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer",
-                filterType === "IMAGE"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <PhotoIcon className="size-3.5" />
-              Photos ({items.filter((i) => i.type === "IMAGE").length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterType("VIDEO")}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer",
-                filterType === "VIDEO"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <Video className="size-3.5" />
-              Videos ({items.filter((i) => i.type === "VIDEO").length})
-            </button>
+      {/* ── Search & Filter Control Panel ── */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-5 space-y-4 shadow-xs">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Search Box */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by title, location, or tag..."
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-xs font-medium text-slate-900 placeholder-slate-400 transition-all focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
 
-          {/* Location Selector Pill Dropdown / Filter */}
-          {locations.length > 0 && (
-            <div className="flex items-center gap-2">
-              <MapPin className="size-4 text-amber-500 shrink-0" />
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 cursor-pointer"
+          {/* Type Tabs */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-2xl bg-slate-100 p-1 border border-slate-200/80">
+              <button
+                type="button"
+                onClick={() => setFilterType("ALL")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                  filterType === "ALL"
+                    ? "bg-slate-950 text-white shadow-xs font-extrabold"
+                    : "text-slate-600 hover:text-slate-950"
+                )}
               >
-                <option value="ALL">All Locations ({items.filter(i => i.location).length})</option>
-                {locations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
+                <Layers className="size-3.5" />
+                All ({items.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType("IMAGE")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                  filterType === "IMAGE"
+                    ? "bg-slate-950 text-white shadow-xs font-extrabold"
+                    : "text-slate-600 hover:text-slate-950"
+                )}
+              >
+                <PhotoIcon className="size-3.5" />
+                Photos ({items.filter((i) => i.type === "IMAGE").length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType("VIDEO")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                  filterType === "VIDEO"
+                    ? "bg-slate-950 text-white shadow-xs font-extrabold"
+                    : "text-slate-600 hover:text-slate-950"
+                )}
+              >
+                <Video className="size-3.5" />
+                Videos ({items.filter((i) => i.type === "VIDEO").length})
+              </button>
             </div>
-          )}
+
+            {/* Location Selector */}
+            {locations.length > 0 && (
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:border-amber-500 cursor-pointer"
+                >
+                  <option value="ALL">📍 All Locations ({items.filter((i) => i.location).length})</option>
+                  {locations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      📍 {loc}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="flex items-center gap-1 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-500/20 transition-all cursor-pointer"
+              >
+                <RotateCcw className="size-3.5" />
+                Reset Filters
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Category Pills */}
+        {/* Category Pills Bar */}
         {categories.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Topics:</span>
             <button
               type="button"
               onClick={() => setSelectedCategory("ALL")}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all border cursor-pointer",
+                "rounded-full px-3.5 py-1 text-xs font-semibold transition-all border cursor-pointer",
                 selectedCategory === "ALL"
-                  ? "border-amber-500/50 bg-amber-500/10 text-amber-800 font-bold"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900 shadow-2xs"
+                  ? "border-amber-500/50 bg-amber-500/10 text-amber-900 font-bold shadow-2xs"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
               )}
             >
               All Topics
             </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all border cursor-pointer",
-                  selectedCategory === cat
-                    ? "border-amber-500/50 bg-amber-500/10 text-amber-800 font-bold"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900 shadow-2xs"
-                )}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const count = items.filter((i) => i.category === cat).length;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={cn(
+                    "rounded-full px-3.5 py-1 text-xs font-semibold transition-all border cursor-pointer",
+                    selectedCategory === cat
+                      ? "border-amber-500/50 bg-amber-500/10 text-amber-900 font-bold shadow-2xs"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                  )}
+                >
+                  {cat} <span className="opacity-60 text-[10px]">({count})</span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Gallery Masonry Grid */}
+      {/* ── Gallery Masonry Grid ── */}
       {filteredItems.length === 0 ? (
         <div className="rounded-3xl border border-slate-200/80 bg-white p-12 text-center text-slate-600 shadow-xs">
-          <Sparkles className="mx-auto size-8 text-amber-500 mb-2" />
-          <p className="font-semibold text-slate-900">No gallery items found</p>
-          <p className="text-xs text-slate-500 mt-1">Try selecting a different filter, location, or topic.</p>
+          <Sparkles className="mx-auto size-10 text-amber-500 mb-3" />
+          <p className="font-heading text-lg font-bold text-slate-900">No media match your search or filters</p>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            Try adjusting your search query, selecting a different topic, or resetting location filters.
+          </p>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-800 hover:bg-amber-500/20 transition-all cursor-pointer"
+          >
+            <RotateCcw className="size-3.5" />
+            Clear All Filters
+          </button>
         </div>
       ) : (
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
@@ -191,10 +259,10 @@ export function GalleryClient({ items }: { items: GalleryItem[] }) {
               <div
                 key={item.id}
                 onClick={() => handleItemClick(item)}
-                className="break-inside-avoid mb-6 inline-block w-full group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/50 hover:shadow-2xl cursor-pointer"
+                className="break-inside-avoid mb-6 inline-block w-full group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/40 hover:shadow-2xl cursor-pointer"
               >
-                {/* Image / Video Poster Container */}
-                <div className="relative w-full overflow-hidden bg-slate-900/5">
+                {/* Media Container */}
+                <div className="relative w-full overflow-hidden bg-slate-100">
                   {isVideo ? (
                     item.thumbnailUrl ? (
                       <img
@@ -221,37 +289,49 @@ export function GalleryClient({ items }: { items: GalleryItem[] }) {
                     />
                   )}
 
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-30 transition-opacity duration-300 group-hover:opacity-75" />
+                  {/* Gradient Overlay on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-20 transition-opacity duration-300 group-hover:opacity-60" />
 
-                  {/* Category & Type Badge */}
-                  <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-slate-950/80 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md shadow-xs border border-white/10">
-                      {isVideo ? <Video className="size-3 text-amber-400" /> : <PhotoIcon className="size-3 text-emerald-400" />}
-                      {isVideo ? "Video" : "Photo"}
-                    </span>
-                    <span className="rounded-xl bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-950 backdrop-blur-md border border-slate-200 shadow-xs">
-                      {item.category}
-                    </span>
+                  {/* Top Floating Badges (Revealed on Hover or Video indicator) */}
+                  <div className="absolute top-3.5 left-3.5 flex flex-wrap items-center gap-1.5 z-10">
+                    {isVideo && (
+                      <span className="inline-flex items-center gap-1 rounded-xl bg-amber-500 px-2.5 py-1 text-[11px] font-extrabold text-slate-950 shadow-md backdrop-blur-md">
+                        <Video className="size-3 text-slate-950" />
+                        Video
+                      </span>
+                    )}
+                    {item.category && item.category !== "General" && (
+                      <span className="rounded-xl bg-slate-950/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md border border-white/10 shadow-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {item.category}
+                      </span>
+                    )}
                   </div>
 
                   {item.featured && (
-                    <div className="absolute top-3 right-3 flex size-7 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-md border border-amber-300">
+                    <div className="absolute top-3.5 right-3.5 flex size-7 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-md border border-amber-300 z-10">
                       <Star className="size-3.5 fill-slate-950" />
                     </div>
                   )}
 
-                  {/* Hover Overlay Icon Button */}
+                  {/* Hover Overlay Button */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="flex size-12 items-center justify-center rounded-full bg-amber-500 text-slate-950 shadow-2xl transition-transform duration-300 group-hover:scale-110">
                       {isVideo ? <Play className="size-5 fill-slate-950 ml-0.5" /> : <Maximize2 className="size-5" />}
                     </div>
                   </div>
+
+                  {/* Location badge on bottom left of image (Revealed on Hover) */}
+                  {item.location && (
+                    <div className="absolute bottom-3 left-3.5 z-10 flex items-center gap-1 rounded-xl bg-slate-950/80 px-2.5 py-1 text-[11px] font-bold text-amber-300 backdrop-blur-md border border-white/10 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <MapPin className="size-3 text-amber-400" />
+                      <span>{item.location}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Footer Info */}
-                {(item.title || item.caption || item.location) && (
-                  <div className="p-4 space-y-1.5">
+                {/* Footer Info (Only shown if title, location, or detailed caption exist) */}
+                {(item.title || item.caption || (item.location && item.location.length > 0)) && (
+                  <div className="p-3.5 space-y-1 bg-white">
                     {item.location && (
                       <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 uppercase tracking-wider">
                         <MapPin className="size-3 text-amber-500" />
