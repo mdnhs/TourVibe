@@ -283,7 +283,7 @@ export default async function RolesPage() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {customRoles.map((role) => {
+              {customRoles.map((role: typeof customRoles[number]) => {
                 const perms = parseRolePermissions(role.permissions);
                 const count = userCounts[role.name] ?? 0;
 

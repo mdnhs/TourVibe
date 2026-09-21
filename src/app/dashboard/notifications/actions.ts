@@ -78,7 +78,7 @@ export async function markAllAsRead() {
   });
 
   await prisma.notificationRead.createMany({
-    data: unread.map((n) => ({ notificationId: n.id, userId })),
+    data: unread.map((n: typeof unread[number]) => ({ notificationId: n.id, userId })),
     skipDuplicates: true,
   });
 

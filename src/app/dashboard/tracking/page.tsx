@@ -39,7 +39,7 @@ export default async function TrackingPage() {
     orderBy: { locationUpdatedAt: "desc" },
   });
 
-  const initialDrivers: DriverLocation[] = users.map((u) => ({
+  const initialDrivers: DriverLocation[] = users.map((u: typeof users[number]) => ({
     id: u.id,
     name: u.name,
     image: u.image,

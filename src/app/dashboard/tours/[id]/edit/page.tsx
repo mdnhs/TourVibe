@@ -35,7 +35,7 @@ export default async function EditTourPage({ params }: { params: Promise<{ id: s
 
   const tour = {
     ...tourData,
-    assignedVehicles: tourData.vehicles.map((v) => v.vehicleId).join(","),
+    assignedVehicles: tourData.vehicles.map((v: typeof tourData.vehicles[number]) => v.vehicleId).join(","),
   } as TourPackage;
 
   // Fetch all vehicles for the assignment form

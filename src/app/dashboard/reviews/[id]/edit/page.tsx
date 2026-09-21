@@ -76,7 +76,7 @@ export default async function EditReviewPage({ params }: { params: Promise<{ id:
               )}
             </div>
             {(() => {
-              const photos = (review.photos ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+              const photos = (review.photos ?? "").split(",").map((s: string) => s.trim()).filter(Boolean);
               if (photos.length === 0) return null;
               return (
                 <div className="space-y-2">
@@ -84,7 +84,7 @@ export default async function EditReviewPage({ params }: { params: Promise<{ id:
                     Photos ({photos.length})
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {photos.map((url) => (
+                    {photos.map((url: string) => (
                       <a
                         key={url}
                         href={url}

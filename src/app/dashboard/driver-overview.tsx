@@ -121,7 +121,7 @@ export async function DriverOverview({
   const greeting = getGreeting();
   const firstName = session.user.name?.split(" ")[0] ?? session.user.name;
 
-  const recentAssigned = recentAssignedRaw.map((b) => ({
+  const recentAssigned = recentAssignedRaw.map((b: typeof recentAssignedRaw[number]) => ({
     id: b.id,
     tourName: b.tourPackage.name,
     duration: b.tourPackage.duration,
@@ -412,7 +412,7 @@ export async function DriverOverview({
                   </p>
                 </div>
               ) : (
-                recentAssigned.map((b) => (
+                recentAssigned.map((b: typeof recentAssigned[number]) => (
                   <Link
                     key={b.id}
                     href={`/dashboard/bookings`}
@@ -463,7 +463,7 @@ export async function DriverOverview({
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {myVehicles.map((v) => (
+                {myVehicles.map((v: typeof myVehicles[number]) => (
                   <div
                     key={v.id}
                     className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/10 p-3"

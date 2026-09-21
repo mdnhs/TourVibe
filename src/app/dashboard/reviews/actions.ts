@@ -141,7 +141,7 @@ export async function deleteReviews(ids: string[]) {
         where: { id: { in: ids } },
         select: { userId: true },
       });
-      if (reviews.some((r) => r.userId !== userId)) {
+      if (reviews.some((r: typeof reviews[number]) => r.userId !== userId)) {
         throw new Error("Unauthorized: You can only delete your own reviews");
       }
     }

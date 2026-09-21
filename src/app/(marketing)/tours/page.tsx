@@ -89,11 +89,11 @@ export default async function ToursPage({ searchParams }: ToursPageProps) {
     },
   });
 
-  const tours = toursRaw.map((t) => {
+  const tours = toursRaw.map((t: typeof toursRaw[number]) => {
     const reviewCount = t.reviews.length;
     const avgRating =
       reviewCount > 0
-        ? t.reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+        ? t.reviews.reduce((acc: number, r: typeof t.reviews[number]) => acc + r.rating, 0) / reviewCount
         : null;
     return {
       ...t,

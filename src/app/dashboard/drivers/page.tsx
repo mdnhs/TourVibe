@@ -39,7 +39,7 @@ export default async function DriversPage() {
     },
   });
 
-  const drivers: Driver[] = rawDrivers.map((u) => ({
+  const drivers: Driver[] = rawDrivers.map((u: typeof rawDrivers[number]) => ({
     id: u.id,
     name: u.name,
     email: u.email,

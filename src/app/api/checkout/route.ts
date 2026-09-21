@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     }
 
-    const vehicleAssigned = tour.vehicles.some((v) => v.vehicleId === vehicleId);
+    const vehicleAssigned = tour.vehicles.some((v: typeof tour.vehicles[number]) => v.vehicleId === vehicleId);
     if (!vehicleAssigned) {
       return NextResponse.json(
         { error: "Selected vehicle is not assigned to this tour" },
@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
     });
 
     try {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: any) => {
         const conflict = await findVehicleConflict(tx, {
           vehicleId,
           start: startTime,

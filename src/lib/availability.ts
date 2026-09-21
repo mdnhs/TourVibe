@@ -1,9 +1,7 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
-
 export const VEHICLE_UNAVAILABLE_MESSAGE =
   "This vehicle is already booked for the selected date. Please choose another vehicle or contact support.";
 
-type PrismaLike = PrismaClient | Prisma.TransactionClient;
+type PrismaLike = any;
 
 export interface AvailabilityConflict {
   bookingId: string;

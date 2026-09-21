@@ -16,7 +16,7 @@ export default async function MessagesPage() {
     <div className="flex flex-1 flex-col overflow-hidden">
       <SiteHeader title="Contact Messages" subtitle="Inbox from landing page contact form" />
       <div className="flex-1 overflow-hidden">
-        <MessagesTable messages={messages.map((m) => ({ ...m, createdAt: m.createdAt.toISOString() }))} />
+        <MessagesTable messages={messages.map((m: typeof messages[number]) => ({ ...m, createdAt: m.createdAt.toISOString() }))} />
       </div>
     </div>
   );

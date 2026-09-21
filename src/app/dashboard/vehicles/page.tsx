@@ -30,7 +30,7 @@ export default async function VehiclesPage() {
     }),
   ]);
 
-  const vehicles: Vehicle[] = rawVehicles.map((v) => ({
+  const vehicles: Vehicle[] = rawVehicles.map((v: typeof rawVehicles[number]) => ({
     ...v,
     createdAt: v.createdAt.toISOString(),
     updatedAt: v.updatedAt.toISOString(),

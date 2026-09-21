@@ -26,7 +26,7 @@ export default async function AboutPage() {
     },
   });
 
-  const reviews = dynamicReviewsRaw.map((r) => {
+  const reviews = dynamicReviewsRaw.map((r: typeof dynamicReviewsRaw[number]) => {
     const isAdmin = r.user.role === "super_admin" || r.user.role === "admin";
     return {
       quote: r.comment || "",
@@ -34,7 +34,7 @@ export default async function AboutPage() {
       image: isAdmin ? r.reviewerImage : (r.reviewerImage || r.user.image),
       role: isAdmin ? "Tourist" : (r.user.role === "tourist" ? "Tourist" : (r.user.role?.replace("_", " ") ?? "Tourist")),
       rating: r.rating,
-      photos: (r.photos ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+      photos: (r.photos ?? "").split(",").map((s: string) => s.trim()).filter(Boolean),
     };
   });
 

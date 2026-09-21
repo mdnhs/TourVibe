@@ -213,15 +213,15 @@ export async function AdminOverview({
   const trendBookingsTotal = trendData.reduce((s, p) => s + p.bookings, 0);
   const trendRevenueTotal = trendData.reduce((s, p) => s + p.revenue, 0);
 
-  const topTourIds = topToursRaw.map((t) => t.tourPackageId);
+  const topTourIds = topToursRaw.map((t: typeof topToursRaw[number]) => t.tourPackageId);
   const topTourPackages = topTourIds.length
     ? await prisma.tourPackage.findMany({
         where: { id: { in: topTourIds } },
         select: { id: true, name: true, slug: true, thumbnail: true, price: true },
       })
     : [];
-  const topTours = topToursRaw.map((t) => {
-    const tp = topTourPackages.find((p) => p.id === t.tourPackageId);
+  const topTours = topToursRaw.map((t: typeof topToursRaw[number]) => {
+    const tp = topTourPackages.find((p: typeof topTourPackages[number]) => p.id === t.tourPackageId);
     return {
       id: t.tourPackageId,
       name: tp?.name ?? "Unknown tour",
@@ -231,7 +231,7 @@ export async function AdminOverview({
     };
   });
 
-  const recentBookings = recentBookingsRaw.map((b) => ({
+  const recentBookings = recentBookingsRaw.map((b: typeof recentBookingsRaw[number]) => ({
     id: b.id,
     customer: b.user?.name ?? b.guestName ?? "Guest",
     email: b.user?.email ?? b.guestEmail ?? "",
@@ -490,7 +490,7 @@ export async function AdminOverview({
                   No bookings yet
                 </p>
               ) : (
-                topTours.map((t, i) => {
+                topTours.map((t: typeof topTours[number], i: number) => {
                   const max = topTours[0]?.bookings || 1;
                   const pct = (t.bookings / max) * 100;
                   return (
@@ -629,7 +629,7 @@ export async function AdminOverview({
                   No bookings yet
                 </p>
               ) : (
-                recentBookings.map((b) => (
+                recentBookings.map((b: typeof recentBookings[number]) => (
                   <div
                     key={b.id}
                     className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/10 px-3.5 py-2.5"

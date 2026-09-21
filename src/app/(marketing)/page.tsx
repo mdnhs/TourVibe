@@ -64,7 +64,7 @@ export default async function Home() {
     },
   });
 
-  const dynamicReviews = dynamicReviewsRaw.map((r) => {
+  const dynamicReviews = dynamicReviewsRaw.map((r: typeof dynamicReviewsRaw[number]) => {
     const isAdmin = r.user.role === "super_admin" || r.user.role === "admin";
     
     return {
@@ -79,14 +79,14 @@ export default async function Home() {
         : (r.reviewerImage || r.user.image),
       role: isAdmin ? "Tourist" : (r.user.role === "tourist" ? "Tourist" : (r.user.role?.replace("_", " ") ?? "Tourist")),
       rating: r.rating,
-      photos: (r.photos ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+      photos: (r.photos ?? "").split(",").map((s: string) => s.trim()).filter(Boolean),
     };
   });
 
   // Fallback if no reviews exist
   const displayReviews =
     dynamicReviews.length > 0
-      ? dynamicReviews.map((r) => ({
+      ? dynamicReviews.map((r: typeof dynamicReviews[number]) => ({
           quote: r.quote,
           name: r.name,
           image: r.image,
@@ -197,7 +197,7 @@ export default async function Home() {
     },
   });
 
-  const liveDrivers: DriverLocation[] = liveDriversRaw.map((u) => ({
+  const liveDrivers: DriverLocation[] = liveDriversRaw.map((u: typeof liveDriversRaw[number]) => ({
     id: u.id,
     name: u.name,
     image: u.image,
@@ -251,7 +251,7 @@ export default async function Home() {
       { createdAt: "desc" },
     ],
     take: 3,
-  }).then((rows) => rows.map((post) => ({
+  }).then((rows: any) => rows.map((post: typeof rows[number]) => ({
     ...post,
     publishedAt: post.publishedAt?.toISOString() ?? null,
     createdAt: post.createdAt.toISOString(),

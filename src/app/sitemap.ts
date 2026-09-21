@@ -38,14 +38,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/blog`,   lastModified: new Date(), changeFrequency: "daily",   priority: 0.85 },
   ];
 
-  const tourRoutes: MetadataRoute.Sitemap = tours.map((t) => ({
+  const tourRoutes: MetadataRoute.Sitemap = tours.map((t: typeof tours[number]) => ({
     url: `${base}/tours/${t.slug}`,
     lastModified: new Date(t.updatedAt),
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((p) => ({
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((p: typeof blogPosts[number]) => ({
     url: `${base}/blog/${p.slug}`,
     lastModified: new Date(p.updatedAt),
     changeFrequency: "monthly" as const,

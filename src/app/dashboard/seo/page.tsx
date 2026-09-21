@@ -222,13 +222,13 @@ export default async function SeoPage() {
       priority: 0.85,
       source: "blog index",
     },
-    ...tourIds.map((t) => ({
+    ...tourIds.map((t: typeof tourIds[number]) => ({
       url: `${base}/tours/${t.id}`,
       changeFrequency: "weekly" as const,
       priority: 0.8,
       source: "tour",
     })),
-    ...blogSlugs.map((p) => ({
+    ...blogSlugs.map((p: typeof blogSlugs[number]) => ({
       url: `${base}/blog/${p.slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.7,

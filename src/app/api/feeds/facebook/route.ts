@@ -32,7 +32,7 @@ export async function GET() {
     },
   });
 
-  const items = tours.map((tour) => {
+  const items = tours.map((tour: typeof tours[number]) => {
     const tourUrl = `${siteUrl}/tours/${tour.slug}`;
     const imageUrl = tour.thumbnail.startsWith("http") 
       ? tour.thumbnail 

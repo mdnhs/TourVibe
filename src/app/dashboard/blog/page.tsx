@@ -34,15 +34,15 @@ export default async function BlogPage() {
     },
   });
 
-  const posts = postsRaw.map((p) => ({
+  const posts = postsRaw.map((p: typeof postsRaw[number]) => ({
     ...p,
     publishedAt: p.publishedAt?.toISOString() ?? null,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   }));
 
-  const draftCount = posts.filter((p) => p.status === "draft").length;
-  const publishedCount = posts.filter((p) => p.status === "published").length;
+  const draftCount = posts.filter((p: typeof posts[number]) => p.status === "draft").length;
+  const publishedCount = posts.filter((p: typeof posts[number]) => p.status === "published").length;
 
   return (
     <>

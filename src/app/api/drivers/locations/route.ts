@@ -37,7 +37,7 @@ export async function GET() {
     orderBy: { locationUpdatedAt: "desc" },
   });
 
-  const drivers: DriverLocation[] = users.map((u) => ({
+  const drivers: DriverLocation[] = users.map((u: typeof users[number]) => ({
     id: u.id,
     name: u.name,
     image: u.image,

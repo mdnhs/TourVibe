@@ -151,7 +151,7 @@ export default async function TourDetailsPage({
   const reviewCount = tourRaw.reviews.length;
   const avgRating =
     reviewCount > 0
-      ? tourRaw.reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+      ? tourRaw.reviews.reduce((acc: number, r: typeof tourRaw.reviews[number]) => acc + r.rating, 0) / reviewCount
       : null;
 
   const tour: Tour = {
@@ -174,7 +174,7 @@ export default async function TourDetailsPage({
     maxPersons2: tourRaw.maxPersons2 ?? null,
     reviewCount,
     avgRating,
-    vehicles: tourRaw.vehicles.map((tv) => ({
+    vehicles: tourRaw.vehicles.map((tv: typeof tourRaw.vehicles[number]) => ({
       id: tv.vehicle.id,
       make: tv.vehicle.make,
       model: tv.vehicle.model,
@@ -183,7 +183,7 @@ export default async function TourDetailsPage({
       thumbnail: tv.vehicle.thumbnail,
       gallery: tv.vehicle.gallery,
     })),
-    reviews: tourRaw.reviews.map((r) => {
+    reviews: tourRaw.reviews.map((r: typeof tourRaw.reviews[number]) => {
       const isAdmin = r.user.role === "super_admin" || r.user.role === "admin";
       return {
         id: r.id,
@@ -194,7 +194,7 @@ export default async function TourDetailsPage({
         comment: r.comment,
         photos: (r.photos ?? "")
           .split(",")
-          .map((s) => s.trim())
+          .map((s: string) => s.trim())
           .filter(Boolean),
         createdAt: r.createdAt,
       };

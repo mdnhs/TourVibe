@@ -44,7 +44,7 @@ export default async function BookingsPage({
     redirect(`/dashboard/bookings/${rawBookings[0].id}/invoice?success=true`);
   }
 
-  const bookings: Booking[] = rawBookings.map((b) => {
+  const bookings: Booking[] = rawBookings.map((b: typeof rawBookings[number]) => {
     const hours =
       b.startTime && b.endTime
         ? Math.round((b.endTime.getTime() - b.startTime.getTime()) / 3_600_000)

@@ -47,7 +47,7 @@ export default async function BlogListPage() {
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
   });
 
-  const posts: BlogPost[] = postsRaw.map((post) => ({
+  const posts: BlogPost[] = postsRaw.map((post: typeof postsRaw[number]) => ({
     ...post,
     publishedAt: post.publishedAt?.toISOString() ?? null,
     createdAt: post.createdAt.toISOString(),

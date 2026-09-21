@@ -28,13 +28,13 @@ export default async function ToursPage() {
     prisma.vehicle.findMany({ select: { id: true, make: true, model: true, licensePlate: true } }),
   ]);
 
-  const tours: TourPackage[] = rawTours.map((t) => ({
+  const tours: TourPackage[] = rawTours.map((t: typeof rawTours[number]) => ({
     ...t,
     price: Number(t.price),
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),
     vehicleCount: t.vehicles.length,
-    assignedVehicles: t.vehicles.map((v) => v.vehicleId).join(","),
+    assignedVehicles: t.vehicles.map((v: typeof t.vehicles[number]) => v.vehicleId).join(","),
   }));
 
   const currency = await getCurrencyCode();

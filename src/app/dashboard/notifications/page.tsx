@@ -29,7 +29,7 @@ export default async function NotificationsPage() {
       orderBy: { createdAt: "desc" },
     });
 
-    const notifications: AdminNotification[] = notificationsRaw.map((n) => ({
+    const notifications: AdminNotification[] = notificationsRaw.map((n: typeof notificationsRaw[number]) => ({
       id: n.id,
       title: n.title,
       body: n.body,
@@ -109,7 +109,7 @@ export default async function NotificationsPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const inbox: NotificationItem[] = notificationsRaw.map((n) => ({
+  const inbox: NotificationItem[] = notificationsRaw.map((n: typeof notificationsRaw[number]) => ({
     id: n.id,
     title: n.title,
     body: n.body,

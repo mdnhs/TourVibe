@@ -80,7 +80,7 @@ export async function deleteCustomRole(id: string) {
 
 export async function getRoleUserCounts(): Promise<Record<string, number>> {
   const rows = await prisma.user.groupBy({ by: ["role"], _count: { _all: true } });
-  return Object.fromEntries(rows.map((r) => [r.role ?? "unknown", r._count._all]));
+  return Object.fromEntries(rows.map((r: typeof rows[number]) => [r.role ?? "unknown", r._count._all]));
 }
 
 const EDITABLE_BUILTIN_ROLES = ["driver", "tourist"] as const;

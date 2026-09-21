@@ -38,7 +38,7 @@ export async function getRecentNotifications() {
         orderBy: { createdAt: "desc" },
         take: 5,
       });
-      messages = rawMessages.map(m => ({
+      messages = rawMessages.map((m: typeof rawMessages[number]) => ({
         id: m.id,
         title: "New Contact Message",
         body: `From: ${m.name} - ${m.subject}`,
@@ -57,7 +57,7 @@ export async function getRecentNotifications() {
       take: 5,
     });
     
-    const notifications = rawNotifications.map(n => ({
+    const notifications = rawNotifications.map((n: typeof rawNotifications[number]) => ({
       id: n.id,
       title: n.title,
       body: n.body,

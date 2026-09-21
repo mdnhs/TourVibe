@@ -27,11 +27,11 @@ export default async function AdminGalleryPage() {
       })
     : [];
 
-  const photoCount = items.filter((i) => i.type === "IMAGE").length;
-  const videoCount = items.filter((i) => i.type === "VIDEO").length;
-  const featuredCount = items.filter((i) => i.featured).length;
+  const photoCount = items.filter((i: typeof items[number]) => i.type === "IMAGE").length;
+  const videoCount = items.filter((i: typeof items[number]) => i.type === "VIDEO").length;
+  const featuredCount = items.filter((i: typeof items[number]) => i.featured).length;
 
-  const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean)));
+  const categories = Array.from(new Set(items.map((i: typeof items[number]) => i.category).filter(Boolean))) as string[];
   if (!categories.includes("Destinations")) categories.push("Destinations");
   if (!categories.includes("Tours")) categories.push("Tours");
   if (!categories.includes("Vehicles")) categories.push("Vehicles");
@@ -117,7 +117,7 @@ export default async function AdminGalleryPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map((item) => (
+          {items.map((item: typeof items[number]) => (
             <GalleryItemCard key={item.id} item={item} />
           ))}
         </div>

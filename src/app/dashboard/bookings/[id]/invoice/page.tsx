@@ -45,7 +45,7 @@ export default async function InvoicePage({
   const isAssignedDriver =
     isDriver &&
     booking.tourPackage.vehicles.some(
-      (tv) => tv.vehicle.driverId === session.user.id,
+      (tv: typeof booking.tourPackage.vehicles[number]) => tv.vehicle.driverId === session.user.id,
     );
 
   // Security check: admin, owning user, or driver assigned to the tour's fleet

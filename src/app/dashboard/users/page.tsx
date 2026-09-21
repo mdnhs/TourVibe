@@ -40,7 +40,7 @@ export default async function UsersPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const allUsers: User[] = allUsersRaw.map((user) => ({
+  const allUsers: User[] = allUsersRaw.map((user: typeof allUsersRaw[number]) => ({
     id: user.id,
     name: user.name,
     email: user.email,
@@ -54,7 +54,7 @@ export default async function UsersPage() {
     select: { name: true },
   });
   const customRoleLabels = Object.fromEntries(
-    customRoles.map((r) => [r.name, r.name]),
+    customRoles.map((r: typeof customRoles[number]) => [r.name, r.name]),
   );
 
   return (

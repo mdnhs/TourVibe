@@ -92,7 +92,7 @@ export async function TouristOverview({
   const greeting = getGreeting();
   const firstName = session.user.name?.split(" ")[0] ?? session.user.name;
 
-  const recentBookings = recentBookingsRaw.map((b) => ({
+  const recentBookings = recentBookingsRaw.map((b: typeof recentBookingsRaw[number]) => ({
     id: b.id,
     name: b.tourPackage.name,
     slug: b.tourPackage.slug,
@@ -401,7 +401,7 @@ export async function TouristOverview({
                   </Link>
                 </div>
               ) : (
-                recentBookings.map((b) => (
+                recentBookings.map((b: typeof recentBookings[number]) => (
                   <Link
                     key={b.id}
                     href={`/dashboard/bookings`}
