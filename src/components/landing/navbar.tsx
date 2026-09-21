@@ -110,7 +110,7 @@ export function Navbar({
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="relative flex size-9 items-center justify-center transition-transform duration-300 group-hover:scale-105">
+            <div className="relative flex size-12 items-center justify-center transition-transform duration-300 group-hover:scale-105">
               {!logoUrl && (
                 <div className="absolute inset-0 bg-linear-to-br from-amber-400 to-orange-500" />
               )}
@@ -118,12 +118,12 @@ export function Navbar({
                 <Image
                   src={logoUrl}
                   alt={siteName}
-                  width={36}
-                  height={36}
+                  width={48}
+                  height={48}
                   className="relative object-cover"
                 />
               ) : (
-                <CarFront className="relative size-4.25 text-white" />
+                <CarFront className="relative size-6 text-white" />
               )}
             </div>
             <div className="hidden sm:block">
